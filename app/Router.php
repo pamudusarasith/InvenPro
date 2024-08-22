@@ -2,10 +2,12 @@
 
 namespace App;
 
-class Router {
+class Router
+{
     private $routes = array();
 
-    public function __construct() {
+    public function __construct()
+    {
         $in = APP_PATH . "/Routes.php";
         if (!is_file($in)) {
             throw new \Exception("No routes defined.");
@@ -13,14 +15,15 @@ class Router {
         $this->routes = include $in;
     }
 
-    function dispatch(): void {
+    function dispatch(): void
+    {
 
-        $url = $_SERVER["REDIRECT_URL"];
+        $url = explode("?", $_SERVER["REQUEST_URI"])[0];
         if (!array_key_exists($url, $this->routes)) {
             View::render("errors/404");
             return;
         }
-        
+
         $controller = $this->routes[$url];
         if (class_exists($controller)) {
             $controllerObj = new $controller();
@@ -30,5 +33,3 @@ class Router {
         }
     }
 }
-
-?>
