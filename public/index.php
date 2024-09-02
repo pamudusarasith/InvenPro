@@ -31,13 +31,13 @@
             include_once $includePath;
     });
 
-    try {
-        $router = new App\Router();
-        $router->dispatch();
-    } catch (\Exception $e) {
+    set_exception_handler(function ($e) {
         App\View::render("errors/500");
         error_log($e->getMessage());
-    }
+    });
+
+    $router = new App\Router();
+    $router->dispatch();
 
     ?>
     <script src="/js/main.js"></script>

@@ -6,28 +6,24 @@ use App;
 
 class Employee
 {
-    private $db = null;
+    private $dbh = null;
 
     public function __construct()
     {
-        $this->db = App\DB::getConnection();
+        $this->dbh = App\DB::getConnection();
     }
 
     public function emailExists($email): bool
     {
-        $query = $this->db->prepare("SELECT email FROM employee WHERE email = ?");
-        $query->bind_param("s", $email);
-        $query->execute();
-        $result = $query->get_result();
-        return $result->num_rows > 0;
+        $stmt = $this->dbh->prepare("SELECT email FROM employee WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->rowCount() > 0;
     }
 
-    public function getPassword($email) {
-        $query = $this->db->prepare("SELECT password FROM employee WHERE email = ?");
-        $query->bind_param("s", $email);
-        $query->execute();
-        $result = $query->get_result();
-        $row = $result->fetch_assoc();
-        return $row["password"];
+    public function getPassword($email)
+    {
+        $stmt = $this->dbh->prepare("SELECT password FROM employee WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetchColumn();
     }
 }

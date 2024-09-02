@@ -5,15 +5,12 @@ namespace App;
 class DB
 {
     private static $instance = null;
-    private $db = null;
+    private $dbh = null;
 
     private function __construct()
     {
         Utils::loadDotEnv();
-        $this->db = new \mysqli('localhost', $_ENV["DB_USER"], $_ENV["DB_PASS"], 'invenpro');
-        if ($this->db->connect_error) {
-            throw new \Exception("Connection failed: " . $this->db->connect_error);
-        }
+        $this->dbh = new \PDO('mysql:host=localhost;dbname=invenpro', $_ENV["DB_USER"], $_ENV["DB_PASS"]);
     }
 
     public static function getConnection()
@@ -21,6 +18,6 @@ class DB
         if (self::$instance == null) {
             self::$instance = new DB();
         }
-        return self::$instance->db;
+        return self::$instance->dbh;
     }
 }
