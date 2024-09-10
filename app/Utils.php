@@ -15,7 +15,7 @@ class Utils
             if (strpos(trim($line), "#") === 0) {
                 continue;
             }
-            list($key, $value) = explode("=", $line);
+            [$key, $value] = explode("=", $line);
             $_ENV[$key] = $value;
         }
     }

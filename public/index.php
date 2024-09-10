@@ -39,6 +39,8 @@
         error_log($e->getMessage());
     });
 
+    session_start();
+
     $router = new App\Router();
     $router->dispatch();
 
