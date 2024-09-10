@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App;
 
-session_start();
-
 class Login
 {
     public function index(): void
@@ -30,7 +28,12 @@ class Login
                 return;
             }
 
-            $_SESSION["email"] = $email;
+            $_SESSION["email"] = $_POST["email"];
+            $empData = $employee->getEmployee();
+            $_SESSION["id"] = $empData["id"];
+            $_SESSION["role_id"] = $empData["role_id"];
+            $_SESSION["branch_id"] = $empData["branch_id"];
+            $_SESSION["full_name"] = $empData["full_name"];
             header("Location: /dashboard");
             exit();
         }
