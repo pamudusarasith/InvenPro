@@ -26,4 +26,22 @@ class Employee
         $stmt->execute([$email]);
         return $stmt->fetchColumn();
     }
+
+    public function getTotalUsers(): int
+    {
+        // Replace with actual database query to get total users
+        return 1000; // Example value
+    }
+
+    public function getActiveUsers(): int
+    {
+        // Replace with actual database query to get active users
+        return 250; // Example value
+    }
+
+    public function getNewSignUps(): int
+    {
+        // Replace with actual database query to get new sign-ups for the month
+        return 50; // Example value
+    }
 }

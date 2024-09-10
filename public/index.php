@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Invenpro</title>
+
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/adminstyles.css">
+
 </head>
 
 <body>
