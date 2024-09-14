@@ -1,16 +1,14 @@
 window.onclick = (e) => {
-  document.querySelectorAll(".navbar-dropdown").forEach((element) => {
+  document.querySelectorAll(".navbar .dropdown").forEach((element) => {
     if (!element.contains(e.target)) {
-      let content = element.querySelector(".dropdown-content");
-      if (content.classList.contains("show")) content.classList.remove("show");
+      element.querySelector(".dd-content").classList.remove("dd-show");
     }
   });
 };
 
 function toggleDropdown(id) {
-  element = document.getElementById(id).querySelector(".dropdown-content");
-  if (element.classList.contains("show")) element.classList.remove("show");
-  else element.classList.toggle("show");
+  let content = document.querySelector(`#${id} .dd-content`);
+  content.classList.toggle("dd-show");
 }
 
 function logout() {
