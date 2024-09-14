@@ -6,6 +6,12 @@ window.onclick = (e) => {
   });
 };
 
+document.querySelectorAll("#filters div").forEach((element) => {
+  element.onclick = (e) => {
+    e.target.classList.toggle("filter-active");
+  };
+});
+
 function toggleDropdown(id) {
   let content = document.querySelector(`#${id} .dd-content`);
   content.classList.toggle("dd-show");
