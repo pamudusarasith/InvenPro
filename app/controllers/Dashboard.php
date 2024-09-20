@@ -12,9 +12,9 @@ class Dashboard
     {
         if (!isset($_SESSION["email"])) {
             header("Location: /");
-            return;
+            exit();
         }
 
-        App\View::render('Dashboard');
+        App\View::render('Template', ['title' => 'Dashboard', 'view' => 'Dashboard']);
     }
 }
