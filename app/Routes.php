@@ -8,5 +8,7 @@ return [
     "/discounts" => "App\Controllers\Dashboard",
     "/suppliers" => "App\Controllers\Dashboard",
     "/reports" => "App\Controllers\Dashboard",
-    "/logout" => "App\Controllers\Logout"
+    "/logout" => "App\Controllers\Logout",
+    "/pos" => "App\Controllers\POS"
+
 ];
