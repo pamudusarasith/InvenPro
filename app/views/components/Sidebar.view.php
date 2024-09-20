@@ -1,23 +1,18 @@
 <div class="sidebar">
     <?php
 
-    $sidebarItems = array(
-        "/dashboard" => "Dashboard",
-        "/products" => "Products",
-        "/orders" => "Orders",
-        "/discounts" => "Discounts",
-        "/suppliers" => "Suppliers",
-        "/reports" => "Reports"
-    );
+    $employee = new App\Models\Employee();
+    $permissionCategories = $employee->getPermissionCategories();
 
-    foreach ($sidebarItems as $path => $text) {
+    foreach ($permissionCategories as $permissionCategory) {
+        $path = "/" . strtolower($permissionCategory);
         $isSelected = $_SERVER["REDIRECT_URL"] == $path;
 
         echo "<a ";
         echo !$isSelected ? "href=\"$path\"" : "";
         echo " class=\"sidebar-item";
         echo $isSelected ? " selected" : "";
-        echo "\">$text</a>";
+        echo "\">$permissionCategory</a>";
     }
 
     ?>

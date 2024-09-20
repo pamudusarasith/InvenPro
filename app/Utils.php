@@ -12,7 +12,10 @@ class Utils
         }
         $lines = file($in, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         foreach ($lines as $line) {
-            list($key, $value) = explode("=", $line);
+            if (strpos(trim($line), "#") === 0) {
+                continue;
+            }
+            [$key, $value] = explode("=", $line);
             $_ENV[$key] = $value;
         }
     }
