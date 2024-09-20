@@ -17,7 +17,7 @@ class View
         $content = APP_PATH . "/views/$view.view.php";
         if (is_readable($content)) {
             extract($data);
-            require_once $content;
+            require $content;
         } else {
             throw new \Exception("View '$view' not found.");
         }

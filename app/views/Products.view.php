@@ -16,5 +16,17 @@
             <div class="btn btn-secondary sp8">Low Stock</div>
             <div class="btn btn-secondary sp8">Out of Stock</div>
         </div>
+        <div class="column">
+            <?php if (isset($categories)) {
+                foreach ($categories as $category) : ?>
+                    <button class="collapsible"><?= $category ?></button>
+                    <div class="collapsible-content">
+                        <?php if (isset($products)) {
+                            App\View::render("components/ProductsTable", ["products" => $products[$category]]);
+                        } ?>
+                    </div>
+                <?php endforeach;
+            } ?>
+        </div>
     </div>
 </div>
