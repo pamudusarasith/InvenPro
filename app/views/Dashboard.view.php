@@ -1,9 +1,8 @@
-<div class="container-column">
+<div class="dashboard-body">
     <?php App\View::render("components/Navbar") ?>
-    <div class="container-row">
-        <?php App\View::render("components/Sidebar") ?>
-        <div>
-            <h1>Dashboard</h1><br>
-        </div>
+    <?php App\View::render("components/Sidebar") ?>
+    <div class="content">
+        <?php App\View::render("admin/dashboard") ?>
     </div>
+</div>
 </div>

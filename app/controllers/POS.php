@@ -6,15 +6,15 @@ use App;
 
 session_start();
 
-class Dashboard
+class POS
 {
     public function index(): void
     {
         if (!isset($_SESSION["email"])) {
             header("Location: /");
-            exit();
+            return;
         }
 
-        App\View::render('Template', ['title' => 'Dashboard', 'view' => 'Dashboard']);
+        App\View::render('POS');
     }
 }

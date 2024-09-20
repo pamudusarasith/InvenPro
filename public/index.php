@@ -1,46 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
 
-<head>
-    <meta charset="UTF-8">
-    <title>Invenpro</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
+define('ROOT_PATH', realpath(__DIR__ . "/.."));
+define('APP_PATH', ROOT_PATH . "/app");
 
-<body>
-    <?php
+spl_autoload_register(function ($class) {
+    $parts = explode('\\', $class);
 
-    define('ROOT_PATH', realpath(__DIR__ . "/.."));
-    define('APP_PATH', ROOT_PATH . "/app");
+    if (count($parts) == 0 || $parts[0] != 'App')
+        return;
 
-    spl_autoload_register(function ($class) {
-        $parts = explode('\\', $class);
+    $path = array_slice($parts, 1, -1);
+    $className = $parts[array_key_last($parts)];
 
-        if (count($parts) == 0 || $parts[0] != 'App')
-            return;
+    $includePath = APP_PATH . "/";
+    if (count($path) != 0)
+        $includePath = $includePath . strtolower(implode('/', $path)) . "/";
+    $includePath = $includePath . $className . ".php";
 
-        $path = array_slice($parts, 1, -1);
-        $className = $parts[array_key_last($parts)];
+    if (is_file($includePath))
+        include_once $includePath;
+});
 
-        $includePath = APP_PATH . "/";
-        if (count($path) != 0)
-            $includePath = $includePath . strtolower(implode('/', $path)) . "/";
-        $includePath = $includePath . $className . ".php";
+set_exception_handler(function ($e) {
+    App\View::render("errors/500");
+    error_log($e->getMessage());
+});
 
-        if (is_file($includePath))
-            include_once $includePath;
-    });
+session_start();
 
-    set_exception_handler(function ($e) {
-        App\View::render("errors/500");
-        error_log($e->getMessage());
-    });
-
-    $router = new App\Router();
-    $router->dispatch();
-
-    ?>
-    <script src="/js/main.js"></script>
-</body>
-
-</html>
+$router = new App\Router();
+$router->dispatch();

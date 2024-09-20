@@ -1,0 +1,187 @@
+/* Font-face definitions */
+@font-face {
+    font-family: "Material Symbols Outlined";
+    font-style: normal;
+    src: url(../fonts/MaterialSymbolsOutlined.woff2) format("woff2");
+}
+
+@font-face {
+    font-family: "Material Symbols Rounded";
+    font-style: normal;
+    src: url(../fonts/MaterialSymbolsRounded.woff2) format("woff2");
+}
+
+.material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px; /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+
+.material-symbols-rounded {
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+}
+
+/* Styles for the login container */
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 7vh);
+    margin: 0 auto;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+}
+
+.login-container .logo {
+    width: auto;
+    height: 13vh; /* Adjust as needed */
+    margin-bottom: 20px; /* Space between logo and form */
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    max-width: 320px; /* Wider than before */
+    padding: 12px; /* Slightly more padding */
+    margin-bottom: 10px; /* Space between form fields */
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-family: sans-serif; /* Font for typed text */
+    font-size: 16px; /* Font size inside input fields */
+}
+
+/* Placeholder text style */
+.login-container input::placeholder {
+    color: #999; /* Light grey color for placeholder text */
+    font-family: "Material Symbols Rounded", sans-serif; /* Font for placeholder text */
+    font-size: 16px; /* Font size for placeholder text */
+}
+
+.login-container input[type="submit"] {
+    width: 100%;
+    max-width: 200px; /* Same width as input fields */
+    padding: 12px; /* Padding for better visual balance */
+    border: 2px solid #e0e0e0; /* Border for submit button */
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "Material Symbols Rounded", sans-serif; /* Font for button */
+}
+
+.login-container input[type="submit"]:hover {
+    background-color: #fafafa; /* Adjust hover color if needed */
+}
+
+/* popup login error */
+.error-popup {
+    display: none; 
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 15px;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.error-popup .message-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.error-popup .icon {
+    font-family: "Material Symbols Outlined";
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.error-popup.show {
+    display: block;
+}
+
+/* Overlay styles */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255, 0.3); /* Semi-transparent background */
+    z-index: 999; /* Ensure it sits below the error popup */
+}
+
+/* Ensure the overlay appears when the 'show' class is added */
+.overlay.show {
+    display: block;
+}
+
+
+/* Styles for the User Statistics widget */
+.widget {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px;
+    width: calc(33% - 20px); /* Adjust width to fit multiple widgets */
+    box-sizing: border-box;
+}
+
+.widget h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.widget p {
+    margin: 5px 0;
+}
+
+/* Ensure widgets are responsive */
+@media (max-width: 768px) {
+    .widget {
+        width: 100%;
+    }
+}
+
+.dashboard-widgets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Space between widgets */
+}
+
+
