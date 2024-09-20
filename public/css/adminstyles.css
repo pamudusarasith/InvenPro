@@ -29,7 +29,7 @@
     font-family: "Material Symbols Rounded";
     font-weight: normal;
     font-style: normal;
-    font-size: 24px; /* Preferred icon size */
+    font-size: 24px;
     display: inline-block;
     line-height: 1;
     text-transform: none;
@@ -45,10 +45,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: calc(100vh - 7vh); /* Adjust based on your navbar height */
+    height: calc(100vh - 7vh);
     margin: 0 auto;
     padding: 20px;
-    border: 2px solid #e0e0e0; /* Border around the container */
+    border: 2px solid #e0e0e0;
     border-radius: 12px;
 }
 
@@ -183,3 +183,5 @@
     flex-wrap: wrap;
     gap: 20px; /* Space between widgets */
 }
+
+

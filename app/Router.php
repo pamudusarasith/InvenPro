@@ -6,7 +6,7 @@ use Exception;
 
 class Router
 {
-    private $routes = array();
+    private $routes = [];
 
     /**
      * @throws Exception
@@ -23,19 +23,28 @@ class Router
     /**
      * @throws Exception
      */
-    function dispatch(): void
+    public function dispatch(): void
     {
-
         $url = explode("?", $_SERVER["REQUEST_URI"])[0];
-        if (!array_key_exists($url, $this->routes)) {
+        $method = $_SERVER['REQUEST_METHOD'];
+
+        if (!isset($this->routes[$method][$url])) {
             View::render("errors/404");
             return;
         }
 
-        $controller = $this->routes[$url];
-        if (class_exists($controller)) {
+        $route = $this->routes[$method][$url];
+        $controller = $route['controller'] ?? null;
+        $action = $route['action'] ?? 'index';
+
+        if ($controller && class_exists($controller)) {
             $controllerObj = new $controller();
-            $controllerObj->index();
+
+            if (method_exists($controllerObj, $action)) {
+                $controllerObj->$action();
+            } else {
+                throw new \Exception("Method '$action' not found in controller $controller.");
+            }
         } else {
             throw new Exception("Controller $controller not found.");
         }
