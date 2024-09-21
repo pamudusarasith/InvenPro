@@ -57,7 +57,7 @@
                 <td>0712345678</td>
                 <td>Biscuits</td>
                 <td><span class="status-active">Active</span></td>
-                <td><a href="/suppliers/supplierDetails" class="view-profile">View profile</a></td>
+                <td><a href="/suppliers/details" class="view-profile">View profile</a></td>
             </tr>
             <tr>
                 <td>002</td>
