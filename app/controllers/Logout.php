@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-session_start();
-
 class Logout
 {
     public function index(): void

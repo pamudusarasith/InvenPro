@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App;
 
-session_start();
-
 class Suppliers
 {
     public function index(): void

@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App;
 
-session_start();
-
 class Dashboard
 {
     public function index(): void
