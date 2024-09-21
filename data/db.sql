@@ -3,11 +3,10 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Sep 21, 2024 at 03:13 PM
+-- Generation Time: Sep 21, 2024 at 04:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
-SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -21,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `invenpro`
 --
+CREATE DATABASE IF NOT EXISTS `invenpro` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `invenpro`;
 
 -- --------------------------------------------------------
 
@@ -28,6 +29,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `branch`
 --
 
+DROP TABLE IF EXISTS `branch`;
 CREATE TABLE IF NOT EXISTS `branch` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -57,6 +59,7 @@ INSERT IGNORE INTO `branch` (`id`, `name`, `address`, `phone_number`, `created_a
 -- Table structure for table `category`
 --
 
+DROP TABLE IF EXISTS `category`;
 CREATE TABLE IF NOT EXISTS `category` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -87,6 +90,7 @@ INSERT IGNORE INTO `category` (`id`, `name`) VALUES
 -- Table structure for table `employee`
 --
 
+DROP TABLE IF EXISTS `employee`;
 CREATE TABLE IF NOT EXISTS `employee` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NOT NULL,
@@ -120,6 +124,7 @@ INSERT IGNORE INTO `employee` (`id`, `email`, `password`, `role_id`, `branch_id`
 -- Table structure for table `inventory`
 --
 
+DROP TABLE IF EXISTS `inventory`;
 CREATE TABLE IF NOT EXISTS `inventory` (
   `branch_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -156,12 +161,12 @@ INSERT IGNORE INTO `inventory` (`branch_id`, `product_id`, `batch_no`, `quantity
 -- Table structure for table `permission`
 --
 
+DROP TABLE IF EXISTS `permission`;
 CREATE TABLE IF NOT EXISTS `permission` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `category_id` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `permission_fk_category_id` (`category_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -183,6 +188,7 @@ INSERT IGNORE INTO `permission` (`id`, `name`, `category_id`) VALUES
 -- Table structure for table `permission_category`
 --
 
+DROP TABLE IF EXISTS `permission_category`;
 CREATE TABLE IF NOT EXISTS `permission_category` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -208,6 +214,7 @@ INSERT IGNORE INTO `permission_category` (`id`, `name`) VALUES
 -- Table structure for table `product`
 --
 
+DROP TABLE IF EXISTS `product`;
 CREATE TABLE IF NOT EXISTS `product` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -240,6 +247,7 @@ INSERT IGNORE INTO `product` (`id`, `name`, `description`, `measure_unit`, `crea
 -- Table structure for table `product_batch`
 --
 
+DROP TABLE IF EXISTS `product_batch`;
 CREATE TABLE IF NOT EXISTS `product_batch` (
   `batch_no` varchar(255) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -277,6 +285,7 @@ INSERT IGNORE INTO `product_batch` (`batch_no`, `product_id`, `price`, `manufact
 -- Table structure for table `product_category`
 --
 
+DROP TABLE IF EXISTS `product_category`;
 CREATE TABLE IF NOT EXISTS `product_category` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
@@ -312,6 +321,7 @@ INSERT IGNORE INTO `product_category` (`product_id`, `category_id`, `created_at`
 -- Table structure for table `role`
 --
 
+DROP TABLE IF EXISTS `role`;
 CREATE TABLE IF NOT EXISTS `role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -336,6 +346,7 @@ INSERT IGNORE INTO `role` (`id`, `name`) VALUES
 -- Table structure for table `role_permission`
 --
 
+DROP TABLE IF EXISTS `role_permission`;
 CREATE TABLE IF NOT EXISTS `role_permission` (
   `role_id` int(11) NOT NULL,
   `permission_id` int(11) NOT NULL,
@@ -361,6 +372,7 @@ INSERT IGNORE INTO `role_permission` (`role_id`, `permission_id`) VALUES
 -- Table structure for table `threshold`
 --
 
+DROP TABLE IF EXISTS `threshold`;
 CREATE TABLE IF NOT EXISTS `threshold` (
   `product_id` int(11) NOT NULL,
   `branch_id` int(11) NOT NULL,
@@ -411,7 +423,7 @@ ALTER TABLE `inventory`
 -- Constraints for table `permission`
 --
 ALTER TABLE `permission`
-  ADD CONSTRAINT `permission_fk_category_id` FOREIGN KEY (`category_id`) REFERENCES `permission_category` (`id`);
+  ADD CONSTRAINT `permission_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `permission_category` (`id`);
 
 --
 -- Constraints for table `product_batch`
@@ -439,7 +451,6 @@ ALTER TABLE `role_permission`
 ALTER TABLE `threshold`
   ADD CONSTRAINT `threshold_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   ADD CONSTRAINT `threshold_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);
-SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
