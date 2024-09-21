@@ -24,4 +24,12 @@ class Utils
             $_ENV[$key] = $value;
         }
     }
+
+    public static function requireAuth(): void
+    {
+        if (!isset($_SESSION["email"])) {
+            header("Location: /");
+            exit();
+        }
+    }
 }

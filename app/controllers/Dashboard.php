@@ -10,10 +10,7 @@ class Dashboard
 {
     public function index(): void
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            exit();
-        }
+        App\Utils::requireAuth();
 
         App\View::render('Template', ['title' => 'Dashboard', 'view' => 'Dashboard']);
     }

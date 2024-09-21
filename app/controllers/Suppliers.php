@@ -10,10 +10,7 @@ class Suppliers
 {
     public function index(): void
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            return;
-        }
+        App\Utils::requireAuth();
 
         App\View::render('Template', [
             'title' => 'Suppliers',
@@ -23,10 +20,7 @@ class Suppliers
 
     public function details(): void
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            return;
-        }
+        App\Utils::requireAuth();
 
         App\View::render('Template', [
             'title' => 'Supplier Details',
@@ -36,10 +30,7 @@ class Suppliers
 
     public function add(): void
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            return;
-        }
+        App\Utils::requireAuth();
 
         App\View::render('AddSupplierForm');
     }

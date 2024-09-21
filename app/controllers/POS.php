@@ -10,10 +10,7 @@ class POS
 {
     public function index(): void
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            return;
-        }
+        App\Utils::requireAuth();
 
         App\View::render('POS');
     }

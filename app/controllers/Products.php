@@ -8,10 +8,8 @@ class Products
 {
     public function index()
     {
-        if (!isset($_SESSION["email"])) {
-            header("Location: /");
-            exit();
-        }
+        App\Utils::requireAuth();
+
         $product = new App\Models\Product();
         $categories = $product->getCategories();
         $products = [];

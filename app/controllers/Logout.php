@@ -10,5 +10,6 @@ class Logout
     {
         session_destroy();
         header("Location: /");
+        exit();
     }
 }
