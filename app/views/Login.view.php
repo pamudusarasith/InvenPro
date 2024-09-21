@@ -14,7 +14,7 @@ $errorMessage = isset($errorMessage) ? $errorMessage : '';
 <div class="login-container">
     <img class="logo" src="/images/logo-light.png" alt="logo">
     
-    <form method="post" action="/">
+    <form method="post" action="/login">
         <input type="text" name="email" placeholder="Email" required />
         <input type="password" name="password" placeholder="Password" required />
         <input type="submit" value="Login" />

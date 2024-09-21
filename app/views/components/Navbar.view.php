@@ -1,5 +1,5 @@
 <div class="navbar">
-    <img class="logo" src="images/logo-light.png" alt="logo">
+    <img class="logo" src="/images/logo-light.png" alt="logo">
     <div class="navbar-btns">
         <div class="dropdown" id="notifications-dd">
             <div class="icon-btn" onclick="toggleDropdown('notifications-dd')">

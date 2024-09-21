@@ -9,7 +9,7 @@ return [
         '/roles' => ['controller' => App\Controllers\RolesController::class],
         '/discounts' => ['controller' => App\Controllers\Dashboard::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
-        '/suppliers/addsupplier' => ['controller' => App\Controllers\AddSupplierForm::class],
+        '/suppliers/add' => ['controller' => App\Controllers\AddSupplierForm::class],
         '/suppliers/supplierDetails' => ['controller' => App\Controllers\SupplierDetails::class],
         '/reports' => ['controller' => App\Controllers\Dashboard::class],
         '/logout' => ['controller' => App\Controllers\Logout::class],
@@ -20,5 +20,6 @@ return [
         '/users/create' => ['controller' => App\Controllers\UserController::class, 'action' => 'create'],
         '/users/edit' => ['controller' => App\Controllers\UserController::class, 'action' => 'edit'],
         '/users/delete' => ['controller' => App\Controllers\UserController::class, 'action' => 'delete'],
+        '/suppliers/add' => ['controller' => App\Controllers\AddSupplierForm::class],
     ]
 ];

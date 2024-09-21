@@ -15,6 +15,9 @@ class SupplierDetails
             return;
         }
 
-        App\View::render('SupplierDetails');
+        App\View::render('Template', [
+            'title' => 'Supplier Details',
+            'view' => 'SupplierDetails'
+        ]);
     }
 }
