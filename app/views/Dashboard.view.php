@@ -1,2 +1,8 @@
-<h1>Dashboard</h1><br>
-<button onclick="window.location.href='/logout'">Logout</button>
+<div class="body">
+    <?php App\View::render("components/Navbar") ?>
+    <?php App\View::render("components/Sidebar") ?>
+    <div class="content">
+        <?php App\View::render("admin/dashboard") ?>
+    </div>
+</div>
+</div>

@@ -1,29 +1,32 @@
 <?php
-    define('APP_PATH', realpath($_SERVER["DOCUMENT_ROOT"] . "/../app"));
 
-    spl_autoload_register(function ($class) {
-        $parts = explode('\\', $class);
+define('ROOT_PATH', realpath(__DIR__ . "/.."));
+define('APP_PATH', ROOT_PATH . "/app");
 
-        if (count($parts) == 0 || $parts[0] != 'App')
-            return;
+spl_autoload_register(function ($class) {
+    $parts = explode('\\', $class);
 
-        $path = array_slice($parts, 1, -1);
-        $className = $parts[array_key_last($parts)];
+    if (count($parts) == 0 || $parts[0] != 'App')
+        return;
 
-        $includePath = APP_PATH . "/";
-        if (count($path) != 0)
-            $includePath = $includePath . strtolower(implode('/', $path)) . "/";
-        $includePath = $includePath . $className . ".php";
-        
-        if (is_file($includePath))
-            include_once $includePath;
-    });
+    $path = array_slice($parts, 1, -1);
+    $className = $parts[array_key_last($parts)];
 
-    try {
-        $router = new App\Router();
-        $router->dispatch();
-    } catch (\Exception $e) {
-        App\View::render("errors/500");
-        error_log($e->getMessage());
-    }
-?>
+    $includePath = APP_PATH . "/";
+    if (count($path) != 0)
+        $includePath = $includePath . strtolower(implode('/', $path)) . "/";
+    $includePath = $includePath . $className . ".php";
+
+    if (is_file($includePath))
+        include_once $includePath;
+});
+
+set_exception_handler(function ($e) {
+    App\View::render("errors/500");
+    error_log($e->getMessage());
+});
+
+session_start();
+
+$router = new App\Router();
+$router->dispatch();
