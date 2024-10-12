@@ -10,6 +10,11 @@ class POS
     {
         App\Utils::requireAuth();
 
-        App\View::render('POS');
+        App\View::render('Template', [
+            'title' => 'Invenpro',
+            'view' => 'POS',
+            'stylesheets' => ['pos'],
+            'scripts' => ['pos'],
+        ]);
     }
 }

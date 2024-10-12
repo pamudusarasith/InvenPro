@@ -13,13 +13,13 @@ return [
         '/suppliers/details' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'details'],
         '/reports' => ['controller' => App\Controllers\Dashboard::class],
         '/logout' => ['controller' => App\Controllers\Logout::class],
+        '/pos' => ['controller' => App\Controllers\POS::class],
     ],
 
     'POST' => [
         '/login' => ['controller' => App\Controllers\Login::class, 'action' => 'login'],
         '/users/create' => ['controller' => App\Controllers\UserController::class, 'action' => 'create'],
         '/users/edit' => ['controller' => App\Controllers\UserController::class, 'action' => 'edit'],
-        '/users/delete' => ['controller' => App\Controllers\UserController::class, 'action' => 'delete'],
-        '/suppliers/add' => ['controller' => App\Controllers\AddSupplierForm::class],
+        '/users/delete' => ['controller' => App\Controllers\UserController::class, 'action' => 'delete']
     ]
 ];

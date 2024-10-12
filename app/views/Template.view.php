@@ -3,16 +3,31 @@
 
 <head>
     <meta charset="UTF-8">
-    <title><?= $title ?></title>
+    <title><?= $title ?? "Invenpro" ?></title>
 
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/adminstyles.css">
+
+    <?php if (isset($stylesheets)) {
+        foreach ($stylesheets as $filename): ?>
+            <link rel="stylesheet" href="/css/<?= $filename ?>.css">
+        <?php endforeach;
+    } ?>
 
 </head>
 
 <body>
-<?php App\View::render($view, $data); ?>
-<script src="/js/main.js"></script>
-</body>
 
+<?php if (isset($view)) {
+    App\View::render($view, $data ?? []);
+} ?>
+
+<script src="/js/main.js"></script>
+
+<?php if (isset($scripts)) {
+    foreach ($scripts as $filename): ?>
+        <script src="/js/<?= $filename ?>.js"></script>
+    <?php endforeach;
+} ?>
+
+</body>
 </html>

@@ -47,6 +47,7 @@ class Login
         App\View::render('Template', [
             'title' => 'Invenpro',
             'view' => 'Login',
+            'stylesheets' => ['admin'],
             'data' => ['errorMessage' => $errorMessage]
         ]);
     }

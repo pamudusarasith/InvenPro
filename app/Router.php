@@ -6,7 +6,7 @@ use Exception;
 
 class Router
 {
-    private $routes = [];
+    private mixed $routes = [];
 
     /**
      * @throws Exception
