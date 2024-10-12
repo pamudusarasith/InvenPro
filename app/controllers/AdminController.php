@@ -21,6 +21,9 @@ class AdminController
             'newSignUps' => $newSignUps,
         ];
 
-        App\View::render('admin/dashboard', $viewData);
+        App\View::render('Template', [
+            'title' => 'Admin Dashboard',
+            'data' => $viewData,
+        ]);
     }
 }

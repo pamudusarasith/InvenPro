@@ -20,6 +20,7 @@ class Products
         App\View::render('Template', [
             'title' => 'Products',
             'view' => 'Products',
+            'stylesheets' => ['products'],
             'data' => ['categories' => $categories, 'products' => $products]
         ]);
     }
