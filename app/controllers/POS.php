@@ -13,7 +13,8 @@ class POS
         App\View::render('Template', [
             'title' => 'Invenpro',
             'view' => 'POS',
-            'stylesheets' => ['pos']
+            'stylesheets' => ['pos'],
+            'scripts' => ['pos'],
         ]);
     }
 }

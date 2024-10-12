@@ -17,17 +17,17 @@
 
 <body>
 
-    <?php if (isset($view)) {
-        App\View::render($view, $data ?? []);
-    } ?>
+<?php if (isset($view)) {
+    App\View::render($view, $data ?? []);
+} ?>
 
-    <script src="/js/main.js"></script>
+<script src="/js/main.js"></script>
 
-    <?php if (isset($scripts)) {
-        foreach ($scripts as $filename): ?>
-            <script src="/js/<?= $filename ?>.js">
-        <?php endforeach;
-    } ?>
+<?php if (isset($scripts)) {
+    foreach ($scripts as $filename): ?>
+        <script src="/js/<?= $filename ?>.js"></script>
+    <?php endforeach;
+} ?>
 
 </body>
 </html>
