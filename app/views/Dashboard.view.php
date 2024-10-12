@@ -5,4 +5,3 @@
         <?php App\View::render("admin/dashboard") ?>
     </div>
 </div>
-</div>

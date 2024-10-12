@@ -10,7 +10,6 @@ class View
      * @param string $view The name of the view file (without extension).
      * @param array $data An associative array of variables to pass to the view.
      * @return void
-     * @throws \Exception If the view file is not found.
      */
     static function render(string $view, array $data = []): void
     {
@@ -19,7 +18,7 @@ class View
             extract($data);
             require $content;
         } else {
-            throw new \Exception("View '$view' not found.");
+            self::render('errors/404');
         }
     }
 }
