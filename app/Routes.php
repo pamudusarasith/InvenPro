@@ -20,6 +20,9 @@ return [
         '/login' => ['controller' => App\Controllers\Login::class, 'action' => 'login'],
         '/users/create' => ['controller' => App\Controllers\UserController::class, 'action' => 'create'],
         '/users/edit' => ['controller' => App\Controllers\UserController::class, 'action' => 'edit'],
-        '/users/delete' => ['controller' => App\Controllers\UserController::class, 'action' => 'delete']
+        '/users/delete' => ['controller' => App\Controllers\UserController::class, 'action' => 'delete'],
+        '/products/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newProduct'],
+        '/batch/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newBatch'],
+        '/category/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newCategory'],
     ]
 ];

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App;
+use App\Consts;
 
 class Products
 {
@@ -24,5 +25,29 @@ class Products
             'scripts' => ['products'],
             'data' => ['categories' => $categories, 'products' => $products]
         ]);
+    }
+
+    public function newProduct()
+    {
+        App\Utils::requireAuth();
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'message' => 'Product added successfully']);
+    }
+
+    public function newBatch()
+    {
+        App\Utils::requireAuth();
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'message' => 'Batch added successfully']);
+    }
+
+    public function newCategory()
+    {
+        App\Utils::requireAuth();
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'message' => 'Category added successfully']);
     }
 }
