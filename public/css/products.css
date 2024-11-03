@@ -26,6 +26,12 @@
   background-color: #d0d0d0;
 }
 
+#new-category-btn,
+#new-prod-btn,
+#new-batch-btn {
+  padding: 4px 12px 4px 8px;
+}
+
 .search-bar {
   margin: 16px 0 8px 0;
   width: 100%;
@@ -105,4 +111,76 @@
 
 .products-tbl .tbl-r:last-child {
   border-radius: 0 0 12px 12px;
+}
+
+.modal {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  overflow: auto;
+}
+
+.modal-content {
+  width: 80%;
+  max-width: 600px;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 16px;
+}
+
+.modal-content .modal-header {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.close-btn {
+  margin: 4px 4px 0 auto;
+  cursor: pointer;
+  padding: 4px;
+}
+
+#category-form,
+#prod-form,
+#batch-form {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 24px 24px 24px;
+}
+
+:is(#category-form, #prod-form, #batch-form) > * {
+  margin-top: 4px;
+}
+
+:is(#category-form, #prod-form, #batch-form) label {
+  margin-top: 16px;
+}
+
+:is(#category-form, #prod-form, #batch-form) :is(input, textarea, select) {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+}
+
+.action-btns {
+  justify-content: flex-end;
+}
+
+.action-btns button {
+  margin: 16px 0 0 12px;
+  border: 0;
+}
+
+.error {
+  display: none;
+  align-items: center;
+  color: red;
+  font-weight: bold;
 }

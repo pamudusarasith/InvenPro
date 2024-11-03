@@ -59,4 +59,15 @@ class Product
         $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $id]);
         return $stmt->fetchAll();
     }
+
+    public function addProduct(array $product): void
+    {
+        $stmt = $this->dbh->prepare("INSERT INTO product (id, name, description, measure_unit) VALUES (:id, :name, :description, :unit)");
+        $stmt->execute([
+            'id' => $product["id"],
+            'name' => $product["name"],
+            'description' => $product["description"],
+            'unit' => $product["unit"]
+        ]);
+    }
 }
