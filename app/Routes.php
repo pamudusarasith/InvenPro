@@ -7,7 +7,7 @@ return [
         '/products' => ['controller' => App\Controllers\Products::class],
         '/users' => ['controller' => App\Controllers\UserController::class],
         '/roles' => ['controller' => App\Controllers\RolesController::class],
-        '/discounts' => ['controller' => App\Controllers\Dashboard::class],
+        '/discounts' => ['controller' => App\Controllers\Discounts::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'add'],
         '/suppliers/details' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'details'],
