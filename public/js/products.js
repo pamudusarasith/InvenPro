@@ -55,7 +55,10 @@ function validateBatchFormData(formData) {
   const exp = new Date(formData.get("exp"));
 
   if (exp <= mfd) {
-    return { isValid: false, error: "Expiration date must be greater than manufacturing date." };
+    return {
+      isValid: false,
+      error: "Expiration date must be greater than manufacturing date.",
+    };
   }
 
   return { isValid: true };
@@ -111,3 +114,9 @@ forms.forEach((formName) => {
       await submitForm(formName);
     });
 });
+
+document
+  .querySelector("#prod-search input")
+  .addEventListener("input", async (e) => {
+    await autocomplete("prod-search");
+  });

@@ -70,4 +70,24 @@ class Product
             'unit' => $product["unit"]
         ]);
     }
+
+    public function search(string $query): array
+    {
+        $result = [];
+        $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE id LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $tmp = array_map(function ($product) {
+            return ['id' => $product['id'], 'name' => $product['name']];
+        }, $stmt->fetchAll());
+        $result = array_merge($result, $tmp);
+
+        $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE name LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $tmp = array_map(function ($product) {
+            return ['id' => $product['id'], 'name' => $product['name']];
+        }, $stmt->fetchAll());
+        $result = array_merge($result, $tmp);
+
+        return $result;
+    }
 }

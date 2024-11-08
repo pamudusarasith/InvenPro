@@ -20,9 +20,11 @@
             <?php \App\View::render('components/ProductForm'); ?>
             <?php \App\View::render('components/BatchForm'); ?>
         </div>
-        <div class="row search-bar">
-            <span class="material-symbols-rounded">search</span>
-            <input type="text" class="" placeholder="Search Products">
+        <div id="prod-search" class="column">
+            <div class="row search-bar">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" class="" placeholder="Search Products">
+            </div>
         </div>
         <h4>Filters</h4>
         <div id="filters" class="row">

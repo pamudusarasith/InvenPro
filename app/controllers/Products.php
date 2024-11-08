@@ -22,7 +22,7 @@ class Products
             'title' => 'Products',
             'view' => 'Products',
             'stylesheets' => ['products'],
-            'scripts' => ['products'],
+            'scripts' => ['products', 'search'],
             'data' => ['categories' => $categories, 'products' => $products]
         ]);
     }
@@ -32,7 +32,7 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Product added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Product added successfully']);
     }
 
     public function newBatch()
@@ -40,7 +40,7 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Batch added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Batch added successfully']);
     }
 
     public function newCategory()
@@ -48,6 +48,18 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Category added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Category added successfully']);
+    }
+
+    public function search()
+    {
+        App\Utils::requireAuth();
+
+        $query = $_GET['q'];
+        $product = new App\Models\Product();
+        $products = $product->search($query);
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'data' => ['query' => $query, 'results' => $products]]);
     }
 }

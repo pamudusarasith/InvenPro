@@ -5,6 +5,7 @@ return [
         '/' => ['controller' => App\Controllers\Login::class],
         '/dashboard' => ['controller' => App\Controllers\Dashboard::class],
         '/products' => ['controller' => App\Controllers\Products::class],
+        '/products/search' => ['controller' => App\Controllers\Products::class, 'action' => 'search'],
         '/users' => ['controller' => App\Controllers\UserController::class],
         '/roles' => ['controller' => App\Controllers\RolesController::class],
         '/discounts' => ['controller' => App\Controllers\Dashboard::class],
