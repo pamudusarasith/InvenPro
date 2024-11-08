@@ -32,8 +32,8 @@
 
 .modal {
   display: none;
-  justify-content: center;
-  align-items: center;
+  justify-content: safe center;
+  align-items: safe center;
   position: absolute;
   z-index: 1;
   top: 0;
@@ -78,7 +78,7 @@
   margin-top: 16px;
 }
 
-#discount-form :is(input, textarea, select) {
+#discount-form > :is(input, textarea, select) {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #cccccc;
@@ -98,4 +98,35 @@
   align-items: center;
   color: red;
   font-weight: bold;
+}
+
+.search-bar {
+  margin: 16px 0 8px 0;
+  width: 100%;
+  padding: 12px;
+  border-radius: 24px;
+  background-color: #e0e0e0;
+  border: 0;
+}
+
+.search-bar input {
+  width: 100%;
+  border: 0;
+  background-color: transparent;
+}
+
+.search-bar input:focus {
+  outline: none;
+}
+
+.search-bar span {
+  color: gray;
+}
+
+#filters {
+  margin-top: 8px;
+}
+
+#filters .filter-active {
+  background-color: #808080;
 }

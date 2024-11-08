@@ -19,3 +19,9 @@ document.querySelector(".action-btns #close").onclick = (e) => {
   }
   element.classList.toggle("show");
 };
+
+document.querySelectorAll("#filters div").forEach((element) => {
+  element.onclick = (e) => {
+    e.target.classList.toggle("filter-active");
+  };
+});
