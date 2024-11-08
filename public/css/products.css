@@ -115,8 +115,8 @@
 
 .modal {
   display: none;
-  justify-content: center;
-  align-items: center;
+  justify-content: safe center;
+  align-items: safe center;
   position: absolute;
   z-index: 1;
   top: 0;
