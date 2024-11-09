@@ -15,21 +15,13 @@ class Product
 
     public function getCategories(): array
     {
-        $stmt = $this->dbh->prepare("SELECT name FROM category");
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category");
         $stmt->execute();
-        $result = $stmt->fetchAll();
-        return array_map(function ($category) {
-            return $category["name"];
-        }, $result);
+        return $stmt->fetchAll();
     }
 
-    public function getProductsByCategory(string $category): array
+    public function getProductsByCategory(string $category_id): array
     {
-        $stmt = $this->dbh->prepare("SELECT id FROM category WHERE name = :category");
-        $stmt->execute(['category' => $category]);
-        $result = $stmt->fetch();
-        $id = $result["id"];
-
         $stmt = $this->dbh->prepare("
         SELECT
             pd.*
@@ -56,7 +48,7 @@ class Product
         ) pd
         INNER JOIN product_category pc ON
             pd.id = pc.product_id AND pc.category_id = :category_id;");
-        $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $id]);
+        $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
         return $stmt->fetchAll();
     }
 
@@ -76,17 +68,11 @@ class Product
         $result = [];
         $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE id LIKE :query");
         $stmt->execute(['query' => "%$query%"]);
-        $tmp = array_map(function ($product) {
-            return ['id' => $product['id'], 'name' => $product['name']];
-        }, $stmt->fetchAll());
-        $result = array_merge($result, $tmp);
+        $result = array_merge($result, $stmt->fetchAll());
 
         $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE name LIKE :query");
         $stmt->execute(['query' => "%$query%"]);
-        $tmp = array_map(function ($product) {
-            return ['id' => $product['id'], 'name' => $product['name']];
-        }, $stmt->fetchAll());
-        $result = array_merge($result, $tmp);
+        $result = array_merge($result, $stmt->fetchAll());
 
         return $result;
     }

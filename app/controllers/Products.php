@@ -15,7 +15,7 @@ class Products
         $categories = $product->getCategories();
         $products = [];
         foreach ($categories as $category) {
-            $products[$category] = $product->getProductsByCategory($category);
+            $products[$category["name"]] = $product->getProductsByCategory($category["id"]);
         }
 
         App\View::render('Template', [
@@ -23,7 +23,7 @@ class Products
             'view' => 'Products',
             'stylesheets' => ['products'],
             'scripts' => ['products', 'search'],
-            'data' => ['categories' => $categories, 'products' => $products]
+            'data' => ['categories' => array_column($categories, 'name'), 'products' => $products]
         ]);
     }
 
@@ -61,5 +61,22 @@ class Products
 
         header(Consts::HEADER_JSON);
         echo json_encode(['success' => true, 'data' => ['query' => $query, 'results' => $products]]);
+    }
+
+    public function details()
+    {
+        App\Utils::requireAuth();
+
+        $id = $_GET['id'];
+        $product = new App\Models\Product();
+        $details = $product->getProductDetails($id);
+
+        App\View::render('Template', [
+            'title' => 'Product Details',
+            'view' => 'ProductDetails',
+            'stylesheets' => ['products'],
+            'scripts' => ['products', 'search'],
+            'data' => ['details' => $details]
+        ]);
     }
 }
