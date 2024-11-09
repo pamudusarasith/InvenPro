@@ -10,9 +10,11 @@ function handleKeydown(id, e) {
       clearResults(id);
       break;
     case "ArrowDown":
+      e.preventDefault();
       handleArrowDown(id);
       break;
     case "ArrowUp":
+      e.preventDefault();
       handleArrowUp(id);
       break;
     case "Enter":
@@ -91,7 +93,5 @@ async function autocomplete(id) {
     results.appendChild(result);
   }
 
-  document
-    .getElementById(id)
-    .addEventListener("keydown", (e) => handleKeydown(id, e));
+  document.getElementById(id).onkeydown = (e) => handleKeydown(id, e);
 }

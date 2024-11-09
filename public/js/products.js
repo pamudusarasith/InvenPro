@@ -75,6 +75,15 @@ async function submitForm(formName) {
   const error = document.querySelector(`#${formName}-form #error-msg`);
   const form = document.getElementById(`${formName}-form`);
   const formData = new FormData(form);
+
+  const reader = new FileReader();
+  reader.readAsDataURL(formData.get("image"));
+  const image = new Promise((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+  formData.set("image", (await image).split(",")[1]);
+
   const validationResult = validators[formName](formData);
 
   if (!validationResult.isValid) {

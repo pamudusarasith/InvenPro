@@ -17,6 +17,8 @@
                 <option value="kg">Kilogram - kg</option>
                 <option value="l">Liters - l</option>
             </select>
+            <label for="prod-img">Image</label>
+            <input id="prod-img" type="file" name="image" accept="image/png" required>
             <div class="error">
                 <span class="material-symbols-rounded">error</span>
                 <span id="error-msg" class="error-msg"></span>
