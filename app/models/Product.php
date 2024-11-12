@@ -13,7 +13,7 @@ class Product
         $this->dbh = App\DB::getConnection();
     }
 
-    public function getCategories(): array
+    public function getAllCategories(): array
     {
         $stmt = $this->dbh->prepare("SELECT id, name FROM category");
         $stmt->execute();

@@ -1,7 +1,7 @@
 <div id="batch-form-modal" class="modal">
     <div class="modal-content">
         <div class="row">
-            <span class="material-symbols-rounded close-btn">close</span>
+            <span class="material-symbols-rounded modal-close-btn">close</span>
         </div>
         <h1 class="modal-header">Add New Batch</h1>
         <form id="batch-form" action="/batch/new" method="post">
@@ -17,14 +17,14 @@
             <input id="prod-mfd" type="date" name="mfd" required>
             <label for="prod-exp">Expiry Date</label>
             <input id="prod-exp" type="date" name="exp" required>
-            <div class="error">
+            <div class="modal-error">
                 <span class="material-symbols-rounded">error</span>
                 <span id="error-msg" class="error-msg"></span>
             </div>
-            <div class="row action-btns">
+            <div class="row modal-action-btns">
                 <span class="loader" style="margin: 24px 12px 0px; font-size: 12px"></span>
-                <button type="button" class="btn btn-secondary">Cancel</button>
-                <button id="submit-btn" type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add</button>
             </div>
         </form>
     </div>

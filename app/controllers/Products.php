@@ -12,7 +12,7 @@ class Products
         App\Utils::requireAuth();
 
         $product = new App\Models\Product();
-        $categories = $product->getCategories();
+        $categories = $product->getAllCategories();
         $products = [];
         foreach ($categories as $category) {
             $products[$category["name"]] = $product->getProductsByCategory($category["id"]);
@@ -21,7 +21,7 @@ class Products
         App\View::render('Template', [
             'title' => 'Products',
             'view' => 'Products',
-            'stylesheets' => ['products'],
+            'stylesheets' => ['products', 'search'],
             'scripts' => ['products', 'search'],
             'data' => ['categories' => array_column($categories, 'name'), 'products' => $products]
         ]);

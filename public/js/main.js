@@ -15,3 +15,12 @@ function logout() {
   window.location.href = "/logout";
 }
 
+document.querySelectorAll(".modal-close-btn").forEach((element) => {
+  element.onclick = (e) => {
+    let element = e.target;
+    while (!element.classList.contains("show")) {
+      element = element.parentElement;
+    }
+    element.classList.toggle("show");
+  };
+});
