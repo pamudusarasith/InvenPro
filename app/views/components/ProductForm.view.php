@@ -1,7 +1,7 @@
 <div id="prod-form-modal" class="modal">
     <div class="modal-content">
         <div class="row">
-            <span class="material-symbols-rounded close-btn">close</span>
+            <span class="material-symbols-rounded modal-close-btn">close</span>
         </div>
         <h1 class="modal-header">Add New Product</h1>
         <form id="prod-form" action="/products/new" method="post">
@@ -17,14 +17,16 @@
                 <option value="kg">Kilogram - kg</option>
                 <option value="l">Liters - l</option>
             </select>
-            <div class="error">
+            <label for="prod-img">Image</label>
+            <input id="prod-img" type="file" name="image" accept="image/png" required>
+            <div class="modal-error">
                 <span class="material-symbols-rounded">error</span>
                 <span id="error-msg" class="error-msg"></span>
             </div>
-            <div class="row action-btns">
+            <div class="row modal-action-btns">
                 <span class="loader" style="margin: 24px 12px 0px; font-size: 12px"></span>
-                <button type="button" class="btn btn-secondary">Cancel</button>
-                <button id="submit-btn" type="submit" class="btn btn-primary">Add</button>
+                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="submit" class="btn btn-primary">Add</button>
             </div>
         </form>
     </div>

@@ -13,23 +13,27 @@ class Product
         $this->dbh = App\DB::getConnection();
     }
 
-    public function getCategories(): array
+    public function getAllCategories(): array
     {
-        $stmt = $this->dbh->prepare("SELECT name FROM category");
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category");
         $stmt->execute();
-        $result = $stmt->fetchAll();
-        return array_map(function ($category) {
-            return $category["name"];
-        }, $result);
+        return $stmt->fetchAll();
     }
 
-    public function getProductsByCategory(string $category): array
+    public function getProductCategories(string $product_id): array
     {
-        $stmt = $this->dbh->prepare("SELECT id FROM category WHERE name = :category");
-        $stmt->execute(['category' => $category]);
-        $result = $stmt->fetch();
-        $id = $result["id"];
+        $stmt = $this->dbh->prepare("SELECT category_id FROM product_category WHERE product_id = :product_id");
+        $stmt->execute(['product_id' => $product_id]);
+        $category_ids = array_column($stmt->fetchAll(), 'category_id');
+        $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
 
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category WHERE id IN ($placeholders)");
+        $stmt->execute($category_ids);
+        return $stmt->fetchAll();
+    }
+
+    public function getProductsByCategory(string $category_id): array
+    {
         $stmt = $this->dbh->prepare("
         SELECT
             pd.*
@@ -56,7 +60,7 @@ class Product
         ) pd
         INNER JOIN product_category pc ON
             pd.id = pc.product_id AND pc.category_id = :category_id;");
-        $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $id]);
+        $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
         return $stmt->fetchAll();
     }
 
@@ -69,5 +73,32 @@ class Product
             'description' => $product["description"],
             'unit' => $product["unit"]
         ]);
+    }
+
+    public function search(string $query): array
+    {
+        $result = [];
+        $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE id LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $result = array_merge($result, $stmt->fetchAll());
+
+        $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE name LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $result = array_merge($result, $stmt->fetchAll());
+
+        return $result;
+    }
+
+    public function getProductDetails(int $id): array
+    {
+        $stmt = $this->dbh->prepare("SELECT id, name, description, measure_unit, image FROM product WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->buffer($result["image"]);
+        $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
+        $result['categories'] = array_column($this->getProductCategories($id), 'name');
+
+        return $result;
     }
 }

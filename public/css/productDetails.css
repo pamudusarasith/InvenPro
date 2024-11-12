@@ -1,0 +1,66 @@
+.details-container {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 24px 24px 24px;
+}
+
+.details-container > * {
+  margin-top: 4px;
+}
+
+.details-container > label {
+  margin-top: 16px;
+}
+
+.details-container > :is(input, textarea, select) {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+}
+
+.image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  margin: 0 24px;
+}
+
+.image-container img {
+  width: 0;
+  min-width: 50%;
+}
+
+.image-container input {
+  display: none;
+}
+
+.image-container label {
+  display: none;
+  padding: 4px 12px;
+  margin: 0;
+}
+
+#edit-btn {
+  margin-left: auto;
+  padding: 4px 12px 4px 8px;
+}
+
+.details-container *[disabled] {
+  color: inherit;
+  background-color: transparent;
+  opacity: 1;
+  font-size: 1rem;
+}
+
+.details-container .action-btns {
+  display: none;
+  justify-content: flex-end;
+}
+
+.details-container .action-btns button {
+  margin: 16px 0 0 12px;
+  border: 0;
+}
