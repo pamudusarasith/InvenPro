@@ -68,15 +68,15 @@ class Products
         App\Utils::requireAuth();
 
         $id = $_GET['id'];
-        $product = new App\Models\Product();
-        $details = $product->getProductDetails($id);
+        $model = new App\Models\Product();
+        $product = $model->getProductDetails($id);
 
         App\View::render('Template', [
             'title' => 'Product Details',
             'view' => 'ProductDetails',
-            'stylesheets' => ['products'],
-            'scripts' => ['products', 'search'],
-            'data' => ['details' => $details]
+            'stylesheets' => ['productDetails'],
+            'scripts' => ['productDetails'],
+            'data' => ['product' => $product]
         ]);
     }
 }

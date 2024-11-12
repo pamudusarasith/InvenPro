@@ -20,6 +20,18 @@ class Product
         return $stmt->fetchAll();
     }
 
+    public function getProductCategories(string $product_id): array
+    {
+        $stmt = $this->dbh->prepare("SELECT category_id FROM product_category WHERE product_id = :product_id");
+        $stmt->execute(['product_id' => $product_id]);
+        $category_ids = array_column($stmt->fetchAll(), 'category_id');
+        $placeholders = implode(',', array_fill(0, count($category_ids), '?'));
+
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category WHERE id IN ($placeholders)");
+        $stmt->execute($category_ids);
+        return $stmt->fetchAll();
+    }
+
     public function getProductsByCategory(string $category_id): array
     {
         $stmt = $this->dbh->prepare("
@@ -73,6 +85,19 @@ class Product
         $stmt = $this->dbh->prepare("SELECT id, name FROM product WHERE name LIKE :query");
         $stmt->execute(['query' => "%$query%"]);
         $result = array_merge($result, $stmt->fetchAll());
+
+        return $result;
+    }
+
+    public function getProductDetails(int $id): array
+    {
+        $stmt = $this->dbh->prepare("SELECT id, name, description, measure_unit, image FROM product WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->buffer($result["image"]);
+        $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
+        $result['categories'] = array_column($this->getProductCategories($id), 'name');
 
         return $result;
     }
