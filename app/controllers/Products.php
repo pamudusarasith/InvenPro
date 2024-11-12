@@ -12,18 +12,18 @@ class Products
         App\Utils::requireAuth();
 
         $product = new App\Models\Product();
-        $categories = $product->getCategories();
+        $categories = $product->getAllCategories();
         $products = [];
         foreach ($categories as $category) {
-            $products[$category] = $product->getProductsByCategory($category);
+            $products[$category["name"]] = $product->getProductsByCategory($category["id"]);
         }
 
         App\View::render('Template', [
             'title' => 'Products',
             'view' => 'Products',
-            'stylesheets' => ['products'],
-            'scripts' => ['products'],
-            'data' => ['categories' => $categories, 'products' => $products]
+            'stylesheets' => ['products', 'search'],
+            'scripts' => ['products', 'search'],
+            'data' => ['categories' => array_column($categories, 'name'), 'products' => $products]
         ]);
     }
 
@@ -32,7 +32,7 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Product added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Product added successfully']);
     }
 
     public function newBatch()
@@ -40,7 +40,7 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Batch added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Batch added successfully']);
     }
 
     public function newCategory()
@@ -48,6 +48,35 @@ class Products
         App\Utils::requireAuth();
 
         header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'message' => 'Category added successfully']);
+        echo json_encode(['success' => true, 'data' => 'Category added successfully']);
+    }
+
+    public function search()
+    {
+        App\Utils::requireAuth();
+
+        $query = $_GET['q'];
+        $product = new App\Models\Product();
+        $products = $product->search($query);
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'data' => ['query' => $query, 'results' => $products]]);
+    }
+
+    public function details()
+    {
+        App\Utils::requireAuth();
+
+        $id = $_GET['id'];
+        $model = new App\Models\Product();
+        $product = $model->getProductDetails($id);
+
+        App\View::render('Template', [
+            'title' => 'Product Details',
+            'view' => 'ProductDetails',
+            'stylesheets' => ['productDetails'],
+            'scripts' => ['productDetails'],
+            'data' => ['product' => $product]
+        ]);
     }
 }

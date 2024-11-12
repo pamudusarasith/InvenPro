@@ -10,6 +10,13 @@ document.querySelectorAll(".collapsible").forEach((element) => {
   };
 });
 
+document.querySelectorAll(".products-tbl .tbl-r[data-id]").forEach((row) => {
+  row.addEventListener("click", function () {
+    const productId = this.getAttribute("data-id");
+    window.location.href = `/product?id=${productId}`;
+  });
+});
+
 document.getElementById("new-category-btn").onclick = (e) => {
   document.getElementById("category-form-modal").classList.toggle("show");
 };
@@ -22,23 +29,17 @@ document.getElementById("new-batch-btn").onclick = (e) => {
   document.getElementById("batch-form-modal").classList.toggle("show");
 };
 
-document.querySelectorAll(".close-btn").forEach((element) => {
-  element.onclick = (e) => {
-    let element = e.target;
-    while (!element.classList.contains("show")) {
-      element = element.parentElement;
-    }
-    element.classList.toggle("show");
-  };
-});
-
-document.querySelector(".action-btns button[type='button']").onclick = (e) => {
-  let element = e.target;
-  while (!element.classList.contains("show")) {
-    element = element.parentElement;
-  }
-  element.classList.toggle("show");
-};
+document
+  .querySelectorAll(".modal-action-btns .cancel-btn")
+  .forEach((element) => {
+    element.addEventListener("click", (e) => {
+      let element = e.target;
+      while (!element.classList.contains("show")) {
+        element = element.parentElement;
+      }
+      element.classList.toggle("show");
+    });
+  });
 
 function validateCategoryFormData(formData) {
   // Add any additional validation logic here if needed
@@ -55,7 +56,10 @@ function validateBatchFormData(formData) {
   const exp = new Date(formData.get("exp"));
 
   if (exp <= mfd) {
-    return { isValid: false, error: "Expiration date must be greater than manufacturing date." };
+    return {
+      isValid: false,
+      error: "Expiration date must be greater than manufacturing date.",
+    };
   }
 
   return { isValid: true };
@@ -72,6 +76,15 @@ async function submitForm(formName) {
   const error = document.querySelector(`#${formName}-form #error-msg`);
   const form = document.getElementById(`${formName}-form`);
   const formData = new FormData(form);
+
+  const reader = new FileReader();
+  reader.readAsDataURL(formData.get("image"));
+  const image = new Promise((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+  formData.set("image", (await image).split(",")[1]);
+
   const validationResult = validators[formName](formData);
 
   if (!validationResult.isValid) {
@@ -111,3 +124,9 @@ forms.forEach((formName) => {
       await submitForm(formName);
     });
 });
+
+document
+  .querySelector("#prod-search input")
+  .addEventListener("input", async (e) => {
+    await autocomplete("prod-search");
+  });

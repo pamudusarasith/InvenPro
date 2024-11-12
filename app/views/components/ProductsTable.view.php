@@ -6,7 +6,7 @@
     </div>
     <?php if (isset($products)) {
         foreach ($products as $product) : ?>
-            <div class="tbl-r">
+            <div class="tbl-r" data-id="<?= $product["id"] ?>">
                 <span class="tbl-d"><?= $product["name"] ?></span>
                 <span class="tbl-d"><?= $product["price"] ?></span>
                 <span class="tbl-d"><?= $product["quantity"] ?></span>
