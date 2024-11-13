@@ -15,8 +15,6 @@
                     <input type="text" placeholder="Search Product...">
                 </div>
                 <div class="searchResultcontainer">
-                    <!--Going to add classes that will be use in my script
-                        Note this are not yet pulled from the database -->
                     <div class="row">
                         <div class="column productContainer" data-pid="32">
                             <div class="productResultContainer">

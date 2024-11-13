@@ -100,8 +100,37 @@ let script = function () {
           productId: pid,
           quantity: orderQty,
         });
+
+        loadscript.addToOrder(productInfo, pid, orderQty);
       }
     });
+  };
+
+  this.addToOrder = function (productInfo, pid, orderQty) {
+    //add to order List to table
+    //check current orders(store invariable)
+    let curItemIds = Object.keys(loadscript.orderItems);
+    let totalAmount = productInfo["price"] * orderQty;
+    //check if it's already added
+
+    if (curItemIds.indexOf(pid) > -1) {
+      //if added,just update the quantity (add qty)
+      loadscript.orderItems[pid]["amount"] += totalAmount;
+      loadscript.orderItems[pid]["orderQty"] += orderQty;
+
+      console.log("exist");
+    } else {
+      //else,add directly
+
+      loadscript.orderItems[pid] = {
+        name: productInfo["name"],
+        price: productInfo["price"],
+        orderQty: orderQty,
+        amount: totalAmount,
+      };
+    }
+    //update quantity to the productinfo
+    loadscript.products[pid]["stock"] -= orderQty;
   };
 
   this.dialogError = function (message) {
