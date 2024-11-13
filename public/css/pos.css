@@ -245,6 +245,16 @@ span.item-total-label{
   transition: 0.3s;
 }
 
+/*--------------*/
+  
+.itemNoData{
+  text-align: center;
+  font-size: 22px;
+  padding: 51px;
+  color: #707070;
+  text-transform: uppercase;
+}
+
 
 
 

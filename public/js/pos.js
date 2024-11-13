@@ -106,6 +106,53 @@ let script = function () {
     });
   };
 
+  //----------------------------------------------------------------------------------
+  this.updateOrderItemTable = function () {
+    //refresh order list table
+    let ordersContainer = document.querySelector(".pos-items");
+
+    let html = ' <p class="itemNoData">No data</p>';
+
+    //check if order items varibles is empty or not
+    if (Object.keys(loadscript.orderItems).length) {
+      let tableHtml = `
+        <table class="table">
+              <thead>
+                   <tr>
+                      <th>#</th>
+                      <th>PRODUCT</th>
+                      <th>PRICE(Rs)</th>
+                      <th>QTY</th>
+                      <th>AMOUNT(Rs)</th>
+                      <th></th>
+                   </tr>
+             </thead>
+             <tbody>__Rows__</tbody>
+        </table>`;
+
+      //Loop orderitems and store in rows
+      let rows = "";
+      let rownNum = 1;
+      for (const [pid, orderItem] of Object.entries(loadscript.orderItems)) {
+        rows += `
+                   <tr>
+                      <td>${rownNum}</td>
+                      <td>${orderItem["name"]}</td>
+                      <td>${orderItem["price"].toFixed(2)}</td>
+                      <td>${orderItem["orderQty"]}</td>
+                      <td>${orderItem["amount"].toFixed(2)}</td>
+                   </tr>
+          `;
+        rownNum++;
+      }
+
+      html = tableHtml.replace("__Rows__", rows);
+    }
+
+    ordersContainer.innerHTML = html;
+  };
+
+  //-----------------------------------------------------------
   this.addToOrder = function (productInfo, pid, orderQty) {
     //add to order List to table
     //check current orders(store invariable)
@@ -131,6 +178,12 @@ let script = function () {
     }
     //update quantity to the productinfo
     loadscript.products[pid]["stock"] -= orderQty;
+
+    this.updateOrderItemTable();
+
+    //refresh order list table
+
+    //refresh the products varible for update stock
   };
 
   this.dialogError = function (message) {
