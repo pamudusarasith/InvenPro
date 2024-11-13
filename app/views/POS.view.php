@@ -15,10 +15,12 @@
                     <input type="text" placeholder="Search Product...">
                 </div>
                 <div class="searchResultcontainer">
+                    <!--Going to add classes that will be use in my script
+                        Note this are not yet pulled from the database -->
                     <div class="row">
-                        <div class="column">
+                        <div class="column productContainer" data-pid="32">
                             <div class="productResultContainer">
-                                <img src="/images/pos/milkpowder.png" width="80%" alt="">
+                                <img src="/images/pos/milkpowder.png" class="productImage" width="80%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -31,9 +33,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="33">
                             <div class="productResultContainer">
-                                <img src="/images/pos/kottumee.png" width="100%" alt="">
+                                <img src="/images/pos/kottumee.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -46,9 +48,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="34">
                             <div class="productResultContainer">
-                                <img src="/images/pos/yoghurt.png" width="100%" alt="">
+                                <img src="/images/pos/yoghurt.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -61,9 +63,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="35">
                             <div class="productResultContainer">
-                                <img src="/images/pos/sustagen.png" width="100%" alt="">
+                                <img src="/images/pos/sustagen.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -76,9 +78,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="36">
                             <div class="productResultContainer">
-                                <img src="/images/pos/Sausages.png" width="100%" alt="">
+                                <img src="/images/pos/Sausages.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -91,9 +93,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="37">
                             <div class="productResultContainer">
-                                <img src="/images/pos/lipton.png" width="100%" alt="">
+                                <img src="/images/pos/lipton.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -106,9 +108,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="38">
                             <div class="productResultContainer">
-                                <img src="/images/pos/applejuice.png" width="100%" alt="">
+                                <img src="/images/pos/applejuice.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -121,9 +123,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="39">
                             <div class="productResultContainer">
-                                <img src="/images/pos/sunlight.png" width="100%" alt="">
+                                <img src="/images/pos/sunlight.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -136,9 +138,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="40">
                             <div class="productResultContainer">
-                                <img src="/images/pos/mayonnaise.png" width="100%" alt="">
+                                <img src="/images/pos/mayonnaise.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
