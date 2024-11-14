@@ -97,7 +97,7 @@ class Product
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->buffer($result["image"]);
         $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
-        $result['categories'] = array_column($this->getProductCategories($id), 'name');
+        $result['categories'] = $this->getProductCategories($id);
 
         return $result;
     }

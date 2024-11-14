@@ -35,7 +35,21 @@
                     <option value="kg" <?= $product["measure_unit"] === "kg" ? "selected" : "" ?>>Kilogram - kg</option>
                     <option value="l" <?= $product["measure_unit"] === "l" ? "selected" : "" ?>>Liters - l</option>
                 </select>
-
+                <label for="prod-category">Categories</label>
+                <div id="category-search" class="search-container" style="display: none;">
+                    <div class="row search-bar">
+                        <span class="material-symbols-rounded">search</span>
+                        <input type="text" class="" placeholder="Search categories">
+                    </div>
+                </div>
+                <div id="category-chips" class="chips">
+                    <?php foreach ($product["categories"] as $category) : ?>
+                        <div class="chip" data-id="<?= htmlspecialchars($category["id"]) ?>">
+                            <?= htmlspecialchars($category["name"]) ?>
+                            <span class="material-symbols-rounded" style="display: none;">close</span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
                 <div class="row action-btns" style="display: none;">
                     <span class="loader" style="margin: 24px 12px 0px; font-size: 12px"></span>
                     <button type="button" class="btn btn-secondary reset-btn">Reset</button>

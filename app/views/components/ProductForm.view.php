@@ -18,7 +18,7 @@
                 <option value="l">Liters - l</option>
             </select>
             <label for="prod-category">Categories</label>
-            <div id="category-search" class="column">
+            <div id="category-search" class="search-container">
                 <div class="row search-bar">
                     <span class="material-symbols-rounded">search</span>
                     <input type="text" class="" placeholder="Search categories">

@@ -4,12 +4,6 @@
   padding: 4px 12px 4px 8px;
 }
 
-#prod-search,
-#category-search {
-  position: relative;
-  margin-bottom: 8px;
-}
-
 #filters {
   margin-top: 8px;
 }
