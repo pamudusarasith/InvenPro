@@ -18,6 +18,8 @@
   height: 100%;
 }
 
+/*leftside*/
+
 .sidebar1 {
   width: 70%;
   background-color: #f6f1f1;
@@ -67,7 +69,7 @@
   font-size: 18px;
   left: 0;
   background: #b4b0b0ba;
-  height: 51px;
+  height: 45px;
   font-weight: bold;
   padding: 9px;
 }
@@ -113,6 +115,8 @@
   padding-left: 15px;      
   box-sizing: border-box; 
 }
+
+/*right side */
 
 .main-content {
   width: 30%;
@@ -240,6 +244,21 @@ span.item-total-label{
   color: #fff;
   transition: 0.3s;
 }
+
+/*--------------*/
+  
+.itemNoData{
+  text-align: center;
+  font-size: 22px;
+  padding: 51px;
+  color: #707070;
+  text-transform: uppercase;
+}
+
+
+
+
+
 
 
 
