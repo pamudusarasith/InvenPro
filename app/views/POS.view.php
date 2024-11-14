@@ -16,9 +16,9 @@
                 </div>
                 <div class="searchResultcontainer">
                     <div class="row">
-                        <div class="column">
+                        <div class="column productContainer" data-pid="32">
                             <div class="productResultContainer">
-                                <img src="/images/pos/milkpowder.png" width="80%" alt="">
+                                <img src="/images/pos/milkpowder.png" class="productImage" width="80%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -31,9 +31,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="33">
                             <div class="productResultContainer">
-                                <img src="/images/pos/kottumee.png" width="100%" alt="">
+                                <img src="/images/pos/kottumee.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -46,9 +46,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="34">
                             <div class="productResultContainer">
-                                <img src="/images/pos/yoghurt.png" width="100%" alt="">
+                                <img src="/images/pos/yoghurt.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -61,9 +61,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="35">
                             <div class="productResultContainer">
-                                <img src="/images/pos/sustagen.png" width="100%" alt="">
+                                <img src="/images/pos/sustagen.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -76,9 +76,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="36">
                             <div class="productResultContainer">
-                                <img src="/images/pos/Sausages.png" width="100%" alt="">
+                                <img src="/images/pos/Sausages.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -91,9 +91,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="37">
                             <div class="productResultContainer">
-                                <img src="/images/pos/lipton.png" width="100%" alt="">
+                                <img src="/images/pos/lipton.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -106,9 +106,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="38">
                             <div class="productResultContainer">
-                                <img src="/images/pos/applejuice.png" width="100%" alt="">
+                                <img src="/images/pos/applejuice.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -121,9 +121,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="39">
                             <div class="productResultContainer">
-                                <img src="/images/pos/sunlight.png" width="100%" alt="">
+                                <img src="/images/pos/sunlight.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -136,9 +136,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column">
+                        <div class="column productContainer" data-pid="40">
                             <div class="productResultContainer">
-                                <img src="/images/pos/mayonnaise.png" width="100%" alt="">
+                                <img src="/images/pos/mayonnaise.png" class="productImage" width="100%" alt="">
                                 <div class="productInfoContainer">
                                     <div class="row">
                                         <div class="column-productName">
@@ -166,80 +166,7 @@
                 </div>
                 <div class="pos-items-container">
                     <div class="pos-items">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>PRODUCT</th>
-                                    <th>PRICE</th>
-                                    <th>QTY</th>
-                                    <th>AMOUNT</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <thody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>𝖸𝗈𝗀𝗁𝗎𝗋𝗍𝗍</td>
-                                    <td>RS.70</td>
-                                    <td>3</td>
-                                    <td>Rs.210</td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="editItem()"><img src="/images/pos/edit-button.png" width="20%" alt=""> </a>
-                                        <a href="javascript:void(0)" onclick="deleteItem()"><img src="/images/pos/delete.png" width="20%" alt=""></a>
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>𝖲𝗎𝗌𝗍𝖺𝗀𝖾𝗇</td>
-                                    <td>RS.1670</td>
-                                    <td>1</td>
-                                    <td>Rs.1670</td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="editItem()"><img src="/images/pos/edit-button.png" width="20%" alt=""> </a>
-                                        <a href="javascript:void(0)" onclick="deleteItem()"><img src="/images/pos/delete.png" width="20%" alt=""></a>
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>𝖢𝗁𝗈𝖼𝗈𝗅𝖺𝗍𝖾</td>
-                                    <td>RS.180</td>
-                                    <td>2</td>
-                                    <td>Rs.360</td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="editItem()"><img src="/images/pos/edit-button.png" width="20%" alt=""></a>
-                                        <a href=" javascript:void(0)" onclick="deleteItem()"><img src="/images/pos/delete.png" width="20%" alt=""></a>
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>𝖢𝗁𝗂𝖼𝗄𝖾𝗇</td>
-                                    <td>RS.660</td>
-                                    <td>1</td>
-                                    <td>Rs.660</td>
-                                    <td>
-                                        <a href="javascript:void(0)" class="order-change" onclick="editItem()"><img src="/images/pos/edit-button.png  " width="20%" alt=""></a>
-                                        <a href="javascript:void(0)" class="order-change" onclick="deleteItem()"><img src="/images/pos/delete.png" width="20%" alt=""></a>
-                                    </td>
-
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>𝖯𝖾𝗇𝖼𝗂𝗅 𝖢𝖺𝗌𝖾</td>
-                                    <td>RS.240</td>
-                                    <td>1</td>
-                                    <td>Rs.240</td>
-                                    <td>
-                                        <a href="javascript:void(0)" onclick="editItem()"><img src="/images/pos/edit-button.png" width="20%" alt=""> </a>
-                                        <a href="javascript:void(0)" onclick="deleteItem()"><img src="/images/pos/delete.png" width="20%" alt=""></a>
-                                    </td>
-
-                                </tr>
-                            </thody>
-                        </table>
+                        <p class="itemNoData">No data</p>
                     </div>
                     <div class="item-total-container">
                         <p class="item-total">
