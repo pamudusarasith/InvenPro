@@ -41,6 +41,58 @@ document
     });
   });
 
+async function getCategoryFormData() {
+  const form = document.getElementById("category-form");
+
+  const formData = {
+    name: form.querySelector("input[name=name]").value,
+  };
+
+  return formData;
+}
+
+async function getProductFormData() {
+  const form = document.getElementById("prod-form");
+
+  const formData = {
+    id: form.querySelector("input[name=id]").value,
+    name: form.querySelector("input[name=name]").value,
+    description: form.querySelector("textarea[name=description]").value,
+    unit: form.querySelector("select[name=unit]").value,
+    categories: new Array(),
+    image: form.querySelector("input[name=image]").files[0],
+  };
+
+  form.querySelectorAll("#category-chips .chip").forEach((chip) => {
+    formData.categories.push(parseInt(chip.dataset.id));
+  });
+
+  const reader = new FileReader();
+  reader.readAsDataURL(formData.image);
+  const image = new Promise((resolve, reject) => {
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+  formData.image = (await image).split(",")[1];
+
+  return formData;
+}
+
+async function getBatchFormData() {
+  const form = document.getElementById("batch-form");
+
+  const formData = {
+    id: form.querySelector("input[name=id]").value,
+    bno: form.querySelector("input[name=bno]").value,
+    price: form.querySelector("input[name=price]").value,
+    qty: form.querySelector("input[name=qty]").value,
+    mfd: form.querySelector("input[name=mfd]").value,
+    exp: form.querySelector("input[name=exp]").value,
+  };
+
+  return formData;
+}
+
 function validateCategoryFormData(formData) {
   // Add any additional validation logic here if needed
   return { isValid: true };
@@ -52,8 +104,8 @@ function validateProductFormData(formData) {
 }
 
 function validateBatchFormData(formData) {
-  const mfd = new Date(formData.get("mfd"));
-  const exp = new Date(formData.get("exp"));
+  const mfd = new Date(formData.mfd);
+  const exp = new Date(formData.exp);
 
   if (exp <= mfd) {
     return {
@@ -71,19 +123,18 @@ const validators = {
   batch: validateBatchFormData,
 };
 
-async function submitForm(formName) {
-  const loader = document.querySelector(`#${formName}-form .loader`);
-  const error = document.querySelector(`#${formName}-form #error-msg`);
-  const form = document.getElementById(`${formName}-form`);
-  const formData = new FormData(form);
+const formDataGetters = {
+  category: getCategoryFormData,
+  prod: getProductFormData,
+  batch: getBatchFormData,
+};
 
-  const reader = new FileReader();
-  reader.readAsDataURL(formData.get("image"));
-  const image = new Promise((resolve, reject) => {
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
-  formData.set("image", (await image).split(",")[1]);
+async function submitForm(formName) {
+  const form = document.getElementById(`${formName}-form`);
+  const loader = form.querySelector(".loader");
+  const error = form.querySelector("#error-msg");
+
+  const formData = await formDataGetters[formName]();
 
   const validationResult = validators[formName](formData);
 
@@ -97,7 +148,7 @@ async function submitForm(formName) {
 
   const response = await fetch(form.action, {
     method: form.method,
-    body: JSON.stringify(Object.fromEntries(formData)),
+    body: JSON.stringify(formData),
     credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",
@@ -125,8 +176,44 @@ forms.forEach((formName) => {
     });
 });
 
+function handleProductSelect(element) {
+  const id = element.dataset.id;
+  window.location.href = `/product?id=${id}`;
+}
+
 document
   .querySelector("#prod-search input")
   .addEventListener("input", async (e) => {
-    await autocomplete("prod-search");
+    await autocomplete("prod-search", "/products/search", handleProductSelect);
+  });
+
+function handleCategorySelect(element) {
+  const id = element.dataset.id;
+  const name = element.innerHTML;
+  document.querySelector("#category-search input").value = "";
+  const chips = document.getElementById("category-chips");
+  for (const chip of chips.children) {
+    if (chip.dataset.id === id) {
+      return;
+    }
+  }
+
+  const chip = document.createElement("div");
+  chip.classList.add("chip");
+  chip.dataset.id = id;
+  chip.innerHTML = `${name} <span class="material-symbols-rounded">close</span>`;
+  chip.querySelector("span").addEventListener("click", (e) => {
+    chip.remove();
+  });
+  chips.appendChild(chip);
+}
+
+document
+  .querySelector("#category-search input")
+  .addEventListener("input", async (e) => {
+    await autocomplete(
+      "category-search",
+      "/categories/search",
+      handleCategorySelect
+    );
   });

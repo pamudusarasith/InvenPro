@@ -17,6 +17,14 @@
                 <option value="kg">Kilogram - kg</option>
                 <option value="l">Liters - l</option>
             </select>
+            <label for="prod-category">Categories</label>
+            <div id="category-search" class="column">
+                <div class="row search-bar">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" class="" placeholder="Search categories">
+                </div>
+            </div>
+            <div id="category-chips" class="chips"></div>
             <label for="prod-img">Image</label>
             <input id="prod-img" type="file" name="image" accept="image/png" required>
             <div class="modal-error">

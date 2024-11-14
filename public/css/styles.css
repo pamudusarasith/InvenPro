@@ -357,3 +357,24 @@ body {
   color: red;
   font-weight: bold;
 }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background-color: #e7e7e7;
+  border-radius: 16px;
+  margin: 0 8px 8px 0;
+}
+
+.chip span {
+  margin-left: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}

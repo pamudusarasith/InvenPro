@@ -4,7 +4,8 @@
   padding: 4px 12px 4px 8px;
 }
 
-#prod-search {
+#prod-search,
+#category-search {
   position: relative;
   margin-bottom: 8px;
 }
@@ -87,8 +88,7 @@
   margin-top: 16px;
 }
 
-:is(#category-form, #prod-form, #batch-form)
-  > :is(input, textarea, select) {
+:is(#category-form, #prod-form, #batch-form) > :is(input, textarea, select) {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #cccccc;
