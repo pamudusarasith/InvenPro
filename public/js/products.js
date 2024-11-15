@@ -10,7 +10,7 @@ document.querySelectorAll(".collapsible").forEach((element) => {
   };
 });
 
-document.querySelectorAll(".products-tbl .tbl-r[data-id]").forEach((row) => {
+document.querySelectorAll(".tbl tr[data-id]:not([data-id=''])").forEach((row) => {
   row.addEventListener("click", function () {
     const productId = this.getAttribute("data-id");
     window.location.href = `/product?id=${productId}`;

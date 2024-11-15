@@ -38,7 +38,12 @@
                     <button class="collapsible"><?= $category ?></button>
                     <div class="collapsible-content">
                         <?php if (isset($products)) {
-                            App\View::render("components/ProductsTable", ["products" => $products[$category]]);
+                            App\View::render('components/Table', [
+                                'headers' => ["Product", "Price", "Quantity"],
+                                'keys' => ["name", "price", "quantity"],
+                                'rows' => $products[$category],
+                                'rowIdField' => "id"
+                            ]);
                         } ?>
                     </div>
             <?php endforeach;

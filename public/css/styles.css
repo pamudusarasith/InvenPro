@@ -378,3 +378,46 @@ body {
   font-size: 0.8rem;
   cursor: pointer;
 }
+
+.tbl table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tbl th {
+  text-align: left;
+  padding: 8px;
+  background-color: #dfdfdf;
+}
+
+.tbl th:first-child {
+  border-radius: 12px 0 0 0;
+}
+
+.tbl th:last-child {
+  border-radius: 0 12px 0 0;
+}
+
+.tbl td {
+  padding: 8px;
+}
+
+.tbl tr {
+  background-color: #efefef;
+}
+
+.tbl tr[data-id]:not([data-id=""]) {
+  cursor: pointer;
+}
+
+.tbl tr[data-id]:not([data-id=""]):hover {
+  background-color: #e7e7e7;
+}
+
+.tbl tr:last-child td:first-child {
+  border-radius: 0 0 0 12px;
+}
+
+.tbl tr:last-child td:last-child {
+  border-radius: 0 0 12px 0;
+}
