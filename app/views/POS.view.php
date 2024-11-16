@@ -158,10 +158,11 @@
             <div class="main-content">
                 <div class="pos-header">
                     <div class="customer-icon">
-                        <img src="/images/pos/add-user.png" alt="Add Customer Icon">
+                        <span class="material-symbols-rounded">menu</span>
                     </div>
-                    <div class="add-customer">
-                        <a href="javascript:void(0);">Add Customer</a>
+                    <div id="add-customer" class="btn btn-primary sp8">
+                        <span class="material-symbols-rounded">add</span>
+                        Add customer
                     </div>
                 </div>
                 <div class="pos-items-container">
@@ -171,7 +172,7 @@
                     <div class="item-total-container">
                         <p class="item-total">
                             <span class="item-total-label">TOTAL</span>
-                            <span class="item-total-value">RS.2420.00</span>
+                            <span class="item-total-value">RS. 0.00</span>
                         </p>
                     </div>
                 </div>
