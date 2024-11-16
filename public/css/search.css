@@ -1,3 +1,10 @@
+.search-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
 .search-bar {
   margin: 16px 0 0 0;
   width: 100%;
