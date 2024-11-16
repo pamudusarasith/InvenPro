@@ -1,11 +1,4 @@
-const originalValues = {
-  "prod-image": document.getElementById("prod-image").src,
-  "prod-name": document.getElementById("prod-name").value,
-  "prod-desc": document.getElementById("prod-desc").value,
-  "prod-unit": document.getElementById("prod-unit").value,
-};
-
-document.getElementById("edit-btn").addEventListener("click", function () {
+document.getElementById("prod-edit-btn").addEventListener("click", function () {
   const imgLabel = document.querySelector(".image-container label");
   const disabledElems = document.querySelectorAll("*[disabled]");
   const categorySearch = document.getElementById("category-search");
@@ -35,14 +28,7 @@ document.getElementById("image-input").addEventListener("change", function () {
 document
   .querySelector(".details-container .reset-btn")
   .addEventListener("click", function () {
-    document.getElementById("prod-image").src = originalValues["prod-image"];
-
-    for (const key in originalValues) {
-      if (key !== "prod-image") {
-        const elem = document.getElementById(key);
-        elem.value = originalValues[key];
-      }
-    }
+    window.location.reload();
   });
 
 document.querySelectorAll(".chip span").forEach((element) => {
@@ -81,3 +67,37 @@ document
       handleCategorySelect
     );
   });
+
+function openBatchEditForm(row) {
+  const form = document.getElementById("batch-edit-form-modal");
+  form.querySelector("input[name='id']").value = row.dataset.id;
+  form.querySelector("input[name='bno']").value = row.children[0].innerHTML;
+  form.querySelector("input[name='qty']").value = row.children[1].innerHTML;
+  form.querySelector("input[name='price']").value = row.children[2].innerHTML;
+  form.querySelector("input[name='mfd']").value = row.children[3].innerHTML;
+  form.querySelector("input[name='exp']").value = row.children[4].innerHTML;
+  form.classList.add("show");
+}
+
+function addEditIconToRow(row) {
+  const td = document.createElement("td");
+  const editIcon = document.createElement("span");
+  editIcon.classList.add("material-symbols-rounded");
+  editIcon.innerHTML = "edit";
+  editIcon.addEventListener("click", function () {
+    openBatchEditForm(row);
+  });
+  td.appendChild(editIcon);
+  row.appendChild(td);
+}
+
+const table = document.querySelector(".batches-container .tbl tbody");
+let row = table.firstChild;
+row.appendChild(document.createElement("th"));
+console.log(row);
+row = row.nextSibling.nextSibling;
+while (row) {
+  console.log(row);
+  addEditIconToRow(row);
+  row = row.nextSibling.nextSibling;
+}

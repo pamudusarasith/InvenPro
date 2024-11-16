@@ -4,7 +4,7 @@
     <div class="content">
         <div class="row">
             <h1>Product Details</h1>
-            <div id="edit-btn" class="btn btn-secondary">
+            <div id="prod-edit-btn" class="btn btn-secondary">
                 <span class="material-symbols-rounded">edit</span>
                 Edit
             </div>
@@ -57,5 +57,23 @@
                 </div>
             </div>
         </form>
+
+        <div class="column batches-container">
+            <div class="row">
+                <h1>Batch Details</h1>
+            </div>
+            <?php
+
+            App\View::render('components/Table', [
+                'headers' => ["BNo.", "Quantity", "Price", "MFD", "EXP"],
+                'keys' => ["batch_no", "quantity", "price", "manufacture_date", "expiry_date"],
+                'rows' => $product["batches"],
+                'rowIdField' => "batch_no"
+            ]);
+
+            App\View::render('components/BatchEditForm');
+
+            ?>
+        </div>
     </div>
 </div>

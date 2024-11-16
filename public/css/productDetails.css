@@ -43,7 +43,8 @@
   margin: 0;
 }
 
-#edit-btn {
+#prod-edit-btn,
+#batch-edit-btn {
   margin-left: auto;
   padding: 4px 12px 4px 8px;
 }
@@ -63,4 +64,36 @@
 .details-container .action-btns button {
   margin: 16px 0 0 12px;
   border: 0;
+}
+
+.batches-container div {
+  margin: 0 0 8px 0;
+}
+
+.batches-container .tbl {
+  margin: 0 24px;
+}
+
+.batches-container .tbl tr {
+  cursor: auto !important;
+}
+
+#batch-edit-form {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 24px 24px 24px;
+}
+
+#batch-edit-form > * {
+  margin-top: 4px;
+}
+
+#batch-edit-form > label {
+  margin-top: 16px;
+}
+
+#batch-edit-form > :is(input, textarea, select) {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
 }
