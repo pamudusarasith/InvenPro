@@ -10,12 +10,14 @@ document.querySelectorAll(".collapsible").forEach((element) => {
   };
 });
 
-document.querySelectorAll(".tbl tr[data-id]:not([data-id=''])").forEach((row) => {
-  row.addEventListener("click", function () {
-    const productId = this.getAttribute("data-id");
-    window.location.href = `/product?id=${productId}`;
+document
+  .querySelectorAll(".tbl tr[data-id]:not([data-id=''])")
+  .forEach((row) => {
+    row.addEventListener("click", function () {
+      const productId = this.getAttribute("data-id");
+      window.location.href = `/product?id=${productId}`;
+    });
   });
-});
 
 document.getElementById("new-category-btn").onclick = (e) => {
   document.getElementById("category-form-modal").classList.toggle("show");
@@ -28,18 +30,6 @@ document.getElementById("new-prod-btn").onclick = (e) => {
 document.getElementById("new-batch-btn").onclick = (e) => {
   document.getElementById("batch-form-modal").classList.toggle("show");
 };
-
-document
-  .querySelectorAll(".modal-action-btns .cancel-btn")
-  .forEach((element) => {
-    element.addEventListener("click", (e) => {
-      let element = e.target;
-      while (!element.classList.contains("show")) {
-        element = element.parentElement;
-      }
-      element.classList.toggle("show");
-    });
-  });
 
 async function getCategoryFormData() {
   const form = document.getElementById("category-form");

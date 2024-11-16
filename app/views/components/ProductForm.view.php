@@ -33,7 +33,7 @@
             </div>
             <div class="row modal-action-btns">
                 <span class="loader" style="margin: 24px 12px 0px; font-size: 12px"></span>
-                <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+                <button type="button" class="btn btn-secondary modal-cancel-btn">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add</button>
             </div>
         </form>
