@@ -24,3 +24,13 @@ document.querySelectorAll(".modal-close-btn").forEach((element) => {
     element.classList.toggle("show");
   };
 });
+
+document.querySelectorAll(".modal-cancel-btn").forEach((element) => {
+  element.addEventListener("click", (e) => {
+    let element = e.target;
+    while (!element.classList.contains("show")) {
+      element = element.parentElement;
+    }
+    element.classList.toggle("show");
+  });
+});

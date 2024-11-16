@@ -74,8 +74,8 @@ class Products
         App\View::render('Template', [
             'title' => 'Product Details',
             'view' => 'ProductDetails',
-            'stylesheets' => ['productDetails'],
-            'scripts' => ['productDetails'],
+            'stylesheets' => ['productDetails', 'search'],
+            'scripts' => ['productDetails', 'search'],
             'data' => ['product' => $product]
         ]);
     }

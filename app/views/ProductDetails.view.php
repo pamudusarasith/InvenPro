@@ -4,7 +4,7 @@
     <div class="content">
         <div class="row">
             <h1>Product Details</h1>
-            <div id="edit-btn" class="btn btn-secondary">
+            <div id="prod-edit-btn" class="btn btn-secondary">
                 <span class="material-symbols-rounded">edit</span>
                 Edit
             </div>
@@ -35,7 +35,21 @@
                     <option value="kg" <?= $product["measure_unit"] === "kg" ? "selected" : "" ?>>Kilogram - kg</option>
                     <option value="l" <?= $product["measure_unit"] === "l" ? "selected" : "" ?>>Liters - l</option>
                 </select>
-
+                <label for="prod-category">Categories</label>
+                <div id="category-search" class="search-container" style="display: none;">
+                    <div class="row search-bar">
+                        <span class="material-symbols-rounded">search</span>
+                        <input type="text" class="" placeholder="Search categories">
+                    </div>
+                </div>
+                <div id="category-chips" class="chips">
+                    <?php foreach ($product["categories"] as $category) : ?>
+                        <div class="chip" data-id="<?= htmlspecialchars($category["id"]) ?>">
+                            <?= htmlspecialchars($category["name"]) ?>
+                            <span class="material-symbols-rounded" style="display: none;">close</span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
                 <div class="row action-btns" style="display: none;">
                     <span class="loader" style="margin: 24px 12px 0px; font-size: 12px"></span>
                     <button type="button" class="btn btn-secondary reset-btn">Reset</button>
@@ -43,5 +57,23 @@
                 </div>
             </div>
         </form>
+
+        <div class="column batches-container">
+            <div class="row">
+                <h1>Batch Details</h1>
+            </div>
+            <?php
+
+            App\View::render('components/Table', [
+                'headers' => ["BNo.", "Quantity", "Price", "MFD", "EXP"],
+                'keys' => ["batch_no", "quantity", "price", "manufacture_date", "expiry_date"],
+                'rows' => $product["batches"],
+                'rowIdField' => "batch_no"
+            ]);
+
+            App\View::render('components/BatchEditForm');
+
+            ?>
+        </div>
     </div>
 </div>

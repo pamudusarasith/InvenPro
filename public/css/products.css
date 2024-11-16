@@ -4,11 +4,6 @@
   padding: 4px 12px 4px 8px;
 }
 
-#prod-search {
-  position: relative;
-  margin-bottom: 8px;
-}
-
 #filters {
   margin-top: 8px;
 }
@@ -36,39 +31,9 @@
   display: none;
 }
 
-.products-tbl {
-  margin: 12px;
+.collapsible-content .tbl {
+  margin: 4px 12px;
   width: 100%;
-}
-
-.products-tbl .tbl-r:first-child {
-  font-weight: bold;
-  background-color: #dfdfdf;
-  border-radius: 12px 12px 0 0;
-}
-
-.products-tbl .tbl-r {
-  display: inline-grid;
-  width: 100%;
-  grid-template-columns: 2fr 1fr 1fr;
-  padding: 12px;
-}
-
-.products-tbl .tbl-r[data-id] {
-  background-color: #efefef;
-}
-
-.products-tbl .tbl-r[data-id]:hover {
-  background-color: #e7e7e7;
-  cursor: pointer;
-}
-
-.products-tbl .tbl-r:last-child {
-  border-radius: 0 0 12px 12px;
-}
-
-.products-tbl .tbl-r:only-child {
-  border-radius: 12px;
 }
 
 #category-form,
@@ -87,8 +52,7 @@
   margin-top: 16px;
 }
 
-:is(#category-form, #prod-form, #batch-form)
-  > :is(input, textarea, select) {
+:is(#category-form, #prod-form, #batch-form) > :is(input, textarea, select) {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid #cccccc;
