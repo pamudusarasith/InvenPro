@@ -150,6 +150,7 @@
   padding-right: 15px;
   padding-left: 16px;
   box-sizing: border-box;
+  margin-top: 15px;
 }
 
 
@@ -160,16 +161,31 @@
   margin-bottom: 20px;
 }
 
-.add-customer {
-  font-size: 16px;
-  color: rgb(102 101 101);
-  cursor: pointer;
-  flex: 0 0 33.333333%;
-  max-width: 33.333333%;
-  padding-right: 15px;
-  padding-left: 34px;
-  box-sizing: border-box;
+#add-customer {
+  margin-top: 15px;
+  margin-left:-25px;
+  padding: 4px 18px 4px 9px; 
+  border-radius: 25px;
+  position: relative;
+  left: 10px;
 }
+
+
+/*.add-customer-btn{
+  font-size: 35px;
+  text-align: center;
+  display: block;
+  text-decoration: none;
+  border-radius: 12px;
+  color: #ffffff;
+  background-color: #04AA6D;
+}
+
+.add-customer-btn:hover{
+  background-color: #04AA6D; 
+  color: white;
+  transition-duration: 0.4s;
+}*/
 
 .customer-icon img {
   width: 24px;
