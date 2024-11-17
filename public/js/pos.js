@@ -1,8 +1,10 @@
 let script = function () {
   //store here list of variables
   this.orderItems = {};
+  //store the totalorder amount
+  this.totalOrderAmount = 0.0;
 
-  //product data push the database
+  //want to this product data push the database
   this.products = {
     32: {
       name: "Malibun Milk powder",
@@ -70,7 +72,7 @@ let script = function () {
         let pid = productContainer.dataset.pid;
         let productInfo = loadscript.products[pid];
 
-        //show dialog
+        //show dialogbox
         //ask for quantity
         //Display product like name and price
         //if quantity is grater than current stock ,then alert throw error
@@ -103,11 +105,31 @@ let script = function () {
 
         loadscript.addToOrder(productInfo, pid, orderQty);
       }
+
+      //delete order items
+      if (
+        targetE1classList.contains("deleteOrderItem") ||
+        targetE1.closest(".deleteOrderItem")
+      ) {
+        let deleteButton = targetE1.closest(".deleteOrderItem");
+        let productId = deleteButton.dataset.id;
+
+        if (confirm(`Are you sure you want to delete this item?`)) {
+          // Get the quantity ordered from the orderItems object
+          let orderedQuantity = loadscript.orderItems[productId]["orderQty"];
+          loadscript.products[productId]["stock"] += orderedQuantity;
+
+          delete loadscript.orderItems[productId];
+          loadscript.updateOrderItemTable(); // Refresh the order list
+        }
+      }
     });
   };
 
   //----------------------------------------------------------------------------------
   this.updateOrderItemTable = function () {
+    loadscript.totalOrderAmount = 0.0;
+
     //refresh order list table
     let ordersContainer = document.querySelector(".pos-items");
 
@@ -141,15 +163,31 @@ let script = function () {
                       <td>${orderItem["price"].toFixed(2)}</td>
                       <td>${orderItem["orderQty"]}</td>
                       <td>${orderItem["amount"].toFixed(2)}</td>
+                      <td> <a href="javascript:void(0)" class = "editeOrderItem" onclick="editItem()"  ><span class="material-symbols-rounded">edit</span> </a> </td>
+                      <td> 
+                           <a href="javascript:void(0)" class = "deleteOrderItem" data-id="${pid}">
+                                <span class="material-symbols-rounded" >delete</span> 
+                           </a>
+                      </td>
                    </tr>
           `;
         rownNum++;
+
+        loadscript.totalOrderAmount += orderItem["amount"];
       }
 
       html = tableHtml.replace("__Rows__", rows);
     }
 
+    //append to order list table
     ordersContainer.innerHTML = html;
+
+    loadscript.updatTotalOrderAmount();
+  };
+
+  this.updatTotalOrderAmount = function () {
+    document.querySelector(".item-total-value").innerHTML =
+      "Rs. " + loadscript.totalOrderAmount.toFixed(2).toLocaleString();
   };
 
   //-----------------------------------------------------------
