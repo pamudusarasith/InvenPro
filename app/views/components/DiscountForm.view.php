@@ -31,10 +31,12 @@
           Combinable
         </label>
       </div>
-      <label for="search-bar">Add Conditions</label>
-      <div id="search-bar" class="row search-bar">
-        <span class="material-symbols-rounded">search</span>
-        <input type="text" class="" placeholder="Search Discounts">
+      <label for="prod-search">Add Conditions</label>
+      <div id="prod-search" class="search-container">
+        <div class="row search-bar">
+          <span class="material-symbols-rounded">search</span>
+          <input type="text" class="" placeholder="Search Products">
+        </div>
       </div>
       <div class="error">
         <span class="material-symbols-rounded">error</span>

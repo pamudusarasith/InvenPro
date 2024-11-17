@@ -25,3 +25,14 @@ document.querySelectorAll("#filters div").forEach((element) => {
     e.target.classList.toggle("filter-active");
   };
 });
+
+function handleProductSelect(element) {
+  const id = element.dataset.id;
+  window.location.href = `/product?id=${id}`;
+}
+
+document
+  .querySelector("#prod-search input")
+  .addEventListener("input", async (e) => {
+    await autocomplete("prod-search", "/products/search", handleProductSelect);
+  });

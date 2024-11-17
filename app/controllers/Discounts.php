@@ -17,8 +17,8 @@ class Discounts
             'title' => 'Discounts',
             'view' => 'Discounts',
             'data' => ['types' => $types],
-            'stylesheets' => ['discounts'],
-            'scripts' => ['discounts'],
+            'stylesheets' => ['discounts', 'search'],
+            'scripts' => ['discounts', 'search'],
         ]);
     }
 }
