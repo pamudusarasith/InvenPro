@@ -15,22 +15,12 @@ function logout() {
   window.location.href = "/logout";
 }
 
-document.querySelectorAll(".modal-close-btn").forEach((element) => {
-  element.onclick = (e) => {
-    let element = e.target;
-    while (!element.classList.contains("show")) {
-      element = element.parentElement;
-    }
-    element.classList.toggle("show");
-  };
-});
-
-document.querySelectorAll(".modal-cancel-btn").forEach((element) => {
+document.querySelectorAll(".modal-close").forEach((element) => {
   element.addEventListener("click", (e) => {
-    let element = e.target;
-    while (!element.classList.contains("show")) {
-      element = element.parentElement;
+    let elem = e.target;
+    while (elem.tagName !== "DIALOG") {
+      elem = elem.parentElement;
     }
-    element.classList.toggle("show");
+    elem.close();
   });
 });

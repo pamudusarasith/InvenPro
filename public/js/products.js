@@ -20,15 +20,15 @@ document
   });
 
 document.getElementById("new-category-btn").onclick = (e) => {
-  document.getElementById("category-form-modal").classList.toggle("show");
+  document.getElementById("category-form-modal").showModal();
 };
 
 document.getElementById("new-prod-btn").onclick = (e) => {
-  document.getElementById("prod-form-modal").classList.toggle("show");
+  document.getElementById("prod-form-modal").showModal();
 };
 
 document.getElementById("new-batch-btn").onclick = (e) => {
-  document.getElementById("batch-form-modal").classList.toggle("show");
+  document.getElementById("batch-form-modal").showModal();
 };
 
 async function getCategoryFormData() {

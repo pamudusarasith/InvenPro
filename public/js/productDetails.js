@@ -68,15 +68,15 @@ document
     );
   });
 
-function openBatchEditForm(row) {
-  const form = document.getElementById("batch-edit-form-modal");
-  form.querySelector("input[name='id']").value = row.dataset.id;
-  form.querySelector("input[name='bno']").value = row.children[0].innerHTML;
-  form.querySelector("input[name='qty']").value = row.children[1].innerHTML;
-  form.querySelector("input[name='price']").value = row.children[2].innerHTML;
-  form.querySelector("input[name='mfd']").value = row.children[3].innerHTML;
-  form.querySelector("input[name='exp']").value = row.children[4].innerHTML;
-  form.classList.add("show");
+function openBatchEditModal(row) {
+  const modal = document.getElementById("batch-edit-form-modal");
+  modal.querySelector("input[name='id']").value = row.dataset.id;
+  modal.querySelector("input[name='bno']").value = row.children[0].innerHTML;
+  modal.querySelector("input[name='qty']").value = row.children[1].innerHTML;
+  modal.querySelector("input[name='price']").value = row.children[2].innerHTML;
+  modal.querySelector("input[name='mfd']").value = row.children[3].innerHTML;
+  modal.querySelector("input[name='exp']").value = row.children[4].innerHTML;
+  modal.showModal();
 }
 
 function addEditIconToRow(row) {
@@ -84,8 +84,9 @@ function addEditIconToRow(row) {
   const editIcon = document.createElement("span");
   editIcon.classList.add("material-symbols-rounded");
   editIcon.innerHTML = "edit";
+  editIcon.style.cursor = "pointer";
   editIcon.addEventListener("click", function () {
-    openBatchEditForm(row);
+    openBatchEditModal(row);
   });
   td.appendChild(editIcon);
   row.appendChild(td);
@@ -94,10 +95,8 @@ function addEditIconToRow(row) {
 const table = document.querySelector(".batches-container .tbl tbody");
 let row = table.firstChild;
 row.appendChild(document.createElement("th"));
-console.log(row);
 row = row.nextSibling.nextSibling;
 while (row) {
-  console.log(row);
   addEditIconToRow(row);
   row = row.nextSibling.nextSibling;
 }
