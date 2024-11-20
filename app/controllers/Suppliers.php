@@ -2,15 +2,16 @@
 
 namespace App\Controllers;
 
-use App;
+use App\Models\Supplier;
+use App\Utils;
+use App\View;
 
 class Suppliers
 {
     public function index(): void
     {
-        App\Utils::requireAuth();
-
-        App\View::render('Template', [
+        Utils::requireAuth();
+        View::render('Template', [
             'title' => 'Suppliers',
             'view' => 'Suppliers'
         ]);
@@ -18,9 +19,8 @@ class Suppliers
 
     public function details(): void
     {
-        App\Utils::requireAuth();
-
-        App\View::render('Template', [
+        Utils::requireAuth();
+        View::render('Template', [
             'title' => 'Supplier Details',
             'view' => 'SupplierDetails'
         ]);
@@ -28,8 +28,46 @@ class Suppliers
 
     public function add(): void
     {
-        App\Utils::requireAuth();
+        Utils::requireAuth();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Data Validation
+            $data = filter_input_array(INPUT_POST, [
+                'supplierID' => FILTER_SANITIZE_STRING,
+                'supplierName' => FILTER_SANITIZE_STRING,
+                'productCategories' => FILTER_SANITIZE_STRING,
+                'products' => FILTER_SANITIZE_STRING,
+                'address' => FILTER_SANITIZE_STRING,
+                'contactNo' => FILTER_SANITIZE_STRING,
+                'email' => FILTER_VALIDATE_EMAIL,
+                'specialNotes' => FILTER_SANITIZE_STRING,
+            ]);
+            
+            // Check Required Fields
+            if (in_array(null, $data, true) || in_array(false, $data, true)) {
+                View::render('AddSupplierForm', [
+                    'title' => 'Add Supplier',
+                    'error' => 'Please fill out all fields correctly.'
+                ]);
+                return;
+            }
 
-        App\View::render('AddSupplierForm');
+            // Add Supplier to Database
+            $supplierModel = new Supplier();
+            $success = $supplierModel->addSupplier($data);
+
+            if ($success) {
+                header('Location: /suppliers');
+                exit;
+            } else {
+                View::render('AddSupplierForm', [
+                    'title' => 'Add Supplier',
+                    'error' => 'Failed to add supplier. Please try again.'
+                ]);
+            }
+        } else {
+            View::render('AddSupplierForm', [
+                'title' => 'Add Supplier'
+            ]);
+        }
     }
 }

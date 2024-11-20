@@ -49,24 +49,46 @@
                 <th>Actions</th>
             </tr>
             </thead>
+
             <tbody>
-            <!-- Example of supplier rows -->
-            <tr>
-                <td>001</td>
-                <td>Munchee</td>
-                <td>0712345678</td>
-                <td>Biscuits</td>
-                <td><span class="status-active">Active</span></td>
-                <td><a href="/suppliers/details" class="view-profile">View profile</a></td>
-            </tr>
-            <tr>
-                <td>002</td>
-                <td>Amal Fdo</td>
-                <td>0712345678</td>
-                <td>Fish</td>
-                <td><span class="status-inactive">Inactive</span></td>
-                <td><a href="#" class="view-profile">View profile</a></td>
-            </tr>
+              <?php
+              $servername = "localhost";
+              $username = "root";
+              $password = "";
+              $database = "invenpro";
+
+              //create connection
+              $connection = new mysqli($servername, $username, $password, $database);
+
+              //check connection
+              if($connection->connect_error){
+                die("Connection failed: " . $connection->connect_error);
+              }
+
+              //read all row from database supplier table
+              $sql = "SELECT * FROM supplier_details";
+              $result = $connection->query($sql);
+
+              if(!$result){
+                die("Invalid Query: " . $connection->error);
+              }
+
+              //read data of each row
+              while($row = $result->fetch_assoc()){
+                echo 
+                "<tr>
+               
+                <td>" . $row["supplierID"] . "</td>
+                <td>" . $row["supplierName"] . "</td>
+                <td>" . $row["contactNo"] . "</td>
+                <td>" . $row["productCategories"] . "</td>
+                
+                </tr>";
+              }
+  
+            
+            ?>
+        
             </tbody>
         </table>
 
@@ -113,10 +135,12 @@
   }
 
   .search-bar {
-    padding: 8px;
-    width: 800px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    margin: 16px 0 8px 0;
+    width: 100%;
+    padding: 12px;
+    border-radius: 24px;
+    background-color: #e0e0e0;
+    border: 0;
   }
 
 
@@ -139,12 +163,18 @@
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
+    background-color: darkgray;
+    text-align: center;
   }
 
   .suppliers-table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
+  }
+
+  .midcol{
+    text-align: center;
   }
 
   .status-active {
