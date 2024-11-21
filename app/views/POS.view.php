@@ -10,6 +10,9 @@
     <div class="pos-body">
         <?php App\View::render("components/Navbar") ?>
         <div class="container">
+            <div>
+                <?php \App\View::render('components/CustomerForm'); ?>
+            </div>
             <div class="sidebar1">
                 <div class="search-container">
                     <input type="text" placeholder="Search Product...">
