@@ -235,3 +235,7 @@ let script = function () {
 
 let loadscript = new script();
 loadscript.initialize(); // Correctly call initialize on the instance
+
+document.getElementById("add-customer").onclick = (e) => {
+  document.getElementById("customer-form-modal").classList.toggle("show");
+};

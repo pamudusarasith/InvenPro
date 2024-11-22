@@ -271,6 +271,27 @@ span.item-total-label{
   text-transform: uppercase;
 }
 
+#customer-form {
+  display: flex;
+  flex-direction: column;
+  margin: 4px 24px 24px 24px;
+}
+
+:is(#customer-form) > * {
+  margin-top: 4px;
+}
+
+:is(#customer-form) > label {
+  margin-top: 16px;
+}
+
+:is(#customer-form)
+  > :is(input, textarea, select) {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+}
+
 
 
 
