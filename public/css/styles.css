@@ -1,4 +1,10 @@
 @font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  src: local("Ubuntu"), url(../fonts/Ubuntu-Regular.woff2) format("woff2");
+}
+
+@font-face {
   font-family: "Material Symbols Outlined", sans-serif;
   font-style: normal;
   src: url(../fonts/MaterialSymbolsOutlined.woff2) format("woff2");
