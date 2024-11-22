@@ -12,7 +12,7 @@ class Discounts
 
         $discount = new App\Models\Discount();
         $types = $discount->getTypes();
-
+        
         App\View::render('Template', [
             'title' => 'Discounts',
             'view' => 'Discounts',

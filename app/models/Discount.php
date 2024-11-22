@@ -15,8 +15,9 @@ class Discount
 
   public function getTypes()
   {
-    $stmt = $this->dbh->prepare("SELECT id, name FROM discount_type");
+    $stmt = $this->dbh->prepare("SHOW COLUMNS FROM discount LIKE 'type';");
     $stmt->execute();
-    return $stmt->fetchAll();
+    $row = $stmt->fetch();
+    return explode("','", substr($row["Type"], 6, -2));
   }
 }
