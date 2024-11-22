@@ -92,6 +92,12 @@
             background-size: 20px;
         }
 
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
         .filter-section {
             margin-bottom: 20px;
         }
