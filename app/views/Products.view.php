@@ -20,7 +20,7 @@
             <?php \App\View::render('components/ProductForm'); ?>
             <?php \App\View::render('components/BatchForm'); ?>
         </div>
-        <div id="prod-search" class="column">
+        <div id="prod-search" class="search-container">
             <div class="row search-bar">
                 <span class="material-symbols-rounded">search</span>
                 <input type="text" class="" placeholder="Search Products">
@@ -38,7 +38,12 @@
                     <button class="collapsible"><?= $category ?></button>
                     <div class="collapsible-content">
                         <?php if (isset($products)) {
-                            App\View::render("components/ProductsTable", ["products" => $products[$category]]);
+                            App\View::render('components/Table', [
+                                'headers' => ["Product", "Price", "Quantity"],
+                                'keys' => ["name", "price", "quantity"],
+                                'rows' => $products[$category],
+                                'rowIdField' => "id"
+                            ]);
                         } ?>
                     </div>
             <?php endforeach;

@@ -89,6 +89,26 @@ class Product
         return $result;
     }
 
+    public function getProductBatches(int $id): array
+    {
+        $stmt = $this->dbh->prepare("
+        SELECT
+            pb.batch_no, i.quantity, pb.price, pb.manufacture_date, pb.expiry_date
+        FROM
+            (
+            SELECT
+                *
+            FROM
+                inventory
+            WHERE
+                product_id = :id AND branch_id = :branch_id
+        ) i
+        INNER JOIN product_batch pb ON
+        pb.product_id = i.product_id AND pb.batch_no = i.batch_no");
+        $stmt->execute(['id' => $id, 'branch_id' => $_SESSION["branch_id"]]);
+        return $stmt->fetchAll();
+    }
+
     public function getProductDetails(int $id): array
     {
         $stmt = $this->dbh->prepare("SELECT id, name, description, measure_unit, image FROM product WHERE id = :id");
@@ -97,7 +117,8 @@ class Product
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->buffer($result["image"]);
         $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
-        $result['categories'] = array_column($this->getProductCategories($id), 'name');
+        $result['categories'] = $this->getProductCategories($id);
+        $result['batches'] = $this->getProductBatches($id);
 
         return $result;
     }

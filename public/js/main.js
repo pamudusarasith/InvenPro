@@ -15,12 +15,12 @@ function logout() {
   window.location.href = "/logout";
 }
 
-document.querySelectorAll(".modal-close-btn").forEach((element) => {
-  element.onclick = (e) => {
-    let element = e.target;
-    while (!element.classList.contains("show")) {
-      element = element.parentElement;
+document.querySelectorAll(".modal-close").forEach((element) => {
+  element.addEventListener("click", (e) => {
+    let elem = e.target;
+    while (elem.tagName !== "DIALOG") {
+      elem = elem.parentElement;
     }
-    element.classList.toggle("show");
-  };
+    elem.close();
+  });
 });

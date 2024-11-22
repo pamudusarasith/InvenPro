@@ -4,9 +4,10 @@ function clearResults(id) {
   }
 }
 
-function handleKeydown(id, e) {
+function handleKeydown(id, e, callback) {
   switch (e.key) {
     case "Escape":
+      e.preventDefault();
       clearResults(id);
       break;
     case "ArrowDown":
@@ -18,7 +19,8 @@ function handleKeydown(id, e) {
       handleArrowUp(id);
       break;
     case "Enter":
-      handleEnter(id);
+      e.preventDefault();
+      handleEnter(id, callback);
       break;
   }
 }
@@ -53,15 +55,16 @@ function handleArrowUp(id) {
   }
 }
 
-function handleEnter(id) {
+function handleEnter(id, callback) {
   const active = document.querySelector(`#${id}-results .active`);
   if (active) {
     document.querySelector(`#${id} input`).value = active.innerText;
     clearResults(id);
+    callback(active);
   }
 }
 
-async function autocomplete(id) {
+async function autocomplete(id, queryAPI, callback) {
   const searchInput = document.querySelector(`#${id} input`);
   const query = searchInput.value;
 
@@ -70,7 +73,7 @@ async function autocomplete(id) {
     return;
   }
 
-  const response = await fetch(`/products/search?q=${query}`);
+  const response = await fetch(`${queryAPI}?q=${query}`);
   const data = await response.json();
 
   if (!data.success || data.data.query !== searchInput.value) {
@@ -83,15 +86,17 @@ async function autocomplete(id) {
   results.classList.add("autocomplete-results");
   document.querySelector(`#${id}`).appendChild(results);
 
-  for (const product of data.data.results) {
+  for (const resultItem of data.data.results) {
     const result = document.createElement("div");
-    result.innerText = product.name;
+    result.dataset.id = resultItem.id;
+    result.innerText = resultItem.name;
     result.addEventListener("click", () => {
-      searchInput.value = product.name;
+      searchInput.value = resultItem.name;
       clearResults(id);
+      callback(result);
     });
     results.appendChild(result);
   }
 
-  document.getElementById(id).onkeydown = (e) => handleKeydown(id, e);
+  document.getElementById(id).onkeydown = (e) => handleKeydown(id, e, callback);
 }

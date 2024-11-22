@@ -305,28 +305,14 @@ body {
 }
 
 .modal {
-  display: none;
-  justify-content: safe center;
-  align-items: safe center;
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
-  overflow: auto;
-}
-
-.modal-content {
   width: 80%;
   max-width: 600px;
-  background-color: white;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin: auto;
+  border: 0;
   border-radius: 16px;
 }
 
-.modal-content .modal-header {
+.modal-header {
   text-align: center;
   font-weight: bold;
   font-size: 1.5rem;
@@ -356,4 +342,68 @@ body {
   align-items: center;
   color: red;
   font-weight: bold;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  background-color: #e7e7e7;
+  border-radius: 16px;
+  margin: 0 8px 8px 0;
+}
+
+.chip span {
+  margin-left: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.tbl table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tbl th {
+  text-align: left;
+  padding: 8px;
+  background-color: #dfdfdf;
+}
+
+.tbl th:first-child {
+  border-radius: 12px 0 0 0;
+}
+
+.tbl th:last-child {
+  border-radius: 0 12px 0 0;
+}
+
+.tbl td {
+  padding: 8px;
+}
+
+.tbl tr {
+  background-color: #efefef;
+}
+
+.tbl tr[data-id]:not([data-id=""]) {
+  cursor: pointer;
+}
+
+.tbl tr[data-id]:not([data-id=""]):hover {
+  background-color: #e7e7e7;
+}
+
+.tbl tr:last-child td:first-child {
+  border-radius: 0 0 0 12px;
+}
+
+.tbl tr:last-child td:last-child {
+  border-radius: 0 0 12px 0;
 }
