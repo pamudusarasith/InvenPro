@@ -1,23 +1,28 @@
 <div class="navbar">
-    <img class="logo" src="/images/logo-light.png" alt="logo">
-    <div class="navbar-btns">
-        <div class="dropdown" id="notifications-dd">
-            <div class="icon-btn" onclick="toggleDropdown('notifications-dd')">
+    <div class="navbar-items">
+        <div id="notifications-btn" class="dropdown">
+            <div class="icon-btn">
                 <span class="material-symbols-rounded">notifications</span>
             </div>
             <div class="dd-content">
                 <div class="dd-item">
                     <span>Notification 1</span>
                 </div>
-                <div class="dd-item" onclick="logout()">
+                <div class="dd-item">
                     <span>Notification 2</span>
                 </div>
             </div>
         </div>
 
-        <div class="dropdown" id="profile-dd">
-            <div class="icon-btn" onclick="toggleDropdown('profile-dd')">
-                <span class="material-symbols-rounded">account_circle</span>
+        <div class="navbar-divider"></div>
+
+        <div id="profile-menu" class="dropdown">
+            <div class="menu-btn">
+                <div class="column">
+                    <p>John Doe</p>
+                    <p class="role">Branch Manager</p>
+                </div>
+                <span class="material-symbols-rounded">keyboard_arrow_down</span>
             </div>
             <div class="dd-content">
                 <div class="dd-item">
