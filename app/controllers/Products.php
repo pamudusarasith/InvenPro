@@ -12,7 +12,7 @@ class Products
         App\Utils::requireAuth();
 
         $product = new App\Models\Product();
-        $categories = $product->getAllCategories();
+        $categories = $product->getPrimaryCategories();
         $products = [];
         foreach ($categories as $category) {
             $products[$category["name"]] = $product->getProductsByCategory($category["id"]);

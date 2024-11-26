@@ -13,9 +13,9 @@ class Product
         $this->dbh = App\DB::getConnection();
     }
 
-    public function getAllCategories(): array
+    public function getPrimaryCategories(): array
     {
-        $stmt = $this->dbh->prepare("SELECT id, name FROM category");
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category WHERE parent_id IS NULL");
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -51,7 +51,7 @@ class Product
         INNER JOIN product_batch pb ON
             p.id = pb.product_id
         WHERE
-            pb.branch_id = :branch_id AND pc.category_id = :category_id
+            p.branch_id = :branch_id AND pc.category_id = :category_id
         GROUP BY
             p.id;");
         $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
