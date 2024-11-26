@@ -1,165 +1,165 @@
-document.getElementById("new-discount-btn").addEventListener("click", (e) => {
-  document.getElementById("discount-form-modal").showModal();
-});
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize form open button
+  document.getElementById("new-discount-btn").addEventListener("click", (e) => {
+    document.getElementById("discount-form-modal").showModal();
+  });
 
-document.querySelectorAll("#filters div").forEach((element) => {
-  element.onclick = (e) => {
-    e.target.classList.toggle("filter-active");
+  // Initialize filters
+  document.querySelectorAll("#filters div").forEach((element) => {
+    element.onclick = (e) => {
+      e.target.classList.toggle("filter-active");
+    };
+  });
+
+  // Initialize form sections
+  const form = {
+    type: document.getElementById("discount-type"),
+    valueSection: document.getElementById("value-section"),
+    categorySection: document.getElementById("category-section"),
+    bundleSection: document.getElementById("bundle-section"),
+    valueInput: document.getElementById("discount-value"),
+    isPercentage: document.getElementById("is-percentage"),
+    form: document.getElementById("discount-form"),
   };
-});
 
-const discForm = {
-  type: document.getElementById("disc-type"),
-  minBillAmountChkbx: document.getElementById("disc-min-bill-amount-chkbx"),
-  maxDiscAmountChkbx: document.getElementById("disc-max-disc-amount-chkbx"),
-  amountType: document.getElementById("disc-amount-type"),
-  amount: document.getElementById("disc-amount"),
-};
+  // Handle discount type changes
+  form.type.addEventListener("change", function () {
+    // Hide all sections first
+    hideAllSections();
 
-window.addEventListener("load", () => {
-  discForm.minBillAmountChkbx.dispatchEvent(new Event("change"));
-  discForm.maxDiscAmountChkbx.dispatchEvent(new Event("change"));
-  discForm.type.dispatchEvent(new Event("change"));
-  discForm.amountType.dispatchEvent(new Event("change"));
-});
-
-discForm.type.addEventListener("change", (e) => {
-  const select = e.target;
-  const type = select.options[select.selectedIndex].text;
-
-  document.querySelectorAll(".condition").forEach((element) => {
-    element.style.display = "none";
-  });
-
-  switch (type) {
-    case "Bill Value Discount":
-      document.getElementById("cond-amount").style.display = "flex";
-      break;
-    case "Product Category Discount":
-      document.getElementById("cond-category").style.display = "flex";
-      break;
-    case "Product Discount":
-      document.getElementById("cond-trigs").style.display = "flex";
-      break;
-    default:
-      break;
-  }
-});
-
-discForm.amountType.addEventListener("change", (e) => {
-  const type = e.target.value;
-  const amount = document.getElementById("disc-amount");
-  if (type === "percentage") {
-    amount.placeholder = "Percentage";
-    amount.max = 100;
-  } else {
-    amount.placeholder = "Amount";
-    amount.max = null;
-  }
-});
-
-function handleCategorySelect(element) {
-  const id = element.dataset.id;
-  const name = element.innerHTML;
-  document.querySelector("#category-search input").value = "";
-  const chips = document.getElementById("category-chips");
-  for (const chip of chips.children) {
-    if (chip.dataset.id === id) {
-      return;
-    }
-  }
-
-  const chip = document.createElement("div");
-  chip.classList.add("chip");
-  chip.dataset.id = id;
-  chip.innerHTML = `${name} <span class="material-symbols-rounded">close</span>`;
-  chip.querySelector("span").addEventListener("click", (e) => {
-    chip.remove();
-  });
-  chips.appendChild(chip);
-}
-
-document
-  .querySelector("#category-search input")
-  .addEventListener("input", async (e) => {
-    await autocomplete(
-      "category-search",
-      "/categories/search",
-      handleCategorySelect
-    );
-  });
-
-function addTrigger(id, name) {
-  const trigs = document.getElementById("trigs-table");
-  trigs.style.display = "table";
-  const table = trigs.querySelector("table");
-  const row = table.insertRow(-1);
-  row.insertCell(0).innerHTML = name;
-  row.insertCell(1).innerHTML =
-    document.getElementById("trig-min-qty").value;
-  row.insertCell(2).innerHTML =
-    document.getElementById("trig-max-qty").value;
-  row.insertCell(
-    3
-  ).innerHTML = `<span class="material-symbols-rounded" style="cursor: pointer;">close</span>`;
-  row.cells[3].querySelector("span").addEventListener("click", (e) => {
-    row.remove();
-    if (table.rows.length === 1) {
-      trigs.style.display = "none";
+    // Show relevant sections based on type
+    switch (this.value) {
+      case "product":
+        form.bundleSection.style.display = "flex";
+        form.valueSection.style.display = "flex";
+        break;
+      case "category":
+        form.categorySection.style.display = "flex";
+        form.valueSection.style.display = "flex";
+        break;
+      case "bill":
+        form.valueSection.style.display = "flex";
+        break;
+      case "bundle":
+        form.bundleSection.style.display = "flex";
+        break;
     }
   });
-}
 
-function handleProductSelect(element) {
-  const id = element.dataset.id;
-  const name = element.innerHTML;
-  const trigEditor = document.getElementById("new-trig");
-  trigEditor.style.display = "block";
-  const closeBtn = document.getElementById("trig-close");
-  closeBtn.onclick = (e) => {
-    trigEditor.style.display = "none";
-    trigEditor.querySelectorAll("input").forEach((input) => {
-      input.value = "";
-    });
-  };
-  const doneBtn = document.getElementById("trig-done");
-  doneBtn.onclick = (e) => {
-    trigEditor.style.display = "none";
-    addTrigger(id, name);
-    trigEditor.querySelectorAll("input").forEach((input) => {
-      input.value = "";
-    });
-  };
-}
+  function hideAllSections() {
+    form.bundleSection.style.display = "none";
+    form.categorySection.style.display = "none";
+    form.valueSection.style.display = "none";
+  }
 
-document
-  .querySelector("#prod-search input")
-  .addEventListener("input", async (e) => {
-    await autocomplete("prod-search", "/products/search", handleProductSelect);
+  // Handle percentage toggle
+  form.isPercentage.addEventListener("change", function () {
+    if (this.checked) {
+      form.valueInput.max = "100";
+      form.valueInput.step = "0.1";
+    } else {
+      form.valueInput.removeAttribute("max");
+      form.valueInput.step = "0.01";
+    }
   });
 
-discForm.minBillAmountChkbx.addEventListener("change", (e) => {
-  if (e.target.checked) {
-    document.querySelector("label[for='disc-min-bill-amount']").style.display =
-      "block";
-    document.getElementById("disc-min-bill-amount").style.display = "block";
-    document.getElementById("disc-min-bill-amount").focus();
-  } else {
-    document.querySelector("label[for='disc-min-bill-amount']").style.display =
-      "none";
-    document.getElementById("disc-min-bill-amount").style.display = "none";
+  // Category search autocomplete
+  const categorySearch = document.querySelector("#category-search input");
+  if (categorySearch) {
+    categorySearch.addEventListener("input", async (e) => {
+      await autocomplete(
+        "category-search",
+        "/categories/search",
+        handleCategorySelect
+      );
+    });
   }
-});
 
-discForm.maxDiscAmountChkbx.addEventListener("change", (e) => {
-  if (e.target.checked) {
-    document.querySelector("label[for='disc-max-disc-amount']").style.display =
-      "block";
-    document.getElementById("disc-max-disc-amount").style.display = "block";
-    document.getElementById("disc-max-disc-amount").focus();
-  } else {
-    document.querySelector("label[for='disc-max-disc-amount']").style.display =
-      "none";
-    document.getElementById("disc-max-disc-amount").style.display = "none";
+  // Product search autocomplete
+  const productSearch = document.querySelector("#product-search input");
+  if (productSearch) {
+    productSearch.addEventListener("input", async (e) => {
+      await autocomplete(
+        "product-search",
+        "/products/search",
+        handleProductSelect
+      );
+    });
+  }
+
+  // Handle category selection
+  function handleCategorySelect(element) {
+    const id = element.dataset.id;
+    const name = element.innerHTML;
+    document.querySelector("#category-search input").value = "";
+    const chips = document.getElementById("category-chips");
+
+    // Check if category already added
+    for (const chip of chips.children) {
+      if (chip.dataset.id === id) return;
+    }
+
+    // Add new category chip
+    const chip = document.createElement("div");
+    chip.classList.add("chip");
+    chip.dataset.id = id;
+    chip.innerHTML = `${name} <span class="material-symbols-rounded">close</span>`;
+
+    // Add remove handler
+    chip.querySelector("span").addEventListener("click", () => {
+      chip.remove();
+    });
+
+    chips.appendChild(chip);
+  }
+
+  // Handle product selection
+  function addBundleProduct(id, name) {
+    const bundlesTable = document.getElementById("bundles-table");
+
+    bundlesTable.style.display = "block";
+    const table = bundlesTable.querySelector("table");
+    const row = table.insertRow(-1);
+
+    row.insertCell(0).innerHTML = name;
+    row.insertCell(1).innerHTML =
+      document.getElementById("bundle-qty")?.value || "NULL";
+
+    // Add remove button
+    const removeCell = row.insertCell(2);
+    removeCell.innerHTML =
+      '<span class="material-symbols-rounded" style="cursor: pointer;">close</span>';
+    removeCell.querySelector("span").addEventListener("click", () => {
+      row.remove();
+      if (table.rows.length === 1) {
+        bundlesTable.style.display = "none";
+      }
+    });
+  }
+
+  // Handle product selection
+  function handleProductSelect(element) {
+    const id = element.dataset.id;
+    const name = element.innerHTML;
+    const newBundleProductEditor =
+      document.getElementById("new-bundle-product");
+
+    newBundleProductEditor.style.display = "";
+    const closeBtn = document.getElementById("bundle-product-close");
+    closeBtn.onclick = () => {
+      newBundleProductEditor.style.display = "none";
+      newBundleProductEditor.querySelectorAll("input").forEach((input) => {
+        input.value = "";
+      });
+    };
+
+    const doneBtn = document.getElementById("bundle-product-done");
+    doneBtn.onclick = () => {
+      newBundleProductEditor.style.display = "none";
+      addBundleProduct(id, name);
+      newBundleProductEditor.querySelectorAll("input").forEach((input) => {
+        input.value = "";
+      });
+    };
   }
 });

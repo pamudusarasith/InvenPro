@@ -18,7 +18,7 @@
         </select>
         <label for="prod-category">Categories</label>
         <div id="category-search" class="search-container">
-            <div class="row search-bar">
+            <div class="search-bar">
                 <span class="material-symbols-rounded">search</span>
                 <input type="text" class="" placeholder="Search categories">
             </div>

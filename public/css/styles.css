@@ -347,6 +347,8 @@ body {
 .chips {
   display: flex;
   flex-wrap: wrap;
+  margin: 0.5rem 0;
+  gap: 0.4rem;
 }
 
 .chip {
@@ -356,7 +358,6 @@ body {
   padding: 8px 12px;
   background-color: #e7e7e7;
   border-radius: 16px;
-  margin: 0 8px 8px 0;
 }
 
 .chip span {

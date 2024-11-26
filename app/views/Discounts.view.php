@@ -8,13 +8,9 @@
                 <span class="material-symbols-rounded">add</span>
                 Discount
             </div>
-            <?php if (isset($types)) {
-                \App\View::render('components/DiscountForm', [
-                    'types' => $types
-                ]);
-            } ?>
+            <?php App\View::render('components/DiscountForm'); ?>
         </div>
-        <div class="row search-bar">
+        <div class="search-bar">
             <span class="material-symbols-rounded">search</span>
             <input type="text" class="" placeholder="Search Discounts">
         </div>
