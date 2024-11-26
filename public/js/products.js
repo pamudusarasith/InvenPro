@@ -166,7 +166,7 @@ forms.forEach((formName) => {
     });
 });
 
-function handleProductSelect(element) {
+function handleProductSelect(element, data) {
   const id = element.dataset.id;
   window.location.href = `/product?id=${id}`;
 }
@@ -177,7 +177,7 @@ document
     await autocomplete("prod-search", "/products/search", handleProductSelect);
   });
 
-function handleCategorySelect(element) {
+function handleCategorySelect(element, data) {
   const id = element.dataset.id;
   const name = element.innerHTML;
   document.querySelector("#category-search input").value = "";

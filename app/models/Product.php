@@ -83,6 +83,30 @@ class Product
         return $result;
     }
 
+    public function posSearch(string $query): array
+    {
+        $result = [];
+        $stmt = $this->dbh->prepare("SELECT id FROM product WHERE id LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $rows = $stmt->fetchAll();
+        $tmp = [];
+        foreach ($rows as $row) {
+            $tmp[] = $this->getProductDetails($row["id"]);
+        }
+        $result = array_merge($result, $tmp);
+
+        $stmt = $this->dbh->prepare("SELECT id FROM product WHERE name LIKE :query");
+        $stmt->execute(['query' => "%$query%"]);
+        $rows = $stmt->fetchAll();
+        $tmp = [];
+        foreach ($rows as $row) {
+            $tmp[] = $this->getProductDetails($row["id"]);
+        }
+        $result = array_merge($result, $tmp);
+
+        return $result;
+    }
+
     public function getProductBatches(int $id): array
     {
         $stmt = $this->dbh->prepare("

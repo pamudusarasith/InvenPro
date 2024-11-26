@@ -5,182 +5,342 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roles & Permissions</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
             background-color: #f0f2f5;
+            color: #1f2937;
+            line-height: 1.5;
         }
+
         .container {
-            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 7vh);
             margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
         }
-        .header {
+
+        .header-section {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 24px;
         }
-        h1, h2 {
-            font-size: 20px;
-            margin: 0;
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
         }
+
         .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-color: transparent;
+            border-radius: 12px;
             cursor: pointer;
+            font-weight: bold;
         }
+
+        .btn-primary {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1565c0;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: black;
+            }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+        
         .role-list {
             padding: 20px;
         }
+
         .role-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 20px 16px;
             border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
         }
+
+        .role-item:hover {
+            background-color: #f0f2f5;
+        }
+
         .role-item:last-child {
             border-bottom: none;
         }
+
         .role-name {
-            display: flex;
-            align-items: center;
+            font-weight: 600;
+            color: #374151;
         }
-        .role-icon {
-            margin-right: 10px;
-            color: #6c757d;
-        }
+
         .role-details {
             font-size: 14px;
-            color: #6c757d;
+            color: #6b7280;
         }
+
         .edit-btn {
-            background-color: transparent;
-            color: #6c757d;
+            background: none;
             border: none;
+            color: #1976d2;
             cursor: pointer;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
         }
+
+        .edit-btn:hover {
+            background-color: #e8f0fe;
+        }
+
         .add-role-btn {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-top: 20px;
             background-color: transparent;
-            border: 2px dashed #007bff;
-            color: #007bff;
+            border: 2px dashed #1976d2;
+            color: #1976d2;
             text-align: center;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
         }
-        .popup-overlay {
+
+        .add-role-btn:hover {
+            background-color: #e8f0fe;
+        }
+
+        .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-        }
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
         }
+
+        .modal.visible {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #f0f2f5;
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
         .close-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 16px;
+            right: 16px;
             font-size: 24px;
             cursor: pointer;
             background: none;
             border: none;
+            color: #6b7280;
         }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #111827;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+
+        .form-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
         }
-        input[type="text"] {
+
+        .form-control {
+            background-color: #f0f2f5;
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
         }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
         .checkbox-group {
-            margin-top: 10px;
+            margin-top: 12px;
         }
+
         .checkbox-item {
+            background-color: #f0f2f5;
+            color: #f0f2f5;
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
+
         .checkbox-item input[type="checkbox"] {
+            border-color: #d1d5db;
             margin-right: 10px;
+        }
+
+        .checkbox-item label {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .table-container {
+            width: 100%;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            background-color: #f0f2f5;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        td {
+            padding: 20px 16px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .table-container {
+                margin: 0 -20px;
+                width: calc(100% + 40px);
+                border-radius: 0;
+            }
+
+            .role-name {
+                min-width: 150px;
+            }
+
+            .container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Roles & Permissions</h1>
-            <button class="btn" onclick="openPopup('add')">Add New Role</button>
+<div class="container">
+        <div class="header-section">
+            <h1 class="page-title">Roles & Permissions</h1>
+            <button class="btn btn-primary" onclick="openPopup('add')">Add New Role</button>
         </div>
         <div class="role-list">
-            <h2>Role List</h2>
-            <div class="role-item">
-                <div class="role-name">
-                    Admin
-                </div>
-                <div class="role-details">2 members</div>
-                <button class="edit-btn" onclick="openPopup('edit', 'Admin')">Edit Role</button>
-            </div>
-            <div class="role-item">
-                <div class="role-name">
-                    Manager
-                </div>
-                <div class="role-details">4 members</div>
-                <button class="edit-btn" onclick="openPopup('edit', 'Manager')">Edit Role</button>
-            </div>
-            <div class="role-item">
-                <div class="role-name">
-                    Sales Associate
-                </div>
-                <div class="role-details">12 members</div>
-                <button class="edit-btn" onclick="openPopup('edit', 'Sales Associate')">Edit Role</button>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Role Name</th>
+                            <th>Members</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="role-name">Admin</td>
+                            <td class="role-details">2 members</td>
+                            <td class="actions-cell">
+                                <button class="edit-btn" onclick="openPopup('edit', 'Admin')">Edit Role</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="role-name">Manager</td>
+                            <td class="role-details">4 members</td>
+                            <td class="actions-cell">
+                                <button class="edit-btn" onclick="openPopup('edit', 'Manager')">Edit Role</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="role-name">Sales Associate</td>
+                            <td class="role-details">12 members</td>
+                            <td class="actions-cell">
+                                <button class="edit-btn" onclick="openPopup('edit', 'Sales Associate')">Edit Role</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <button class="add-role-btn" onclick="openPopup('add')">+ Add New Role</button>
         </div>
     </div>
 
-    <div id="popupOverlay" class="popup-overlay">
-        <div class="popup">
-            <button class="close-btn" onclick="closePopup()">&times;</button>
-            <h2 id="popupTitle">Edit Role</h2>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modalTitle">Edit Role</h2>
             <div class="form-group">
-                <label for="role-name">Role Name</label>
-                <input type="text" id="role-name" name="role-name">
+                <label class="form-label" for="role-name">Role Name</label>
+                <input type="text" id="role-name" name="role-name" class="form-control">
             </div>
             <div class="form-group">
-                <label>Permissions</label>
+                <label class="form-label">Permissions</label>
                 <div class="checkbox-group">
                     <div class="checkbox-item">
                         <input type="checkbox" id="create-edit-products">
@@ -208,29 +368,52 @@
                     </div>
                 </div>
             </div>
-            <button class="btn" onclick="saveRole()">Save</button>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closePopup('addUserModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveRole()">Save</button>
+            </div>
         </div>
     </div>
 
     <script>
         function openPopup(action, roleName = '') {
-            document.getElementById('popupOverlay').style.display = 'block';
-            document.getElementById('popupTitle').textContent = action === 'add' ? 'Add New Role' : 'Edit Role';
+            const modal = document.getElementById('modal');
+            modal.classList.add('visible');
+            document.getElementById('modalTitle').textContent = action === 'add' ? 'Add New Role' : 'Edit Role';
             document.getElementById('role-name').value = roleName;
             // Reset checkboxes (you might want to load actual permissions for edit)
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
         function closePopup() {
-            document.getElementById('popupOverlay').style.display = 'none';
+            const modal = document.getElementById('modal');
+            modal.classList.remove('visible');
         }
 
         function saveRole() {
-            // Here you would typically save the role data
-            // For this example, we'll just close the popup
-            alert('Role saved!');
+            // Get form data
+            const roleName = document.getElementById('role-name').value;
+            const permissions = Array.from(document.querySelectorAll('input[type="checkbox"]'))
+                .filter(cb => cb.checked)
+                .map(cb => cb.id);
+
+            // Here you would typically save the role data to your backend
+            console.log('Saving role:', {
+                name: roleName,
+                permissions: permissions
+            });
+
+            // Show success message
+            alert('Role saved successfully!');
             closePopup();
         }
+
+        // Close modal when clicking outside
+        document.getElementById('modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePopup();
+            }
+        });
     </script>
 </body>
 </html>

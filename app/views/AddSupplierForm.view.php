@@ -2,7 +2,7 @@
 <div class="container">
     <h2>Add New Supplier</h2>
 
-    <form class="form-container" action="/suppliers/add" method="POST">
+    <form  id ="sup-form" class="form-container" action="/suppliers/add" method="POST">
         <!-- Supplier ID and Supplier Name -->
         <div class="form-row">
             <div class="form-group">
@@ -159,8 +159,8 @@
     }
 
     .cancel-btn {
-        background-color: #f0f0f0;
-        color: #333;
+        background-color: #6c757d;
+        color: white;
         padding: 10px 25px;
         border: none;
         border-radius: 8px;
