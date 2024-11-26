@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap");
+
+@font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  src: local("Ubuntu"), url(../fonts/Ubuntu-Regular.woff2) format("woff2");
+}
 
 @font-face {
   font-family: "Material Symbols Outlined", sans-serif;
@@ -118,10 +124,13 @@ body {
   align-items: center;
 }
 
-.navbar .dropdown {
+.dropdown {
   display: flex;
-  height: 100%;
   position: relative;
+}
+
+.navbar .dropdown {
+  height: 100%;
   aspect-ratio: 1 / 1;
 }
 

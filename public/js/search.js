@@ -4,7 +4,7 @@ function clearResults(id) {
   }
 }
 
-function handleKeydown(id, e, callback) {
+function handleKeydown(id, e) {
   switch (e.key) {
     case "Escape":
       e.preventDefault();
@@ -18,10 +18,6 @@ function handleKeydown(id, e, callback) {
       e.preventDefault();
       handleArrowUp(id);
       break;
-    case "Enter":
-      e.preventDefault();
-      handleEnter(id, callback);
-      break;
   }
 }
 
@@ -34,9 +30,11 @@ function handleArrowDown(id) {
   const active = document.querySelector(`#${id}-results .active`);
   if (!active) {
     results.firstChild.classList.add("active");
+    results.firstChild.focus();
   } else if (active?.nextElementSibling) {
     active.classList.remove("active");
     active.nextElementSibling.classList.add("active");
+    active.nextElementSibling.focus();
   }
 }
 
@@ -49,18 +47,11 @@ function handleArrowUp(id) {
   const active = document.querySelector(`#${id}-results .active`);
   if (!active) {
     results.lastChild.classList.add("active");
+    results.lastChild.focus();
   } else if (active?.previousElementSibling) {
     active.classList.remove("active");
     active.previousElementSibling.classList.add("active");
-  }
-}
-
-function handleEnter(id, callback) {
-  const active = document.querySelector(`#${id}-results .active`);
-  if (active) {
-    document.querySelector(`#${id} input`).value = active.innerText;
-    clearResults(id);
-    callback(active);
+    active.previousElementSibling.focus();
   }
 }
 
@@ -87,16 +78,24 @@ async function autocomplete(id, queryAPI, callback) {
   document.querySelector(`#${id}`).appendChild(results);
 
   for (const resultItem of data.data.results) {
-    const result = document.createElement("div");
+    const result = document.createElement("button");
     result.dataset.id = resultItem.id;
     result.innerText = resultItem.name;
     result.addEventListener("click", () => {
       searchInput.value = resultItem.name;
       clearResults(id);
-      callback(result);
+      callback(result, resultItem);
+    });
+    result.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        searchInput.value = resultItem.name;
+        clearResults(id);
+        callback(result, resultItem);
+      }
     });
     results.appendChild(result);
   }
 
-  document.getElementById(id).onkeydown = (e) => handleKeydown(id, e, callback);
+  document.getElementById(id).onkeydown = (e) => handleKeydown(id, e);
 }
