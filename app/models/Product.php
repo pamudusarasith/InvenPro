@@ -36,30 +36,24 @@ class Product
     {
         $stmt = $this->dbh->prepare("
         SELECT
-            pd.*
+            p.id,
+            p.name,
+            IF(
+                COUNT(pb.selling_price) > 1,
+                \"Multiple\",
+                pb.selling_price
+            ) AS price,
+            SUM(pb.current_quantity) AS quantity
         FROM
-            (
-            SELECT
-                p.id,
-                p.name,
-                p.measure_unit,
-                IF(
-                    COUNT(pb.price) > 1,
-                    \"Multiple\",
-                    pb.price
-                ) AS price,
-                SUM(i.quantity) AS quantity
-            FROM
-                product p
-            INNER JOIN inventory i ON
-                p.id = i.product_id AND i.branch_id = :branch_id AND i.quantity > 0
-            INNER JOIN product_batch pb ON
-                p.id = pb.product_id AND i.batch_no = pb.batch_no
-            GROUP BY
-                p.id
-        ) pd
-        INNER JOIN product_category pc ON
-            pd.id = pc.product_id AND pc.category_id = :category_id;");
+            `product_category` pc
+        INNER JOIN product p ON
+            p.id = pc.product_id
+        INNER JOIN product_batch pb ON
+            p.id = pb.product_id
+        WHERE
+            pb.branch_id = :branch_id AND pc.category_id = :category_id
+        GROUP BY
+            p.id;");
         $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
         return $stmt->fetchAll();
     }
@@ -93,7 +87,7 @@ class Product
     {
         $stmt = $this->dbh->prepare("
         SELECT
-            pb.batch_no, i.quantity, pb.price, pb.manufacture_date, pb.expiry_date
+            pb.batch_no, i.quantity, pb.selling_price, pb.manufacture_date, pb.expiry_date
         FROM
             (
             SELECT
