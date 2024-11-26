@@ -17,6 +17,7 @@ return [
         '/reports' => ['controller' => App\Controllers\Dashboard::class],
         '/logout' => ['controller' => App\Controllers\Logout::class],
         '/pos' => ['controller' => App\Controllers\POS::class],
+        '/pos/search' => ['controller' => App\Controllers\POS::class, 'action' => 'search'],
     ],
 
     'POST' => [
@@ -27,5 +28,6 @@ return [
         '/products/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newProduct'],
         '/batch/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newBatch'],
         '/category/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newCategory'],
+        '/customer/new' => ['controller' => App\Controllers\Customer::class, 'action' => 'newCustomer'],
     ]
 ];
