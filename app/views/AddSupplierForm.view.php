@@ -2,7 +2,7 @@
 <div class="container">
     <h2>Add New Supplier</h2>
 
-    <form class="form-container" action="/suppliers/add" method="POST">
+    <form  id ="sup-form" class="form-container" action="/suppliers/add" method="POST">
         <!-- Supplier ID and Supplier Name -->
         <div class="form-row">
             <div class="form-group">

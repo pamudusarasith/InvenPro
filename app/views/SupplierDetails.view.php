@@ -7,108 +7,94 @@
             <h1>Supplier Details</h1>
         </div>
     
-        <!-- details section -->
+        <!-- Details Section -->
         <div class="details-section">
-                <p><span>Supplier ID :</span> 001</p>
-                <p><span>Supplier Name :</span> Munchee Company</p>
-                <p><span>Product Categories :</span> Biscuits</p>
-                <p><span>Products :</span> Chocolate biscuits, Gold marie</p>
-                <p><span>Address :</span> Rathmalana</p>
-                <p><span>Email :</span> munchee@gmail.com</p>
-                <p><span>Contact No :</span> 0712345678</p>
-                <p><span>Special Notes :</span> -</p>
+            <?php
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $database = "invenpro";
+
+            // Create connection
+            $connection = new mysqli($servername, $username, $password, $database);
+
+            // Check connection
+            if ($connection->connect_error) {
+                die("Connection failed: " . $connection->connect_error);
+            }
+
+            // Retrieve supplier ID from the URL
+            $supplierID = isset($_GET['id']) ? $_GET['id'] : null;
+
+            if ($supplierID) {
+                // Query to fetch supplier details
+                $sql = "SELECT * FROM supplier_details WHERE supplierID = ?";
+                $stmt = $connection->prepare($sql);
+                $stmt->bind_param("s", $supplierID);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                // Display supplier details if found
+                if ($row = $result->fetch_assoc()) {
+                    echo "<p><span>Supplier ID :</span> " . htmlspecialchars($row["supplierID"]) . "</p>";
+                    echo "<p><span>Supplier Name :</span> " . htmlspecialchars($row["supplierName"]) . "</p>";
+                    echo "<p><span>Product Categories :</span> " . htmlspecialchars($row["productCategories"]) . "</p>";
+                    echo "<p><span>Products :</span> " . htmlspecialchars($row["products"]) . "</p>";
+                    echo "<p><span>Address :</span> " . htmlspecialchars($row["address"]) . "</p>";
+                    echo "<p><span>Email :</span> " . htmlspecialchars($row["email"]) . "</p>";
+                    echo "<p><span>Contact No :</span> " . htmlspecialchars($row["contactNo"]) . "</p>";
+                    echo "<p><span>Special Notes :</span> " . htmlspecialchars($row["specialNotes"]) . "</p>";
+                } else {
+                    echo "<p>No supplier found with the given ID.</p>";
+                }
+
+                // Close resources
+                $stmt->close();
+            } else {
+                echo "<p>Invalid supplier ID.</p>";
+            }
+
+            $connection->close();
+            ?>
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <button class="btn-update">Update profile</button>
-            <button class="btn-delete">Delete profile</button>
-            <a href="/suppliers" class="btn-cancel">Cancel</a>
+            <a href="/suppliers" class="btn-cancel">Back to List</a>
         </div>
     </div>
 </div>
 
-
 <style>
+/* Supplier Details Page Styles */
+.details-section p {
+    padding: 6px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
 
-/* Basic reset and font */
+.details-section span {
+    font-weight: bold;
+}
 
-        /* Header */
-        .header-section h1 {
-            display: flex;
-            justify-content: space-between; /* Align items to the opposite sides */
-            align-items: center; /* Vertically align the button with the heading */
-            margin-bottom: 20px; /* Add extra space below the content */
-        }
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+}
 
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
 
-        /* Supplier details */
-        .details-section p {
-            padding: 6px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .details-section span {
-            font-weight: bold;
-        }
-
-        /* Action buttons */
-        .action-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            margin-top: 80px;
-        }
-
-        .action-buttons button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-update {
-            background-color:#28a745;
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .btn-update:hover {
-            background-color: #218838;
-        }
-
-        .btn-delete {
-            background-color: #dc3545;
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .btn-delete:hover {
-            background-color: #c82333;
-        }
-
-        .btn-cancel {
-            background-color: #6c757d;
-            color: white;
-            padding: 10px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .btn-cancel:hover {
-            background-color: #5a6268;
-        }
-    </style>
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+</style>

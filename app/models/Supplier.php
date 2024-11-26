@@ -2,43 +2,31 @@
 
 namespace App\Models;
 
-use mysqli;
+use App;
 
 class Supplier
 {
-    private mysqli $conn;
+    private $dbh;
 
     public function __construct()
     {
-        $this->conn = new mysqli('localhost', 'root', '', 'invenpro');
-        if ($this->conn->connect_error) {
-            die('Connection Failed: ' . $this->conn->connect_error);
-        }
+        $this->dbh = App\DB::getConnection();
     }
 
-    public function addSupplier(array $data): bool
+    public function addSupplier(): void
     {
-        $stmt = $this->conn->prepare(
-            "INSERT INTO supplier_details (supplierID, supplierName, productCategories, products, address, contactNo, email, specialNotes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        );
+        $stmt = $this->dbh->prepare("INSERT INTO `supplier_details` (`supplierID`, `supplierName`, `productCategories`, `products`, `address`, `contactNo`, `email`, `specialNotes`) VALUES 
+            (:supplierID, :supplierName, :productCategories, :products, :addr, :contactNo, :email, :specialNotes);");
 
-        $stmt->bind_param(
-            "ssssssss",
-            $data['supplierID'],
-            $data['supplierName'],
-            $data['productCategories'],
-            $data['products'],
-            $data['address'],
-            $data['contactNo'],
-            $data['email'],
-            $data['specialNotes']
-        );
-
-        $result = $stmt->execute();
-        $stmt->close();
-        $this->conn->close();
-
-        return $result;
+        $stmt->execute([
+                'supplierID' => $_POST["supplier-id"],
+                'supplierName' => $_POST["supplier-name"],
+                'productCategories' => $_POST["product-categories"],
+                'products' => $_POST["products"],
+                'addr' => $_POST["address"],
+                'contactNo' => $_POST["contact-no"],
+                'email' => $_POST["email"],
+                'specialNotes' => $_POST["special-notes"],
+            ]);
     }
 }
