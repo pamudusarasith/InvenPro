@@ -89,11 +89,11 @@
                 <td>" . $row["products"] . "</td>
                 <td class='status'>Active</td>
                 <td class='action-btn'>
-                  <a class='btn-view' href='/suppliers/details'>View</a>
+                  <a class='btn-view' href='/suppliers/details?id=" . urlencode($row["supplierID"]) . "'>View</a>
                   <form method='POST' action='/suppliers/delete' style='display: inline;'>
                             <input type='hidden' name='supplier-id' value='" . htmlspecialchars($row["supplierID"]) . "' />
                             <button type='submit' class='btn-delete' onclick='return confirm(\"Are you sure you want to delete this supplier?\");'>Delete</button>
-                        </form>
+                  </form>
                 </td>
                 </tr>";
               }

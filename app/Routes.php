@@ -33,4 +33,6 @@ return [
         '/customer/new' => ['controller' => App\Controllers\Customer::class, 'action' => 'newCustomer'],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'addSupplier'],
         '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier']
+    ]
+
 ];
