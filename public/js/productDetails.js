@@ -37,7 +37,7 @@ document.querySelectorAll(".chip span").forEach((element) => {
   });
 });
 
-function handleCategorySelect(element) {
+function handleCategorySelect(element, data) {
   const id = element.dataset.id;
   const name = element.innerHTML;
   document.querySelector("#category-search input").value = "";

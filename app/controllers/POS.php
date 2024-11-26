@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App;
+use App\Consts;
 
 class POS
 {
@@ -13,8 +14,20 @@ class POS
         App\View::render('Template', [
             'title' => 'Invenpro',
             'view' => 'POS',
-            'stylesheets' => ['pos'],
-            'scripts' => ['pos'],
+            'stylesheets' => ['pos', 'search'],
+            'scripts' => ['pos', 'search'],
         ]);
+    }
+
+    public function search()
+    {
+        App\Utils::requireAuth();
+
+        $query = $_GET['q'];
+        $product = new App\Models\Product();
+        $products = $product->posSearch($query);
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'data' => ['query' => $query, 'results' => $products]]);
     }
 }

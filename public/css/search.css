@@ -40,26 +40,29 @@
   border-radius: 8px;
   border: 1px solid #cccccc;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.autocomplete-results div {
+.autocomplete-results button {
   padding: 8px;
-  cursor: pointer;
+  border: 0;
+  text-align: left;
 }
 
-.autocomplete-results div:hover,
-.autocomplete-results div.active {
+.autocomplete-results button:hover,
+.autocomplete-results button.active {
   background-color: #e7e7e7;
 }
 
-.autocomplete-results div:first-child {
+.autocomplete-results button:first-child {
   border-radius: 8px 8px 0 0;
 }
 
-.autocomplete-results div:last-child {
+.autocomplete-results button:last-child {
   border-radius: 0 0 8px 8px;
 }
 
-.autocomplete-results div:only-child {
+.autocomplete-results button:only-child {
   border-radius: 8px;
 }

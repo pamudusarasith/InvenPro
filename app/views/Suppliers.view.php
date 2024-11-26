@@ -7,12 +7,15 @@
         <!-- Flexbox container for heading and button -->
         <div class="header-section">
             <h1>Suppliers</h1>
-            <a href="/suppliers/add" class="add-btn">Add New Supplier</a>
+            <a href="/suppliers/add" class="btn btn-primary sp8">Add New Supplier</a>
         </div>
 
         <!-- Seasrch and Filter Section -->
-        <div class="search-section">
-            <input type="text" placeholder="Search here" class="search-bar">
+        <div id="sup-search" class="search-container">
+          <div class="row search-bar">
+            <span class="material-symbols-rounded">search</span>
+            <input type="text" class="" placeholder="Search here" >
+          </div>
         </div>
 
         <div class="filter-section">
@@ -45,28 +48,56 @@
                 <th>Name</th>
                 <th>Contact No</th>
                 <th>Product Category</th>
+                <th>Products</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
             </thead>
+
             <tbody>
-            <!-- Example of supplier rows -->
-            <tr>
-                <td>001</td>
-                <td>Munchee</td>
-                <td>0712345678</td>
-                <td>Biscuits</td>
-                <td><span class="status-active">Active</span></td>
-                <td><a href="/suppliers/details" class="view-profile">View profile</a></td>
-            </tr>
-            <tr>
-                <td>002</td>
-                <td>Amal Fdo</td>
-                <td>0712345678</td>
-                <td>Fish</td>
-                <td><span class="status-inactive">Inactive</span></td>
-                <td><a href="#" class="view-profile">View profile</a></td>
-            </tr>
+              <?php
+              $servername = "localhost";
+              $username = "root";
+              $password = "";
+              $database = "invenpro";
+
+              //create connection
+              $connection = new mysqli($servername, $username, $password, $database);
+
+              //check connection
+              if($connection->connect_error){
+                die("Connection failed: " . $connection->connect_error);
+              }
+
+              //read all row from database supplier table
+              $sql = "SELECT * FROM supplier_details";
+              $result = $connection->query($sql);
+
+              if(!$result){
+                die("Invalid Query: " . $connection->error);
+              }
+
+              //read data of each row
+              while($row = $result->fetch_assoc()){
+                echo 
+                "<tr>
+               
+                <td>" . $row["supplierID"] . "</td>
+                <td>" . $row["supplierName"] . "</td>
+                <td>" . $row["contactNo"] . "</td>
+                <td>" . $row["productCategories"] . "</td>
+                <td>" . $row["products"] . "</td>
+                <td class='status'>Active</td>
+                <td class='action-btn'>
+                  <a class='btn-view' href='/suppliers/details'>View</a>
+                  <a class='btn-delete' href='/suppliers'>Delete</a>
+                </td>
+                </tr>";
+              }
+  
+            
+            ?>
+        
             </tbody>
         </table>
 
@@ -83,7 +114,7 @@
     align-items: center; /* Vertically align the button with the heading */
   }
 
-  .search-section {
+  .search-container {
     display: flex;
     margin-bottom: 10px; /* Adjust margin for spacing */
   }
@@ -113,10 +144,12 @@
   }
 
   .search-bar {
-    padding: 8px;
-    width: 800px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    margin: 16px 0 8px 0;
+    width: 100%;
+    padding: 12px;
+    border-radius: 24px;
+    background-color: #e0e0e0;
+    border: 0;
   }
 
 
@@ -139,12 +172,18 @@
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
+    background-color: darkgray;
+    text-align: center;
   }
 
   .suppliers-table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
+  }
+
+  .midcol{
+    text-align: center;
   }
 
   .status-active {
@@ -161,11 +200,42 @@
     border-radius: 4px;
   }
 
-  .view-profile {
-    color: black;
-    text-decoration: underline;
-    cursor: pointer;
+  .suppliers-table td.status {
+      text-align: center; /* For fallback alignment */
   }
+
+  .btn-view {
+        background-color:#28a745;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+  }
+
+  .btn-delete{
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+  }
+
+    /* Center-align content in the Actions column */
+  .action-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px; /* Adds space between buttons */
+  }
+
+  .suppliers-table td.action-btn {
+      text-align: center; /* For fallback alignment */
+  }
+
 
 
 </style>

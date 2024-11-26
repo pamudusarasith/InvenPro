@@ -2,15 +2,18 @@
 
 namespace App\Controllers;
 
+use App\Models\Supplier;
+use App\Utils;
+use App\View;
+use App\Consts;
 use App;
 
 class Suppliers
 {
     public function index(): void
     {
-        App\Utils::requireAuth();
-
-        App\View::render('Template', [
+        Utils::requireAuth();
+        View::render('Template', [
             'title' => 'Suppliers',
             'view' => 'Suppliers'
         ]);
@@ -18,9 +21,8 @@ class Suppliers
 
     public function details(): void
     {
-        App\Utils::requireAuth();
-
-        App\View::render('Template', [
+        Utils::requireAuth();
+        View::render('Template', [
             'title' => 'Supplier Details',
             'view' => 'SupplierDetails'
         ]);
@@ -28,8 +30,24 @@ class Suppliers
 
     public function add(): void
     {
+        Utils::requireAuth();
+        View::render('Template', [
+            'title' => 'Add Supplier',
+            'view' => 'AddSupplierForm'
+        ]);
+    }
+
+    public function addSupplier()
+    {
         App\Utils::requireAuth();
 
-        App\View::render('AddSupplierForm');
+        $supplier = new App\Models\Supplier();
+        $supplier->addSupplier();
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'data' => 'Supplier added successfully']);
+        
+
     }
 }
+?>
