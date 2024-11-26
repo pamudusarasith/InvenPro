@@ -31,17 +31,20 @@ class Supplier
     }
 
     public function deleteSupplier(string $supplierID): bool
+{
+    $stmt = $this->dbh->prepare("DELETE FROM supplier_details WHERE supplierID = :supplierID");
+    return $stmt->execute(['supplierID' => $supplierID]);
+}
+
+
+    public function getSupplierDetails(string $supplierID): ?array
     {
-        $stmt = $this->dbh->prepare("DELETE FROM `supplier_details` WHERE `supplierID` = :supplierID");
+        $stmt = $this->dbh->prepare("SELECT * FROM supplier_details WHERE supplierID = :supplierID");
+        $stmt->execute(['supplierID' => $supplierID]);
 
-        $stmt->bindParam(':supplierID', $supplierID);
+        $supplier = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        try {
-            return $stmt->execute(); // Returns true if successful, false otherwise
-        } catch (\PDOException $e) {
-            // Handle any errors (optional logging or error reporting)
-            error_log("Error deleting supplier: " . $e->getMessage());
-            return false;
-        }
+        return $supplier ?: null; // Return null if no supplier is found
     }
+
 }

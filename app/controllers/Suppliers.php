@@ -28,11 +28,38 @@ class Suppliers
     public function details(): void
     {
         Utils::requireAuth();
+
+        // Retrieve supplier ID from the query parameter
+        $supplierID = $_GET['id'] ?? null;
+
+        if (!$supplierID) {
+            // Redirect to the suppliers list if no ID is provided
+            header("Location: /suppliers");
+            exit;
+        }
+
+        // Use the Supplier model to fetch the supplier details
+        $supplier = new App\Models\Supplier();
+        $supplierDetails = $supplier->getSupplierDetails($supplierID);
+
+        // If supplier not found, redirect or show an error
+        if (!$supplierDetails) {
+            View::render('Template', [
+                'title' => 'Supplier Not Found',
+                'view' => 'Error',
+                'errorMessage' => 'Supplier not found.',
+            ]);
+            return;
+        }
+
+        // Render the SupplierDetails view with the supplier details
         View::render('Template', [
             'title' => 'Supplier Details',
-            'view' => 'SupplierDetails'
+            'view' => 'SupplierDetails',
+            'supplier' => $supplierDetails, // Pass the data to the view
         ]);
-    }
+}
+
 
     public function add(): void
     {
@@ -64,28 +91,22 @@ class Suppliers
     {
         App\Utils::requireAuth();
 
-        // Ensure the supplier ID is provided in the request (e.g., as a POST or GET parameter)
-        $supplierID = $_POST['supplier-id'] ?? null; // Use POST for secure deletion
+        $supplierID = $_POST['supplier-id'] ?? null; // Securely fetch supplier ID
+
         if (!$supplierID) {
-            // If no supplier ID is provided, handle the error
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Missing supplier ID']);
             return;
         }
 
-        // Call the deleteSupplier method from the Supplier model
         $supplier = new App\Models\Supplier();
         $result = $supplier->deleteSupplier($supplierID);
 
         if ($result) {
-            // Redirect or send success response
-            http_response_code(200);
-            header("Location: /suppliers");
+            header("Location: /suppliers"); // Redirect to supplier list after successful deletion
             exit;
-            //echo json_encode(['success' => true, 'message' => 'Supplier deleted successfully']);
         } else {
-            // Handle deletion failure
-            http_response_code(500); // Internal Server Error
+            http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Failed to delete supplier']);
         }
     }
