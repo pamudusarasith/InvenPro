@@ -12,6 +12,7 @@ return [
         '/roles' => ['controller' => App\Controllers\RolesController::class],
         '/discounts' => ['controller' => App\Controllers\Dashboard::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
+        '/orders' => ['controller' => App\Controllers\PurchaseOrders::class],
         '/branches' => ['controller' => App\Controllers\Branches::class],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'add'],
         '/suppliers/details' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'details'],
@@ -30,5 +31,6 @@ return [
         '/batch/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newBatch'],
         '/category/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newCategory'],
         '/customer/new' => ['controller' => App\Controllers\Customer::class, 'action' => 'newCustomer'],
-    ]
+        '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'addSupplier'],
+        '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier']
 ];

@@ -7,7 +7,7 @@
         <!-- Flexbox container for heading and button -->
         <div class="header-section">
             <h1>Suppliers</h1>
-            <a href="/suppliers/add" class="btn btn-primary sp8">Add New Supplier</a>
+            <a href="/suppliers/add" class="add-btn">Add New Supplier</a>
         </div>
 
         <!-- Seasrch and Filter Section -->
@@ -90,7 +90,10 @@
                 <td class='status'>Active</td>
                 <td class='action-btn'>
                   <a class='btn-view' href='/suppliers/details'>View</a>
-                  <a class='btn-delete' href='/suppliers'>Delete</a>
+                  <form method='POST' action='/suppliers/delete' style='display: inline;'>
+                            <input type='hidden' name='supplier-id' value='" . htmlspecialchars($row["supplierID"]) . "' />
+                            <button type='submit' class='btn-delete' onclick='return confirm(\"Are you sure you want to delete this supplier?\");'>Delete</button>
+                        </form>
                 </td>
                 </tr>";
               }
@@ -105,137 +108,4 @@
     </div>
 </div>
 
-<!-- Updated CSS -->
-<style>
-  /* Flex container for heading and button */
-  .header-section {
-    display: flex;
-    justify-content: space-between; /* Align items to the opposite sides */
-    align-items: center; /* Vertically align the button with the heading */
-  }
 
-  .search-container {
-    display: flex;
-    margin-bottom: 10px; /* Adjust margin for spacing */
-  }
-
-  /* Filter section */
-  .filter-section {
-    display: flex;
-    gap: 50px;
-    margin-bottom: 30px;
-  }
-
-  .filter-lable {
-    font-family: Arial, sans-serif;
-    margin-bottom: 5px;
-    font-size: 14px;
-    padding: 5px
-  }
-
-  .drp {
-    padding: 5px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f2f4f5;
-    width: 150px
-
-  }
-
-  .search-bar {
-    margin: 16px 0 8px 0;
-    width: 100%;
-    padding: 12px;
-    border-radius: 24px;
-    background-color: #e0e0e0;
-    border: 0;
-  }
-
-
-  .add-btn {
-    background-color: #28a745;
-    color: white;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-
-  .suppliers-table {
-    width: 95%;
-    border-collapse: collapse;
-    margin: 0 auto;
-  }
-
-  .suppliers-table th {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-    background-color: darkgray;
-    text-align: center;
-  }
-
-  .suppliers-table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-  }
-
-  .midcol{
-    text-align: center;
-  }
-
-  .status-active {
-    color: white;
-    background-color: green;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-
-  .status-inactive {
-    color: white;
-    background-color: red;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-
-  .suppliers-table td.status {
-      text-align: center; /* For fallback alignment */
-  }
-
-  .btn-view {
-        background-color:#28a745;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-  }
-
-  .btn-delete{
-        background-color: #dc3545;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-  }
-
-    /* Center-align content in the Actions column */
-  .action-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px; /* Adds space between buttons */
-  }
-
-  .suppliers-table td.action-btn {
-      text-align: center; /* For fallback alignment */
-  }
-
-
-
-</style>
