@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\Supplier;
 use App\Utils;
 use App\View;
+use App\Consts;
+use App;
 
 class Suppliers
 {
@@ -29,45 +31,23 @@ class Suppliers
     public function add(): void
     {
         Utils::requireAuth();
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Data Validation
-            $data = filter_input_array(INPUT_POST, [
-                'supplierID' => FILTER_SANITIZE_STRING,
-                'supplierName' => FILTER_SANITIZE_STRING,
-                'productCategories' => FILTER_SANITIZE_STRING,
-                'products' => FILTER_SANITIZE_STRING,
-                'address' => FILTER_SANITIZE_STRING,
-                'contactNo' => FILTER_SANITIZE_STRING,
-                'email' => FILTER_VALIDATE_EMAIL,
-                'specialNotes' => FILTER_SANITIZE_STRING,
-            ]);
-            
-            // Check Required Fields
-            if (in_array(null, $data, true) || in_array(false, $data, true)) {
-                View::render('AddSupplierForm', [
-                    'title' => 'Add Supplier',
-                    'error' => 'Please fill out all fields correctly.'
-                ]);
-                return;
-            }
+        View::render('Template', [
+            'title' => 'Add Supplier',
+            'view' => 'AddSupplierForm'
+        ]);
+    }
 
-            // Add Supplier to Database
-            $supplierModel = new Supplier();
-            $success = $supplierModel->addSupplier($data);
+    public function addSupplier()
+    {
+        App\Utils::requireAuth();
 
-            if ($success) {
-                header('Location: /suppliers');
-                exit;
-            } else {
-                View::render('AddSupplierForm', [
-                    'title' => 'Add Supplier',
-                    'error' => 'Failed to add supplier. Please try again.'
-                ]);
-            }
-        } else {
-            View::render('AddSupplierForm', [
-                'title' => 'Add Supplier'
-            ]);
-        }
+        $supplier = new App\Models\Supplier();
+        $supplier->addSupplier();
+
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => true, 'data' => 'Supplier added successfully']);
+        
+
     }
 }
+?>

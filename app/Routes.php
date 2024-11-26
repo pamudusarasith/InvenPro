@@ -12,6 +12,7 @@ return [
         '/roles' => ['controller' => App\Controllers\RolesController::class],
         '/discounts' => ['controller' => App\Controllers\Dashboard::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
+        '/branches' => ['controller' => App\Controllers\Branches::class],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'add'],
         '/suppliers/details' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'details'],
         '/reports' => ['controller' => App\Controllers\Dashboard::class],
