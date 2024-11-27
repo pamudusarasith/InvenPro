@@ -10,6 +10,10 @@ class Dashboard
     {
         App\Utils::requireAuth();
 
-        App\View::render('Template', ['title' => 'Dashboard', 'view' => 'Dashboard']);
+        App\View::render('Template', [
+            'title' => 'Dashboard',
+            'view' => 'Dashboard',
+            'stylesheets' => ['dashboard']
+        ]);
     }
 }
