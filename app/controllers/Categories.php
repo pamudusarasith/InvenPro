@@ -7,9 +7,15 @@ use App\Consts;
 
 class Categories
 {
-    public function index()
+    public function index(): void
     {
         App\Utils::requireAuth();
+
+        App\View::render('Template', [
+            'title' => 'Categories',
+            'view' => 'Categories',
+            'stylesheets' => ['']
+        ]);
     }
 
     public function search()

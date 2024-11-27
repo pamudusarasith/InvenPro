@@ -21,8 +21,8 @@ class Products
         App\View::render('Template', [
             'title' => 'Products',
             'view' => 'Products',
-            'stylesheets' => ['products', 'search'],
-            'scripts' => ['products', 'search'],
+            // 'stylesheets' => ['products', 'search'],
+            // 'scripts' => ['products', 'search'],
             'data' => ['categories' => array_column($categories, 'name'), 'products' => $products]
         ]);
     }

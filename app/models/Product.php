@@ -43,12 +43,12 @@ class Product
                 \"Multiple\",
                 pb.selling_price
             ) AS price,
-            SUM(pb.current_quantity) AS quantity
+            SUM(pb.quantity) AS quantity
         FROM
             `product_category` pc
         INNER JOIN product p ON
             p.id = pc.product_id
-        INNER JOIN product_batch pb ON
+        INNER JOIN inventory pb ON
             p.id = pb.product_id
         WHERE
             p.branch_id = :branch_id AND pc.category_id = :category_id
@@ -121,7 +121,7 @@ class Product
             WHERE
                 product_id = :id AND branch_id = :branch_id
         ) i
-        INNER JOIN product_batch pb ON
+        INNER JOIN inventory pb ON
         pb.product_id = i.product_id AND pb.batch_no = i.batch_no");
         $stmt->execute(['id' => $id, 'branch_id' => $_SESSION["branch_id"]]);
         return $stmt->fetchAll();

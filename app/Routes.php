@@ -20,7 +20,8 @@ return [
         '/logout' => ['controller' => App\Controllers\Logout::class],
         '/pos' => ['controller' => App\Controllers\POS::class],
         '/pos/search' => ['controller' => App\Controllers\POS::class, 'action' => 'search'],
-        '/reports' => ['controller' => App\Controllers\Reports::class]
+        '/reports' => ['controller' => App\Controllers\Reports::class],
+        '/categories' => ['controller' => App\Controllers\Categories::class]
     ],
 
     'POST' => [
