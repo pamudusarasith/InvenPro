@@ -1,72 +1,43 @@
 <div class="body">
-    <?php App\View::render("components/Navbar") ?>
-    <?php App\View::render("components/Sidebar") ?>
+    <?php App\View::render("components/Navbar"); ?>
+    <?php App\View::render("components/Sidebar"); ?>
     <div class="content">
 
         <div class="header-section">
-            <h1>Supplier Details</h1>
+            <h1 class="h1">Supplier Details</h1>
         </div>
-    
+
         <!-- Details Section -->
         <div class="details-section">
-            <?php
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $database = "invenpro";
-
-            // Create connection
-            $connection = new mysqli($servername, $username, $password, $database);
-
-            // Check connection
-            if ($connection->connect_error) {
-                die("Connection failed: " . $connection->connect_error);
-            }
-
-            // Retrieve supplier ID from the URL
-            $supplierID = isset($_GET['id']) ? $_GET['id'] : null;
-
-            if ($supplierID) {
-                // Query to fetch supplier details
-                $sql = "SELECT * FROM supplier_details WHERE supplierID = ?";
-                $stmt = $connection->prepare($sql);
-                $stmt->bind_param("s", $supplierID);
-                $stmt->execute();
-                $result = $stmt->get_result();
-
-                // Display supplier details if found
-                if ($row = $result->fetch_assoc()) {
-                    echo "<p><span>Supplier ID :</span> " . htmlspecialchars($row["supplierID"]) . "</p>";
-                    echo "<p><span>Supplier Name :</span> " . htmlspecialchars($row["supplierName"]) . "</p>";
-                    echo "<p><span>Product Categories :</span> " . htmlspecialchars($row["productCategories"]) . "</p>";
-                    echo "<p><span>Products :</span> " . htmlspecialchars($row["products"]) . "</p>";
-                    echo "<p><span>Address :</span> " . htmlspecialchars($row["address"]) . "</p>";
-                    echo "<p><span>Email :</span> " . htmlspecialchars($row["email"]) . "</p>";
-                    echo "<p><span>Contact No :</span> " . htmlspecialchars($row["contactNo"]) . "</p>";
-                    echo "<p><span>Special Notes :</span> " . htmlspecialchars($row["specialNotes"]) . "</p>";
-                } else {
-                    echo "<p>No supplier found with the given ID.</p>";
-                }
-
-                // Close resources
-                $stmt->close();
-            } else {
-                echo "<p>Invalid supplier ID.</p>";
-            }
-
-            $connection->close();
-            ?>
+            <?php if (isset($supplier) && $supplier): ?>
+                <p><span>Supplier ID:</span> <?= htmlspecialchars($supplier['supplierID']); ?></p>
+                <p><span>Supplier Name:</span> <?= htmlspecialchars($supplier['supplierName']); ?></p>
+                <p><span>Product Categories:</span> <?= htmlspecialchars($supplier['productCategories']); ?></p>
+                <p><span>Products:</span> <?= htmlspecialchars($supplier['products']); ?></p>
+                <p><span>Address:</span> <?= htmlspecialchars($supplier['address']); ?></p>
+                <p><span>Email:</span> <?= htmlspecialchars($supplier['email']); ?></p>
+                <p><span>Contact No:</span> <?= htmlspecialchars($supplier['contactNo']); ?></p>
+                <p><span>Special Notes:</span> <?= htmlspecialchars($supplier['specialNotes']); ?></p>
+            <?php else: ?>
+                <p style="color:red;">No supplier found with the given ID.</p>
+            <?php endif; ?>
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons">
-            <a href="/suppliers" class="btn-cancel">Back to List</a>
+        <div class="action-btn">
+            <a href="/suppliers" class="btn-update">Update</a>
+            <a href="/suppliers" class="btn-cancel">Cancel</a>
         </div>
     </div>
 </div>
 
+<!-- CSS Styling -->
 <style>
 /* Supplier Details Page Styles */
+.h1{
+    margin-bottom: 20px;
+}
+
 .details-section p {
     padding: 6px;
     font-size: 16px;
@@ -77,24 +48,43 @@
     font-weight: bold;
 }
 
-.action-buttons {
+.action-btn {
     display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 20px;
+    justify-content: flex-end; /* Aligns the buttons to the right */
+    gap: 15px; /* Adds space between buttons */
+    margin-top: 50px;
 }
 
+/* Styling for Cancel button */
 .btn-cancel {
     background-color: #6c757d;
     color: white;
-    padding: 10px 25px;
+    padding: 10px 20px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
+    text-decoration: none;
 }
 
 .btn-cancel:hover {
     background-color: #5a6268;
+}
+
+/* Styling for Update button */
+.btn-update {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.btn-update:hover {
+    background-color: #218838;
+
 }
 </style>

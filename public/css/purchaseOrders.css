@@ -46,7 +46,7 @@
 
 
   .add-btn {
-    background-color: #1976d2;
+    background-color:#1976d2;
     color: white;
     padding: 8px 12px;
     border: 1px solid #ccc;
@@ -55,13 +55,13 @@
     text-decoration: none;
   }
 
-  .suppliers-table {
+  .purchaseOrders-table {
     width: 95%;
     border-collapse: collapse;
     margin: 0 auto;
   }
 
-  .suppliers-table th {
+  .purchaseOrders-table th {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
@@ -69,7 +69,7 @@
     text-align: center;
   }
 
-  .suppliers-table td {
+  .purchaseOrders-table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
@@ -93,7 +93,7 @@
     border-radius: 4px;
   }
 
-  .suppliers-table td.status {
+  .purchaseOrders-table td.status {
       text-align: center; /* For fallback alignment */
   }
 
@@ -127,7 +127,6 @@
       gap: 10px; /* Adds space between buttons */
   }
 
-  .suppliers-table td.action-btn {
+  .purchaseOrders-table td.action-btn {
       text-align: center; /* For fallback alignment */
   }
-
