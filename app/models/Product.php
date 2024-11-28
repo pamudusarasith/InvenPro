@@ -13,9 +13,9 @@ class Product
         $this->dbh = App\DB::getConnection();
     }
 
-    public function getAllCategories(): array
+    public function getPrimaryCategories(): array
     {
-        $stmt = $this->dbh->prepare("SELECT id, name FROM category");
+        $stmt = $this->dbh->prepare("SELECT id, name FROM category WHERE parent_id IS NULL");
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -36,32 +36,46 @@ class Product
     {
         $stmt = $this->dbh->prepare("
         SELECT
-            pd.*
+            p.id,
+            p.name,
+            p.description,
+            p.measure_unit,
+            p.weight,
+            p.dimensions,
+            p.barcode,
+            p.is_active,
+            SUM(i.quantity) as quantity,
+            IF(
+                COUNT(DISTINCT i.selling_price) > 1,
+                'Multiple',
+                i.selling_price
+            ) as selling_price,
+            GROUP_CONCAT(DISTINCT c.name) as categories,
+            -- Add threshold details
+            t.min_threshold,
+            t.max_threshold,
+            t.reorder_point,
+            t.reorder_quantity
         FROM
-            (
-            SELECT
-                p.id,
-                p.name,
-                p.measure_unit,
-                IF(
-                    COUNT(pb.price) > 1,
-                    \"Multiple\",
-                    pb.price
-                ) AS price,
-                SUM(i.quantity) AS quantity
-            FROM
-                product p
-            INNER JOIN inventory i ON
-                p.id = i.product_id AND i.branch_id = :branch_id AND i.quantity > 0
-            INNER JOIN product_batch pb ON
-                p.id = pb.product_id AND i.batch_no = pb.batch_no
-            GROUP BY
-                p.id
-        ) pd
-        INNER JOIN product_category pc ON
-            pd.id = pc.product_id AND pc.category_id = :category_id;");
+            product p
+            LEFT JOIN inventory i ON p.id = i.product_id
+            LEFT JOIN product_category pc ON p.id = pc.product_id
+            LEFT JOIN category c ON pc.category_id = c.id
+            LEFT JOIN threshold t ON p.id = t.product_id
+        WHERE
+            p.is_active = 1
+            AND p.branch_id = :branch_id
+            AND pc.category_id = :category_id
+        GROUP BY
+            p.id
+        ORDER BY
+            p.name;");
         $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        foreach ($result as &$product) {
+            $product['quantity'] = is_numeric($product['quantity']) ? (int) $product['quantity'] : 0;
+        }
+        return $result;
     }
 
     public function addProduct(array $product): void
@@ -117,7 +131,7 @@ class Product
     {
         $stmt = $this->dbh->prepare("
         SELECT
-            pb.batch_no, i.quantity, pb.price, pb.manufacture_date, pb.expiry_date
+            pb.batch_no, i.quantity, pb.selling_price, pb.manufacture_date, pb.expiry_date
         FROM
             (
             SELECT
@@ -127,7 +141,7 @@ class Product
             WHERE
                 product_id = :id AND branch_id = :branch_id
         ) i
-        INNER JOIN product_batch pb ON
+        INNER JOIN inventory pb ON
         pb.product_id = i.product_id AND pb.batch_no = i.batch_no");
         $stmt->execute(['id' => $id, 'branch_id' => $_SESSION["branch_id"]]);
         return $stmt->fetchAll();
@@ -135,14 +149,41 @@ class Product
 
     public function getProductDetails(int $id): array
     {
-        $stmt = $this->dbh->prepare("SELECT id, name, description, measure_unit, image FROM product WHERE id = :id");
-        $stmt->execute(['id' => $id]);
+        $stmt = $this->dbh->prepare("
+        SELECT
+            p.id,
+            p.name,
+            p.description,
+            p.measure_unit,
+            p.weight,
+            p.dimensions,
+            p.shelf_life_days,
+            p.storage_requirements,
+            p.barcode,
+            p.image,
+            p.is_active,
+            GROUP_CONCAT(DISTINCT c.name) as categories,
+            -- Add threshold details
+            t.min_threshold,
+            t.max_threshold,
+            t.reorder_point,
+            t.reorder_quantity,
+            t.alert_email
+        FROM
+            product p
+            LEFT JOIN product_category pc ON p.id = pc.product_id
+            LEFT JOIN category c ON pc.category_id = c.id
+            LEFT JOIN threshold t ON p.id = t.product_id
+        WHERE
+            p.is_active = 1
+            AND p.branch_id = :branch_id
+            AND p.id = :id;");
+        $stmt->execute(['id' => $id, 'branch_id' => $_SESSION["branch_id"]]);
         $result = $stmt->fetch();
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->buffer($result["image"]);
         $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
-        $result['categories'] = $this->getProductCategories($id);
-        $result['batches'] = $this->getProductBatches($id);
+        // $result['batches'] = $this->getProductBatches($id);
 
         return $result;
     }

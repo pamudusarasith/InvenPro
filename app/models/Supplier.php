@@ -29,4 +29,30 @@ class Supplier
                 'specialNotes' => $_POST["special-notes"],
             ]);
     }
+
+    public function deleteSupplier(string $supplierID): bool
+    {
+        $stmt = $this->dbh->prepare("DELETE FROM `supplier_details` WHERE `supplierID` = :supplierID");
+
+        $stmt->bindParam(':supplierID', $supplierID);
+
+        try {
+            return $stmt->execute(); // Returns true if successful, false otherwise
+        } catch (\PDOException $e) {
+            // Handle any errors (optional logging or error reporting)
+            error_log("Error deleting supplier: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getSupplierDetails(string $supplierID): ?array
+    {
+        $stmt = $this->dbh->prepare("SELECT * FROM supplier_details WHERE supplierID = :supplierID");
+        $stmt->execute(['supplierID' => $supplierID]);
+
+        $supplier = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $supplier ?: null; // Return null if no supplier is found
+    }
+
 }

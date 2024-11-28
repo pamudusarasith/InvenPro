@@ -284,3 +284,68 @@ function showNotification(message, type = 'success') {
         }, 300);
     }, 3000);
 }
+
+function confirmDeleteUser(userId) {
+    const confirmDelete = confirm('Are you sure you want to delete this user?');
+    if (confirmDelete) {
+        deleteUser(userId);
+    }
+}
+
+function deleteUser(userId) {
+    fetch('/users/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            removeUserFromTable(userId);
+            showNotification('User deleted successfully');
+        } else {
+            showNotification(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Failed to delete user', 'error');
+    });
+}
+
+function removeUserFromTable(userId) {
+    const rowToRemove = document.querySelector(`tr[data-user-id="${userId}"]`);
+    if (rowToRemove) {
+        rowToRemove.remove();
+        
+        originalTableData = originalTableData.filter(item => 
+            item.element.getAttribute('data-user-id') !== userId.toString()
+        );
+    }
+}
+
+function createUserTableRow(user) {
+    const row = document.createElement('tr');
+    row.className = 'clickable-row';
+    row.setAttribute('data-user-id', user.id);
+    row.onclick = () => openUserDetails(user);
+
+    row.innerHTML = `
+        <td>${user.id}</td>
+        <td>${user.name}</td>
+        <td>${user.role}</td>
+        <td>${user.branch}</td>
+        <td>
+            <span class="status-badge ${user.status === 'active' ? 'status-active' : 'status-inactive'}">
+                ${user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+            </span>
+        </td>
+        <td>
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); confirmDeleteUser(${user.id})">Delete</button>
+        </td>
+    `;
+
+    return row;
+}

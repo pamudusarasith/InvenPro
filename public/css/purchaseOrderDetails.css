@@ -1,0 +1,55 @@
+
+/* Purchase order Details Page Styles */
+.h1{
+    margin-bottom: 20px;
+}
+
+.details-section p {
+    padding: 6px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.details-section span {
+    font-weight: bold;
+}
+
+.action-btn {
+    display: flex;
+    justify-content: flex-end; /* Aligns the buttons to the right */
+    gap: 15px; /* Adds space between buttons */
+    margin-top: 50px;
+}
+
+/* Styling for Cancel button */
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+/* Styling for Update button */
+.btn-update {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.btn-update:hover {
+    background-color: #218838;
+
+}

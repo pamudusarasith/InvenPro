@@ -6,10 +6,15 @@ window.onclick = (e) => {
   });
 };
 
-function toggleDropdown(id) {
-  let content = document.querySelector(`#${id} .dd-content`);
-  content.classList.toggle("show");
-}
+document.getElementById('profile-menu').addEventListener('click', function() {
+  const ddContent = this.querySelector('.dd-content');
+  ddContent.classList.toggle('show');
+});
+
+document.getElementById('notifications-btn').addEventListener('click', function() {
+  const ddContent = this.querySelector('.dd-content');
+  ddContent.classList.toggle('show');
+});
 
 function logout() {
   window.location.href = "/logout";

@@ -117,6 +117,18 @@ class User
         $stmt = $this->dbh->prepare($query);
         return $stmt->execute($params);
     }
+
+    public function deleteUser(int $id): bool
+{
+    $stmt = $this->dbh->prepare("
+        DELETE FROM employee 
+        WHERE id = :id
+    ");
+    
+    return $stmt->execute([
+        'id' => $id
+    ]);
+}
     
     public function getRoles(): array
     {

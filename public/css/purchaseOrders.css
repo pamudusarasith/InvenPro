@@ -1,0 +1,229 @@
+
+  /* Flex container for heading and button */
+  .header-section {
+    display: flex;
+    justify-content: space-between; /* Align items to the opposite sides */
+    align-items: center; /* Vertically align the button with the heading */
+  }
+
+  /* Filter section */
+  .filter-section {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 30px;
+  }
+
+  .filter-lable {
+    font-family: Arial, sans-serif;
+    margin-bottom: 5px;
+    font-size: 14px;
+    padding: 5px
+  }
+
+  .drp {
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f2f4f5;
+    width: 150px
+
+  }
+
+  .add-btn {
+    background-color:#1976d2;
+    color: white;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+
+  .purchaseOrders-table {
+    width: 95%;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+
+  .purchaseOrders-table th {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    background-color: darkgray;
+    text-align: center;
+  }
+
+  .purchaseOrders-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .midcol{
+    text-align: center;
+  }
+
+  .status-active {
+    color: white;
+    background-color: green;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+  .status-inactive {
+    color: white;
+    background-color: red;
+    padding: 5px 10px;
+    border-radius: 4px;
+  }
+
+  .purchaseOrders-table td.status {
+      text-align: center; /* For fallback alignment */
+  }
+
+  .btn-view {
+        background-color:#28a745;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+  }
+
+  .btn-delete{
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+  }
+
+    /* Center-align content in the Actions column */
+  .action-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px; /* Adds space between buttons */
+  }
+
+  .purchaseOrders-table td.action-btn {
+      text-align: center; /* For fallback alignment */
+  }
+
+  /*add order form css*/
+  .container {
+    width: 85%;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin-bottom: 50px;
+    font-weight: bold;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    flex: 1;
+}
+
+label {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f2f4f5; /* Light grey background */
+    width: 100%;
+    outline: none;
+}
+
+input[type="text"],
+input[type="email"] {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f2f4f5; /* Light grey background */
+    width: 100%;
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus {
+    border-color: #007bff;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.save-btn {
+    background-color:#28a745;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
+}
+
+.cancel-btn:hover {
+    background-color: #d3d3d3;
+}
+
+/* Add spacing between fields */
+.form-row {
+    margin-bottom: 15px;
+}

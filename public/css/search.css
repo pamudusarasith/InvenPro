@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 8px;
+  margin: 8px;
 }
 
 .search-bar {
@@ -12,8 +12,8 @@
   width: 100%;
   padding: 8px;
   border-radius: 24px;
-  background-color: #e0e0e0;
-  border: 0;
+  border: 1px solid #cccccc;
+  background-color: #f5f6fa;
 }
 
 .search-bar input {
@@ -31,6 +31,8 @@
 }
 
 .autocomplete-results {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   width: 100%;
   background-color: #efefef;
@@ -38,15 +40,16 @@
   left: 0;
   right: 0;
   border-radius: 8px;
-  border: 1px solid #cccccc;
+  border: 1px solid #d0d0d0;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
+  margin-top: 4px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
 }
 
 .autocomplete-results button {
-  padding: 8px;
+  padding: 12px;
   border: 0;
+  border-bottom: 1px solid #d0d0d0;
   text-align: left;
 }
 
