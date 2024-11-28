@@ -55,4 +55,35 @@ class Supplier
         return $supplier ?: null; // Return null if no supplier is found
     }
 
+
+    public function updateSupplier(string $supplierID, array $data): bool
+{
+    $stmt = $this->dbh->prepare("UPDATE `supplier_details` 
+        SET `supplierName` = :supplierName, 
+            `productCategories` = :productCategories,
+            `products` = :products, 
+            `address` = :address,
+            `contactNo` = :contactNo,
+            `email` = :email,
+            `specialNotes` = :specialNotes
+        WHERE `supplierID` = :supplierID");
+
+    try {
+        return $stmt->execute([
+            'supplierID' => $supplierID,
+            'supplierName' => $data["supplier-name"],
+            'productCategories' => $data["product-categories"],
+            'products' => $data["products"],
+            'address' => $data["address"],
+            'contactNo' => $data["contact-no"],
+            'email' => $data["email"],
+            'specialNotes' => $data["special-notes"],
+        ]);
+    } catch (\PDOException $e) {
+        error_log("Error updating supplier: " . $e->getMessage());
+        return false;
+    }
+}
+
+
 }
