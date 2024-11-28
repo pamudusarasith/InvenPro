@@ -85,7 +85,7 @@
   }
 
   .btn-view {
-        background-color:#28a745;
+        background-color:#1976d2;
         color: white;
         padding: 10px 15px;
         border: none;
@@ -96,7 +96,7 @@
   }
 
   .btn-delete{
-        background-color: #dc3545;
+        background-color: #c11b2bd3;
         color: white;
         padding: 10px 15px;
         border: none;
@@ -196,7 +196,7 @@
     }
 
     .save-btn {
-        background-color:#28a745;
+        background-color:#1976d2;
         color: white;
         padding: 10px 25px;
         border: none;

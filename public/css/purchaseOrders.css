@@ -41,9 +41,10 @@
   }
 
   .purchaseOrders-table {
-    width: 95%;
+    width: 85%;
     border-collapse: collapse;
     margin: 0 auto;
+    font-size: 14px;
   }
 
   .purchaseOrders-table th {
@@ -83,7 +84,7 @@
   }
 
   .btn-view {
-        background-color:#28a745;
+        background-color:#1976d2;
         color: white;
         padding: 10px 15px;
         border: none;
@@ -94,7 +95,7 @@
   }
 
   .btn-delete{
-        background-color: #dc3545;
+        background-color: #c11b2bd3;
         color: white;
         padding: 10px 15px;
         border: none;
@@ -184,7 +185,7 @@ input[type="email"] {
 
 input[type="text"]:focus,
 input[type="email"]:focus {
-    border-color: #007bff;
+    border-color: #1976d2;
 }
 
 .form-actions {
@@ -194,7 +195,7 @@ input[type="email"]:focus {
 }
 
 .save-btn {
-    background-color:#28a745;
+    background-color:#1976d2;
     color: white;
     padding: 10px 25px;
     border: none;
@@ -216,7 +217,7 @@ input[type="email"]:focus {
 }
 
 .save-btn:hover {
-    background-color: #0056b3;
+    background-color: #1976d2;
 }
 
 .cancel-btn:hover {

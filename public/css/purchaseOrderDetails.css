@@ -39,7 +39,7 @@
 
 /* Styling for Update button */
 .btn-update {
-    background-color: #28a745;
+    background-color: #1976d2;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -50,6 +50,6 @@
 }
 
 .btn-update:hover {
-    background-color: #218838;
+    background-color: #1976d2;
 
 }
