@@ -1,13 +1,12 @@
 <!-- AddSupplierForm.view.php -->
 <div class="container">
-    <h2>Add New Supplier</h2>
+    <h2>Add New Order</h2>
 
-    <form  id ="sup-form" class="form-container" action="/suppliers/add" method="POST">
-        <!-- Supplier ID and Supplier Name -->
+    <form  id ="order-form" class="form-container" action="" method="POST">
         <div class="form-row">
             <div class="form-group">
-                <label for="supplier-id">Supplier ID</label>
-                <input type="text" id="supplier-id" name="supplier-id" required>
+                <label for="Order-id">Order ID</label>
+                <input type="text" id="order-id" name="order-id" required>
             </div>
             <div class="form-group">
                 <label for="supplier-name">Supplier Name</label>
@@ -37,20 +36,24 @@
         <!-- Address -->
         <div class="form-row">
             <div class="form-group full-width">
-                <label for="address">Address</label>
-                <input type="text" id="address" name="address" required>
+                <label for="qty">Quantity</label>
+                <input type="text" id="qty" name="qty" required>
+            </div>
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="text" id="amount" name="amount" required>
             </div>
         </div>
 
         <!-- Contact No and Email -->
         <div class="form-row">
             <div class="form-group">
-                <label for="contact-no">Contact No</label>
+                <label for="contact-no">Supplier Contact No</label>
                 <input type="text" id="contact-no" name="contact-no" required>
             </div>
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <label for="date">Expected Delivery Date</label>
+                <input type="text" id="date" name="date" required>
             </div>
         </div>
 
@@ -65,7 +68,7 @@
         <!-- Buttons -->
         <div class="form-actions">
             <button type="submit" class="save-btn">Save</button>
-            <a href="/suppliers" class="cancel-btn">Cancel</a>
+            <a href="/orders" class="cancel-btn">Cancel</a>
         </div>
     </form>
 </div>

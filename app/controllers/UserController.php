@@ -2,10 +2,9 @@
 
 namespace App\Controllers;
 
-use App;
-use App\Consts;
+use App\View;
 
-class UserController 
+class UserController
 {
     public function index()
     {

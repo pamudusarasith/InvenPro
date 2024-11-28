@@ -29,7 +29,8 @@ set_exception_handler(function ($e) {
     App\View::render("errors/500");
     error_log($e->getMessage());
     if (DEBUG) {
-        echo $e->getMessage();
+        echo $e->getMessage() . "<br>";
+        echo nl2br($e->getTraceAsString());
     }
 });
 
