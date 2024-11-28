@@ -81,18 +81,19 @@ document
   .getElementById("add-phone-no-button")
   .addEventListener("click", function (event) {
     event.preventDefault();
-    const formData = new FormData(this);
-    fetch("/customer/update", {
+    const phone = event.target.parentNode.querySelector("input").value;
+    const formData = new FormData();
+    formData.append("phone", phone);
+    fetch("/customer/retrieve", {
       method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          alert("Customer updated successfully");
-          location.reload();
+          console.log(data);
         } else {
-          document.getElementById("error-msg").textContent = data.message;
+          console.log(data);
         }
       })
       .catch((error) => {
