@@ -11,7 +11,7 @@ return [
         '/categories/search' => ['controller' => App\Controllers\Categories::class, 'action' => 'search'],
         '/users' => ['controller' => App\Controllers\UserController::class],
         '/roles' => ['controller' => App\Controllers\RolesController::class],
-        '/discounts' => ['controller' => App\Controllers\Dashboard::class],
+        '/discounts' => ['controller' => App\Controllers\Discounts::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
         '/orders' => ['controller' => App\Controllers\PurchaseOrders::class],
         '/orders/add' => ['controller' => App\Controllers\PurchaseOrders::class, 'action' => 'addformview'],

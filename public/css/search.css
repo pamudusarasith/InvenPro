@@ -6,6 +6,8 @@
 }
 
 .search-bar {
+  display: flex;
+  flex-direction: row;
   margin: 16px 0 0 0;
   width: 100%;
   padding: 8px;
