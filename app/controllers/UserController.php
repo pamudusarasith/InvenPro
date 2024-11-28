@@ -19,8 +19,8 @@ class UserController
         App\View::render('Template', [
             'title' => 'Users',
             'view' => 'Users',
-            'stylesheets' => ['users', 'search'],
-            'scripts' => ['users', 'search'],
+            'stylesheets' => ['user', 'search'],
+            'scripts' => ['user', 'search'],
             'data' => [
                 'users' => $users,
                 'roles' => $roles,
@@ -40,8 +40,8 @@ class UserController
         App\View::render('Template', [
             'title' => 'User Details',
             'view' => 'UserDetails',
-            'stylesheets' => ['userDetails', 'search'],
-            'scripts' => ['userDetails', 'search'],
+            'stylesheets' => ['user', 'search'],
+            'scripts' => ['user', 'search'],
             'data' => [
                 'user' => $userData,
                 'roles' => $user->getRoles(),
@@ -133,4 +133,26 @@ class UserController
         
         return true;
     }
+
+    public function deleteUser()
+{
+    App\Utils::requireAuth();
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($data['id']) || !is_numeric($data['id'])) {
+        header(Consts::HEADER_JSON);
+        echo json_encode(['success' => false, 'error' => 'Invalid user ID']);
+        return;
+    }
+
+    $user = new App\Models\User();
+    $success = $user->deleteUser($data['id']);
+
+    header(Consts::HEADER_JSON);
+    echo json_encode([
+        'success' => $success, 
+        'message' => $success ? 'User deleted successfully' : 'Failed to delete user'
+    ]);
+}
 }
