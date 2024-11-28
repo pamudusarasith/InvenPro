@@ -1,127 +1,71 @@
 
-  /* Flex container for heading and button */
-  .header-section {
-    display: flex;
-    justify-content: space-between; /* Align items to the opposite sides */
-    align-items: center; /* Vertically align the button with the heading */
-  }
+    .content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
+    .center-container {
+        text-align: center;
+    }
 
-  /* Filter section */
-  .filter-section {
-    display: flex;
-    gap: 50px;
-    margin-bottom: 30px;
-  }
+    .top-right-btn {
+        position: absolute; 
+        top: 70px; 
+        right: 20px; 
+        z-index: 100; 
+    }
+    
+    .add-btn {
+        background-color: #1976d2; 
+        color: #fff;  
+        padding: 10px 20px;  
+        text-decoration: none;  
+        border-radius: 5px; 
+        font-size: 14px;  
+    }
+    
+    .add-btn:hover {
+        background-color: #1976d2;  
+    }
+    
 
-  .filter-lable {
-    font-family: Arial, sans-serif;
-    margin-bottom: 5px;
-    font-size: 14px;
-    padding: 5px
-  }
+    .header-section h1 {
+        font-size: 32px;
+        margin-bottom: 30px;
+        color: #333;
+    }
 
-  .drp {
-    padding: 5px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f2f4f5;
-    width: 150px
+    .branchDropdown select {
+        padding: 10px;
+        font-size: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        width: 400px;
+        background-color: #fff;
+        margin-bottom: 30px;
+    }
 
-  }
+    .branchDropdown select:focus {
+        border-color: #007bff;
+        outline: none;
+    }
 
-
-  .add-btn {
-    background-color: #1976d2;
-    color: white;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    border-radius: 4px;
-    text-decoration: none;
-  }
-
-  .suppliers-table {
-    width: 95%;
-    border-collapse: collapse;
-    margin: 0 auto;
-  }
-
-  .suppliers-table th {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-    background-color: darkgray;
-    text-align: center;
-  }
-
-  .suppliers-table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-  }
-
-  .midcol{
-    text-align: center;
-  }
-
-  .status-active {
-    color: white;
-    background-color: green;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-
-  .status-inactive {
-    color: white;
-    background-color: red;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-
-  .suppliers-table td.status {
-      text-align: center; /* For fallback alignment */
-  }
-
-  .btn-view {
+    .ok {
         background-color:#28a745;
         color: white;
-        padding: 10px 15px;
+        padding: 10px 25px;
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 14px;
-        text-decoration: none;
-  }
+        font-size: 20px;
+    }
 
-  .btn-delete{
-        background-color: #dc3545;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-        text-decoration: none;
-  }
-
-    /* Center-align content in the Actions column */
-  .action-btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px; /* Adds space between buttons */
-  }
-
-  .suppliers-table td.action-btn {
-      text-align: center; /* For fallback alignment */
-  }
-
-  /*add supplier form css*/
     .container {
         width: 85%;
         margin: 0 auto;
+        margin-top: 30px;
         background-color: #f9f9f9;
         padding: 20px;
         border-radius: 12px;
@@ -229,6 +173,3 @@
     .form-row {
         margin-bottom: 15px;
     }
-    
-  
-

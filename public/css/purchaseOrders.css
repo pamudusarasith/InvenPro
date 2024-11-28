@@ -6,11 +6,6 @@
     align-items: center; /* Vertically align the button with the heading */
   }
 
-  .search-container {
-    display: flex;
-    margin-bottom: 10px; /* Adjust margin for spacing */
-  }
-
   /* Filter section */
   .filter-section {
     display: flex;
@@ -34,16 +29,6 @@
     width: 150px
 
   }
-
-  .search-bar {
-    margin: 16px 0 8px 0;
-    width: 100%;
-    padding: 12px;
-    border-radius: 24px;
-    background-color: #e0e0e0;
-    border: 0;
-  }
-
 
   .add-btn {
     background-color:#1976d2;
@@ -130,3 +115,115 @@
   .purchaseOrders-table td.action-btn {
       text-align: center; /* For fallback alignment */
   }
+
+  /*add order form css*/
+  .container {
+    width: 85%;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin-bottom: 50px;
+    font-weight: bold;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    flex: 1;
+}
+
+label {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f2f4f5; /* Light grey background */
+    width: 100%;
+    outline: none;
+}
+
+input[type="text"],
+input[type="email"] {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f2f4f5; /* Light grey background */
+    width: 100%;
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus {
+    border-color: #007bff;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.save-btn {
+    background-color:#28a745;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
+}
+
+.cancel-btn:hover {
+    background-color: #d3d3d3;
+}
+
+/* Add spacing between fields */
+.form-row {
+    margin-bottom: 15px;
+}

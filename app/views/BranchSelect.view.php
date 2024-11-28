@@ -3,7 +3,11 @@
     <?php App\View::render("components/Sidebar") ?>
 
     <div class="content">
-        <!-- Flexbox container for heading and dropdown -->
+        <!-- Add a wrapper for the button to position it -->
+        <div class="top-right-btn">
+            <a href="/branch/add" class="add-btn">Add New Branch</a>
+        </div>
+
         <div class="center-container">
             <div class="header-section">
                 <h1>Select a Branch</h1>
@@ -26,47 +30,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .content {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .center-container {
-        text-align: center;
-    }
-
-    .header-section h1 {
-        font-size: 32px;
-        margin-bottom: 30px;
-        color: #333;
-    }
-
-    .branchDropdown select {
-        padding: 10px;
-        font-size: 20px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
-        width: 400px;
-        background-color: #fff;
-        margin-bottom: 30px;
-    }
-
-    .branchDropdown select:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-
-    .ok {
-        background-color:#28a745;
-        color: white;
-        padding: 10px 25px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 20px;
-    }
-</style>

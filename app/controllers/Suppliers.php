@@ -18,7 +18,7 @@ class Suppliers
         App\View::render('Template', [
             'title' => 'Suppliers',
             'view' => 'Suppliers',
-            'stylesheets' => ['suppliers'],
+            'stylesheets' => ['suppliers','search'],
             'scripts' => ['suppliers'],
         ]);
 
@@ -47,7 +47,7 @@ class Suppliers
             View::render('Template', [
                 'title' => 'Supplier Not Found',
                 'view' => 'Error',
-                'errorMessage' => 'Supplier not found.',
+                'errorMessage' => 'Supplier not found.'
             ]);
             return;
         }
@@ -56,7 +56,9 @@ class Suppliers
         View::render('Template', [
             'title' => 'Supplier Details',
             'view' => 'SupplierDetails',
-            'supplier' => $supplierDetails, // Pass the data to the view
+            'stylesheets' => ['supplierDetails'],
+            'supplier' => $supplierDetails,
+            
         ]);
 }
 
@@ -66,7 +68,8 @@ class Suppliers
         Utils::requireAuth();
         View::render('Template', [
             'title' => 'Add Supplier',
-            'view' => 'AddSupplierForm'
+            'view' => 'AddSupplierForm',
+            'stylesheets' => ['suppliers']
         ]);
     }
 

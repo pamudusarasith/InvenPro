@@ -7,11 +7,11 @@
         <!-- Flexbox container for heading and button -->
         <div class="header-section">
             <h1>Purchase Orders</h1>
-            <a href="/suppliers/add" class="add-btn">Add New Order</a>
+            <a href="/orders/add" class="add-btn">Add New Order</a>
         </div>
 
         <!-- Seasrch and Filter Section -->
-        <div id="sup-search" class="search-container">
+        <div id="order-search" class="search-container">
           <div class="row search-bar">
             <span class="material-symbols-rounded">search</span>
             <input type="text" class="" placeholder="Search here" >
@@ -76,8 +76,8 @@
                 <td>Pending</td>
                 <td>No</td>
                 <td class='action-btn'>
-                  <a class='btn-view' href='/suppliers/details'>View</a>
-                  <a class='btn-delete' href='/suppliers'>Delete</a>
+                  <a class='btn-view' href='/orders/details'>View</a>
+                  <a class='btn-delete' href='/orders'>Delete</a>
                 </td>
                 </tr>
             
