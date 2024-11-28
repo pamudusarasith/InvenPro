@@ -113,5 +113,67 @@ class Suppliers
             echo json_encode(['success' => false, 'message' => 'Failed to delete supplier']);
         }
     }
+
+    public function edit(): void
+{
+    Utils::requireAuth();
+
+    // Retrieve supplier ID from the query parameter
+    $supplierID = $_GET['id'] ?? null;
+
+    if (!$supplierID) {
+        // Redirect if no ID is provided
+        header("Location: /suppliers");
+        exit;
+    }
+
+    // Fetch existing supplier details
+    $supplier = new App\Models\Supplier();
+    $supplierDetails = $supplier->getSupplierDetails($supplierID);
+
+    // If supplier not found, redirect or show error
+    if (!$supplierDetails) {
+        View::render('Template', [
+            'title' => 'Supplier Not Found',
+            'view' => 'Error',
+            'errorMessage' => 'Supplier not found.'
+        ]);
+        return;
+    }
+
+    // Render the form with the existing supplier details
+    View::render('Template', [
+        'title' => 'Edit Supplier Details',
+        'view' => 'AddSupplierForm', // Reuse the same form view
+        'stylesheets' => ['suppliers'],
+        'supplier' => $supplierDetails // Pass details to populate form
+    ]);
+}
+
+public function updateSupplier(): void
+{
+    Utils::requireAuth();
+
+    $supplierID = $_POST['supplier-id'] ?? null;
+
+    if (!$supplierID) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing supplier ID']);
+        return;
+    }
+
+    $supplier = new App\Models\Supplier();
+    $result = $supplier->updateSupplier($supplierID, $_POST);
+
+    if ($result) {
+        // Redirect to suppliers page after update
+        header("Location: /suppliers/details?id=" . $supplierID);
+        exit;
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Failed to update supplier']);
+    }
+}
+
 }
 ?>

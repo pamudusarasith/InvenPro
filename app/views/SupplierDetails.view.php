@@ -25,7 +25,7 @@
 
         <!-- Action Buttons -->
         <div class="action-btn">
-            <a href="/suppliers" class="btn-update">Update</a>
+            <a href="/suppliers/edit?id=<?= htmlspecialchars($supplier['supplierID']); ?>" class="btn-update">Update</a>
             <a href="/suppliers" class="btn-cancel">Cancel</a>
         </div>
     </div>
