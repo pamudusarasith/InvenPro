@@ -24,7 +24,7 @@ return [
         '/pos' => ['controller' => App\Controllers\POS::class],
         '/pos/search' => ['controller' => App\Controllers\POS::class, 'action' => 'search'],
         '/reports' => ['controller' => App\Controllers\Reports::class]
-
+    ],
     'POST' => [
         '/login' => ['controller' => App\Controllers\Login::class, 'action' => 'login'],
         '/users/create' => ['controller' => App\Controllers\UserController::class, 'action' => 'create'],
@@ -35,7 +35,11 @@ return [
         '/category/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newCategory'],
         '/customer/new' => ['controller' => App\Controllers\Customer::class, 'action' => 'newCustomer'],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'addSupplier'],
-        '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier']
+        '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier'],
+        '/customer/delete' => ['controller' => App\Controllers\Customer::class, 'action' => 'delete'],
+        '/customer/update' => ['controller' => App\Controllers\Customer::class, 'action' => 'update'],
+        '/customer/retrieve' => ['controller' => App\Controllers\Customer::class, 'action' => 'retrieve']
+
     ]
 
 ];

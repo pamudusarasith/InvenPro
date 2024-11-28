@@ -18,11 +18,9 @@ class Suppliers
         App\View::render('Template', [
             'title' => 'Suppliers',
             'view' => 'Suppliers',
-            'stylesheets' => ['suppliers','search'],
+            'stylesheets' => ['suppliers', 'search'],
             'scripts' => ['suppliers'],
         ]);
-
-
     }
 
     public function details(): void
@@ -58,9 +56,9 @@ class Suppliers
             'view' => 'SupplierDetails',
             'stylesheets' => ['supplierDetails'],
             'supplier' => $supplierDetails,
-            
+
         ]);
-}
+    }
 
 
     public function add(): void
@@ -86,7 +84,7 @@ class Suppliers
         //header(Consts::HEADER_JSON);
         //echo json_encode(['success' => true, 'data' => 'Supplier added successfully']);
 
-        
+
 
     }
 
@@ -114,4 +112,3 @@ class Suppliers
         }
     }
 }
-?>
