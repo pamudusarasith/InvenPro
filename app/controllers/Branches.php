@@ -10,6 +10,20 @@ class Branches
     {
         App\Utils::requireAuth();
 
-        App\View::render('Template', ['title' => 'BranchSelect', 'view' => 'BranchSelect']);
+        App\View::render('Template', [
+            'title' => 'BranchSelect', 
+            'view' => 'BranchSelect',
+            'stylesheets' => ['branch']
+        ]);
+    }
+
+    public function addformview(): void
+    {
+        App\Utils::requireAuth();
+        App\View::render('Template', [
+            'title' => 'Add Branch',
+            'view' => 'AddBranchForm',
+            'stylesheets' => ['branch']
+        ]);
     }
 }
