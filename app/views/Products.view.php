@@ -11,13 +11,9 @@
                 <p class="header-description">Manage your products, stock levels and categories</p>
             </div>
             <div class="header-actions">
-                <button id="new-prod-btn" class="btn btn-light" onclick="openProductModal()">
+                <button id="new-prod-btn" class="btn btn-primary" onclick="openProductModal()">
                     <span class="material-symbols-rounded">add_box</span>
                     New Product
-                </button>
-                <button id="new-batch-btn" class="btn btn-primary" onclick="openBatchModal()">
-                    <span class="material-symbols-rounded">inventory_2</span>
-                    Add Batch
                 </button>
             </div>
         </div>
@@ -59,7 +55,7 @@
                 foreach ($categories as $category):
                     $categoryProducts = $products[$category] ?? [];
                     $totalProducts = count($categoryProducts);
-                    $lowStock = count(array_filter($categoryProducts, fn($p) => $p['quantity'] <= 100 && $p['quantity'] > 0));
+                    $lowStock = count(array_filter($categoryProducts, fn($p) => $p['quantity'] <= $p['min_threshold'] && $p['quantity'] > 0));
                     $outOfStock = count(array_filter($categoryProducts, fn($p) => $p['quantity'] === 0));
             ?>
                     <div class="category-card glass">
@@ -90,7 +86,7 @@
                                     <thead>
                                         <tr>
                                             <th>Product Details</th>
-                                            <th>Price</th>
+                                            <th>Selling Price</th>
                                             <th>Stock Level</th>
                                             <th>Status</th>
                                             <th>Actions</th>
@@ -107,13 +103,13 @@
                                                         </div>
                                                         <div class="product-details">
                                                             <p class="product-name"><?= htmlspecialchars($product['name']) ?></p>
-                                                            <span class="product-id">ID: <?= htmlspecialchars($product['id']) ?></span>
+                                                            <span class="product-barcode">BARCODE: <?= htmlspecialchars($product['barcode']) ?></span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="price-cell">
                                                     <span class="price">
-                                                        <?= is_numeric($product['price']) ? "Rs. " . number_format($product['price'], 2) : $product['price'] ?>
+                                                        <?= is_numeric($product['selling_price']) ? "Rs. " . number_format($product['selling_price'], 2) : $product['selling_price'] ?>
                                                     </span>
                                                 </td>
                                                 <td class="stock-cell">
@@ -126,21 +122,18 @@
                                                 </td>
                                                 <td class="status-cell">
                                                     <?php
-                                                    $status = $product['quantity'] === 0 ? 'out' : ($product['quantity'] <= 100 ? 'low' : 'in');
-                                                    $statusText = $product['quantity'] === 0 ? 'Out of Stock' : ($product['quantity'] <= 100 ? 'Low Stock' : 'In Stock');
+                                                    $status = $product['quantity'] === 0 ? 'out' : ($product['quantity'] <= $product['min_threshold'] ? 'low' : 'in');
+                                                    $statusText = $product['quantity'] === 0 ? 'Out of Stock' : ($product['quantity'] <= $product['min_threshold'] ? 'Low Stock' : 'In Stock');
                                                     ?>
                                                     <span class="status-badge <?= $status ?>"><?= $statusText ?></span>
                                                 </td>
                                                 <td class="actions-cell">
                                                     <div class="action-buttons">
-                                                        <button class="action-btn" title="Edit Product" data-action="edit">
+                                                        <button class="action-btn" title="Edit Product" data-action="edit" onclick="openProductEditModal(<?= $product['id'] ?>)">
                                                             <span class="material-symbols-rounded">edit</span>
                                                         </button>
-                                                        <button class="action-btn" title="Add Stock" data-action="stock">
+                                                        <button class="action-btn" title="Add Stock" data-action="stock" onclick="openBatchModal()">
                                                             <span class="material-symbols-rounded">add_circle</span>
-                                                        </button>
-                                                        <button class="action-btn" title="View History" data-action="history">
-                                                            <span class="material-symbols-rounded">history</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -370,6 +363,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
+        text-align: left;
         letter-spacing: 0.05em;
         color: var(--text-secondary);
         border-bottom: 1px solid var(--border-light);
@@ -808,4 +802,23 @@
             console.log('View history:', productId);
         }
     });
+
+    async function fetchProductDetails(productId) {
+        try {
+            const response = await fetch(`/api/product?id=${productId}`);
+            if (!response.ok) throw new Error('Failed to fetch product details');
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching product details:', error);
+            return null;
+        }
+    }
+
+    // Update the openProductEditModal function
+    async function openProductEditModal(productId) {
+        const productData = await fetchProductDetails(productId);
+        if (productData) {
+            openProductModal(true, productData);
+        }
+    }
 </script>

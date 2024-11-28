@@ -38,24 +38,44 @@ class Product
         SELECT
             p.id,
             p.name,
+            p.description,
+            p.measure_unit,
+            p.weight,
+            p.dimensions,
+            p.barcode,
+            p.is_active,
+            SUM(i.quantity) as quantity,
             IF(
-                COUNT(pb.selling_price) > 1,
-                \"Multiple\",
-                pb.selling_price
-            ) AS price,
-            SUM(pb.quantity) AS quantity
+                COUNT(DISTINCT i.selling_price) > 1,
+                'Multiple',
+                i.selling_price
+            ) as selling_price,
+            GROUP_CONCAT(DISTINCT c.name) as categories,
+            -- Add threshold details
+            t.min_threshold,
+            t.max_threshold,
+            t.reorder_point,
+            t.reorder_quantity
         FROM
-            `product_category` pc
-        INNER JOIN product p ON
-            p.id = pc.product_id
-        INNER JOIN inventory pb ON
-            p.id = pb.product_id
+            product p
+            LEFT JOIN inventory i ON p.id = i.product_id
+            LEFT JOIN product_category pc ON p.id = pc.product_id
+            LEFT JOIN category c ON pc.category_id = c.id
+            LEFT JOIN threshold t ON p.id = t.product_id
         WHERE
-            p.branch_id = :branch_id AND pc.category_id = :category_id
+            p.is_active = 1
+            AND p.branch_id = :branch_id
+            AND pc.category_id = :category_id
         GROUP BY
-            p.id;");
+            p.id
+        ORDER BY
+            p.name;");
         $stmt->execute(['branch_id' => $_SESSION["branch_id"], 'category_id' => $category_id]);
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        foreach ($result as &$product) {
+            $product['quantity'] = is_numeric($product['quantity']) ? (int) $product['quantity'] : 0;
+        }
+        return $result;
     }
 
     public function addProduct(array $product): void
@@ -129,14 +149,41 @@ class Product
 
     public function getProductDetails(int $id): array
     {
-        $stmt = $this->dbh->prepare("SELECT id, name, description, measure_unit, image FROM product WHERE id = :id");
-        $stmt->execute(['id' => $id]);
+        $stmt = $this->dbh->prepare("
+        SELECT
+            p.id,
+            p.name,
+            p.description,
+            p.measure_unit,
+            p.weight,
+            p.dimensions,
+            p.shelf_life_days,
+            p.storage_requirements,
+            p.barcode,
+            p.image,
+            p.is_active,
+            GROUP_CONCAT(DISTINCT c.name) as categories,
+            -- Add threshold details
+            t.min_threshold,
+            t.max_threshold,
+            t.reorder_point,
+            t.reorder_quantity,
+            t.alert_email
+        FROM
+            product p
+            LEFT JOIN product_category pc ON p.id = pc.product_id
+            LEFT JOIN category c ON pc.category_id = c.id
+            LEFT JOIN threshold t ON p.id = t.product_id
+        WHERE
+            p.is_active = 1
+            AND p.branch_id = :branch_id
+            AND p.id = :id;");
+        $stmt->execute(['id' => $id, 'branch_id' => $_SESSION["branch_id"]]);
         $result = $stmt->fetch();
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime = $finfo->buffer($result["image"]);
         $result["image"] = "data:$mime;base64," . base64_encode($result["image"]);
-        $result['categories'] = $this->getProductCategories($id);
-        $result['batches'] = $this->getProductBatches($id);
+        // $result['batches'] = $this->getProductBatches($id);
 
         return $result;
     }

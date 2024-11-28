@@ -79,4 +79,16 @@ class Products
             'data' => ['product' => $product]
         ]);
     }
+
+    public function apiDetails()
+    {
+        App\Utils::requireAuth();
+
+        $id = $_GET['id'];
+        $model = new App\Models\Product();
+        $product = $model->getProductDetails($id);
+
+        header(Consts::HEADER_JSON);
+        echo json_encode($product);
+    }
 }

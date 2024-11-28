@@ -1,7 +1,7 @@
 <!-- Product Form Modal -->
 <dialog id="productFormModal" class="modal">
     <div class="modal-content">
-        <h2>Add New Product</h2>
+        <h2 class="modal-title">Add New Product</h2>
         <form id="productForm" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Product Name*</label>
@@ -85,8 +85,8 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn-submit">Save Product</button>
                 <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancel</button>
+                <button type="submit" class="btn-submit">Save Product</button>
             </div>
         </form>
     </div>
@@ -213,18 +213,18 @@
     }
 
     .btn-submit {
-        background: var(--success-500);
+        background: var(--primary-500);
         color: var(--surface-white);
     }
 
     .btn-submit:hover {
-        background: var(--success-600);
+        background: var(--primary-600);
         transform: translateY(-1px);
         box-shadow: var(--shadow-sm);
     }
 
     .btn-submit:active {
-        background: var(--success-700);
+        background: var(--primary-700);
         transform: translateY(0);
     }
 
@@ -266,8 +266,24 @@
 </style>
 
 <script>
-    function openProductModal() {
+    function openProductModal(isEdit = false, productData = null) {
         const modal = document.getElementById('productFormModal');
+        const form = document.getElementById('productForm');
+        const title = modal.querySelector('.modal-title');
+
+        title.textContent = isEdit ? 'Update Product' : 'New Product';
+        form.reset();
+
+        if (isEdit && productData) {
+            // Pre-fill form with product data
+            Object.keys(productData).forEach(key => {
+                const input = form.querySelector(`:is(input, textarea)[name="${key}"]:not(input[type="file"])`);
+                if (input) {
+                    input.value = productData[key];
+                }
+            });
+        }
+
         modal.showModal();
     }
 

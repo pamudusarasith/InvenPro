@@ -5,7 +5,7 @@
     <div class="category-container">
       <div class="top-bar">
         <h1>Categories</h1>
-        <button id="new-category-btn" class="btn btn-primary">
+        <button id="new-category-btn" class="btn btn-primary" onclick="openCategoryModal()">
           <span class="material-symbols-rounded">add</span>New Category
         </button>
       </div>

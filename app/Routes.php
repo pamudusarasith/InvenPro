@@ -7,6 +7,7 @@ return [
         '/products' => ['controller' => App\Controllers\Products::class],
         '/products/search' => ['controller' => App\Controllers\Products::class, 'action' => 'search'],
         '/product' => ['controller' => App\Controllers\Products::class, 'action' => 'details'],
+        '/api/product' => ['controller' => App\Controllers\Products::class, 'action' => 'apiDetails'],
         '/categories/search' => ['controller' => App\Controllers\Categories::class, 'action' => 'search'],
         '/users' => ['controller' => App\Controllers\UserController::class],
         '/roles' => ['controller' => App\Controllers\RolesController::class],
