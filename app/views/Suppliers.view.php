@@ -12,10 +12,10 @@
 
         <!-- Seasrch and Filter Section -->
         <div id="sup-search" class="search-container">
-          <div class="row search-bar">
-            <span class="material-symbols-rounded">search</span>
-            <input type="text" class="" placeholder="Search here" >
-          </div>
+            <div class="row search-bar">
+                <span class="material-symbols-rounded">search</span>
+                <input type="text" class="" placeholder="Search here">
+            </div>
         </div>
 
         <div class="filter-section">

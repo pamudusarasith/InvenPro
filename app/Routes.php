@@ -13,6 +13,9 @@ return [
         '/discounts' => ['controller' => App\Controllers\Dashboard::class],
         '/suppliers' => ['controller' => App\Controllers\Suppliers::class],
         '/orders' => ['controller' => App\Controllers\PurchaseOrders::class],
+        '/orders/add' => ['controller' => App\Controllers\PurchaseOrders::class, 'action' => 'addformview'],
+        '/orders/details' => ['controller' => App\Controllers\PurchaseOrders::class, 'action' => 'details'],
+        '/branch/add' => ['controller' => App\Controllers\Branches::class, 'action' => 'addformview'],
         '/branches' => ['controller' => App\Controllers\Branches::class],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'add'],
         '/suppliers/details' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'details'],
@@ -20,6 +23,7 @@ return [
         '/logout' => ['controller' => App\Controllers\Logout::class],
         '/pos' => ['controller' => App\Controllers\POS::class],
         '/pos/search' => ['controller' => App\Controllers\POS::class, 'action' => 'search'],
+
     ],
 
     'POST' => [
