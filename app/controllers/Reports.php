@@ -4,16 +4,16 @@ namespace App\Controllers;
 
 use App;
 
-class Dashboard
+class Reports
 {
     public function index(): void
     {
         App\Utils::requireAuth();
 
         App\View::render('Template', [
-            'title' => 'Dashboard',
-            'view' => 'Dashboard',
-            'stylesheets' => ['dashboard']
+            'title' => 'Reports',
+            'view' => 'Reports',
+            'stylesheets' => ['reports']
         ]);
     }
 }
