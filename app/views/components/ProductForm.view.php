@@ -2,7 +2,7 @@
 <dialog id="productFormModal" class="modal">
     <div class="modal-content">
         <h2 class="modal-title">Add New Product</h2>
-        <form id="productForm" method="POST" enctype="multipart/form-data">
+        <form id="productForm" action="/product/new" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Product Name*</label>
                 <input type="text" id="name" name="name" required>
@@ -84,6 +84,17 @@
                 <input type="email" id="alert_email" name="alert_email">
             </div>
 
+            <!-- Add this after the alert_email form-group -->
+            <div class="form-group">
+                <label for="categorySearch">Categories</label>
+                <div class="category-search-container">
+                    <input type="text" id="categorySearch" placeholder="Search categories...">
+                    <div id="categoryDropdown" class="category-dropdown"></div>
+                </div>
+                <div id="selectedCategories" class="selected-categories"></div>
+                <input type="hidden" name="categories" id="categoryIds">
+            </div>
+
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancel</button>
                 <button type="submit" class="btn-submit">Save Product</button>
@@ -93,6 +104,79 @@
 </dialog>
 
 <style>
+    /* Category Search Styles */
+    .category-search-container {
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--surface-white);
+        border: 1px solid var(--border-medium);
+        border-radius: 8px;
+        box-shadow: var(--shadow-md);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 100;
+    }
+
+    .category-dropdown.show {
+        display: block;
+    }
+
+    .category-option {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+    }
+
+    .category-option:hover {
+        background: var(--primary-50);
+        color: var(--primary-600);
+    }
+
+    .selected-categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        min-height: 32px;
+    }
+
+    .category-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background: var(--primary-50);
+        color: var(--primary-600);
+        border-radius: 16px;
+        font-size: 0.875rem;
+    }
+
+    .remove-chip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--primary-200);
+        color: var(--primary-700);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .remove-chip:hover {
+        background: var(--primary-300);
+        color: var(--primary-800);
+    }
+
     /* Modal Styles */
     .modal {
         padding: 0;
@@ -271,6 +355,14 @@
         const form = document.getElementById('productForm');
         const title = modal.querySelector('.modal-title');
 
+        form.action = isEdit ? `/products/update` : '/products/new';
+        if (isEdit) {
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = productData.id;
+            form.appendChild(idInput);
+        }
         title.textContent = isEdit ? 'Update Product' : 'New Product';
         form.reset();
 
@@ -298,7 +390,7 @@
         const formData = new FormData(this);
 
         // Example AJAX submission
-        fetch('/api/products', {
+        fetch(this.action, {
                 method: 'POST',
                 body: formData
             })
@@ -307,11 +399,121 @@
                 if (data.success) {
                     closeProductModal();
                     // Add success message or refresh product list
+                    window.location.reload();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 // Handle error case
             });
+    });
+
+    // Add this to your existing JavaScript
+    class CategoryManager {
+        constructor() {
+            this.searchInput = document.getElementById('categorySearch');
+            this.dropdown = document.getElementById('categoryDropdown');
+            this.selectedContainer = document.getElementById('selectedCategories');
+            this.hiddenInput = document.getElementById('categoryIds');
+            this.selectedCategories = new Map(); // id -> {id, name}
+
+            this.init();
+        }
+
+        init() {
+            this.searchInput.addEventListener('input', () => this.handleSearch());
+            this.searchInput.addEventListener('focus', () => this.showDropdown());
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.category-search-container')) {
+                    this.hideDropdown();
+                }
+            });
+
+            // Initialize hidden input
+            this.updateHiddenInput();
+        }
+
+        async handleSearch() {
+            const searchTerm = this.searchInput.value.trim();
+            if (searchTerm.length < 2) {
+                this.hideDropdown();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/categories/search?q=${encodeURIComponent(searchTerm)}`);
+                const categories = (await response.json()).data.results;
+
+                this.renderDropdown(categories);
+            } catch (error) {
+                console.error('Error searching categories:', error);
+            }
+        }
+
+        renderDropdown(categories) {
+            this.dropdown.innerHTML = '';
+
+            categories.forEach(category => {
+                if (this.selectedCategories.has(category.id)) return;
+
+                const option = document.createElement('div');
+                option.className = 'category-option';
+                option.textContent = category.name;
+                option.addEventListener('click', () => this.addCategory(category));
+
+                this.dropdown.appendChild(option);
+            });
+
+            this.showDropdown();
+        }
+
+        addCategory(category) {
+            if (this.selectedCategories.has(category.id)) return;
+
+            this.selectedCategories.set(category.id, category);
+
+            const chip = document.createElement('div');
+            chip.className = 'category-chip';
+            chip.innerHTML = `
+            ${category.name}
+            <span class="remove-chip" data-id="${category.id}">&times;</span>
+        `;
+
+            chip.querySelector('.remove-chip').addEventListener('click',
+                () => this.removeCategory(category.id));
+
+            this.selectedContainer.appendChild(chip);
+            this.searchInput.value = '';
+            this.hideDropdown();
+            this.updateHiddenInput();
+        }
+
+        removeCategory(categoryId) {
+            this.selectedCategories.delete(categoryId);
+            const chip = this.selectedContainer.querySelector(`[data-id="${categoryId}"]`).parentElement;
+            chip.remove();
+            this.updateHiddenInput();
+        }
+
+        updateHiddenInput() {
+            this.hiddenInput.value = Array.from(this.selectedCategories.keys()).join(',');
+        }
+
+        showDropdown() {
+            if (this.dropdown.children.length > 0) {
+                this.dropdown.classList.add('show');
+            }
+        }
+
+        hideDropdown() {
+            this.dropdown.classList.remove('show');
+        }
+    }
+
+    // Initialize category manager when document loads
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryManager = new CategoryManager();
     });
 </script>

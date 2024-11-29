@@ -58,7 +58,7 @@
                 <a href="javascript:void(0);" class="checkoutbtn">CHECKOUT</a>
             </div>
             <?php \App\View::render('components/CustomerForm'); ?>
-            <?php \App\View::render('components/SearchavailabilityForm'); ?>
+            <!-- <?php \App\View::render('components/SearchavailabilityForm'); ?> -->
         </div>
     </div>
 </div>

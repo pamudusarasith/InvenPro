@@ -39,8 +39,8 @@
             <div id="profile" class="dropdown">
                 <button class="profile-btn">
                     <div class="profile-info">
-                        <p class="profile-name">John Doe</p>
-                        <p class="profile-role">Branch Manager</p>
+                        <p class="profile-name"><?= $_SESSION["full_name"] ?></p>
+                        <p class="profile-role"><?= $_SESSION["role_name"] ?></p>
                     </div>
                     <span class="material-symbols-rounded">expand_more</span>
                 </button>
@@ -49,10 +49,11 @@
                         <span class="material-symbols-rounded">account_circle</span>
                         <span>My Profile</span>
                     </a>
-                    <button class="dropdown-item" onclick="handleLogout()">
+                    <a href="/logout" class="dropdown-item">
                         <span class="material-symbols-rounded">logout</span>
                         <span>Logout</span>
-                    </button>
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -285,9 +286,4 @@
             menu.addEventListener('click', (e) => e.stopPropagation());
         });
     });
-
-    function handleLogout() {
-        // Add logout logic here
-        console.log('Logging out...');
-    }
 </script>

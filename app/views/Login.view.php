@@ -4,12 +4,14 @@ $errorMessage = isset($errorMessage) ? $errorMessage : '';
 
 <div class="overlay <?php echo !empty($errorMessage) ? 'show' : ''; ?>"></div>
 
-<div class="error-popup <?php echo !empty($errorMessage) ? 'show' : ''; ?>">
-    <div class="message-container">
-        <span class="icon material-symbols-outlined">error</span>
-        <div><?php echo htmlspecialchars($errorMessage); ?></div>
+<?php if (!empty($errorMessage)) : ?>
+    <div class="error-popup show">
+        <div class="message-container">
+            <span class="icon material-symbols-outlined">error</span>
+            <div><?php echo htmlspecialchars($errorMessage); ?></div>
+        </div>
     </div>
-</div>
+<?php endif; ?>
 
 <div class="login-container">
     <img class="logo" src="/images/logo-light.png" alt="logo">

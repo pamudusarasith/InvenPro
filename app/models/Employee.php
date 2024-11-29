@@ -6,65 +6,206 @@ use App;
 
 class Employee
 {
-    private $dbh = null;
+    private $dbh;
 
     public function __construct()
     {
         $this->dbh = App\DB::getConnection();
     }
 
-    public function emailExists($email): bool
+    public function getAllUsers(): array
     {
-        $stmt = $this->dbh->prepare("SELECT email FROM employee WHERE email = ?");
-        $stmt->execute([$email]);
-        return $stmt->rowCount() > 0;
+        $stmt = $this->dbh->prepare("
+        SELECT
+            e.id,
+            e.email,
+            e.role_id,
+            e.branch_id,
+            e.full_name,
+            e.phone_number,
+            e.address,
+            e.joining_date,
+            e.last_login,
+            e.is_active,
+            e.failed_login_attempts,
+            e.account_locked_until,
+            r.name AS role_name,
+            r.description AS role_description,
+            GROUP_CONCAT(DISTINCT p.name) AS permissions,
+            b.name AS branch_name
+        FROM
+            employee e
+            LEFT JOIN role r ON e.role_id = r.id
+            LEFT JOIN role_permission rp ON r.id = rp.role_id
+            LEFT JOIN permission p ON rp.permission_id = p.id
+            LEFT JOIN branch b ON e.branch_id = b.id
+        WHERE
+            1=1
+        GROUP BY
+            e.id
+        ORDER BY
+            e.joining_date DESC;");
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
-    public function getPassword($email)
+    public function getUserById(int $id): array
     {
-        $stmt = $this->dbh->prepare("SELECT password FROM employee WHERE email = ?");
-        $stmt->execute([$email]);
-        return $stmt->fetchColumn();
-    }
-
-    public function getEmployee()
-    {
-        if (!isset($_SESSION["email"]))
-            return null;
-        $stmt = $this->dbh->prepare("SELECT id, role_id, branch_id, full_name FROM employee WHERE email = ?");
-        $stmt->execute([$_SESSION["email"]]);
+        $stmt = $this->dbh->prepare("
+            SELECT 
+                e.*,
+                r.name as role_name,
+                b.name as branch_name
+            FROM employee e
+            JOIN role r ON e.role_id = r.id
+            JOIN branch b ON e.branch_id = b.id
+            WHERE e.id = :id
+        ");
+        $stmt->execute(['id' => $id]);
         return $stmt->fetch();
     }
 
-    public function getPermissionCategories()
+    public function getUserByEmail(string $email): array
     {
-        if (!isset($_SESSION["role_id"]))
-            return [];
-        $stmt = $this->dbh->prepare("SELECT DISTINCT pc.name FROM role_permission rp INNER JOIN permission p ON rp.permission_id = p.id INNER JOIN permission_category pc ON p.category_id = pc.id WHERE rp.role_id = ?");
-        $stmt->execute([$_SESSION["role_id"]]);
-        $rows = $stmt->fetchAll();
-        $categories = array();
-        foreach ($rows as $row) {
-            array_push($categories, $row["name"]);
+        $stmt = $this->dbh->prepare("
+            SELECT
+                e.*,
+                r.name as role_name,
+                b.name as branch_name
+            FROM employee e
+            JOIN role r ON e.role_id = r.id
+            JOIN branch b ON e.branch_id = b.id
+            WHERE e.email = :email
+        ");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }
+
+    public function addUser(array $userData): int
+    {
+        $stmt = $this->dbh->prepare("
+            INSERT INTO employee (
+                email, 
+                password, 
+                role_id, 
+                branch_id, 
+                full_name, 
+                phone_number
+            ) VALUES (
+                :email,
+                :password,
+                :role_id,
+                :branch_id,
+                :full_name,
+                :phone_number
+            )
+        ");
+
+        $stmt->execute([
+            'email' => $userData['email'],
+            'password' => password_hash($userData['password'], PASSWORD_DEFAULT),
+            'role_id' => $userData['role_id'],
+            'branch_id' => $userData['branch_id'],
+            'full_name' => $userData['full_name'],
+            'phone_number' => $userData['phone']
+        ]);
+
+        return (int)$this->dbh->lastInsertId();
+    }
+
+    public function updateUser(array $userData): bool
+    {
+        $params = [
+            'id' => $userData['id'],
+            'email' => $userData['email'],
+            'role_id' => $userData['role_id'],
+            'branch_id' => $userData['branch_id'],
+            'full_name' => $userData['full_name'],
+            'phone_number' => $userData['phone']
+        ];
+
+        $query = "
+            UPDATE employee
+            SET
+                email = :email,
+                role_id = :role_id,
+                branch_id = :branch_id,
+                full_name = :full_name,
+                phone_number = :phone_number
+        ";
+
+        if (!empty($userData['password'])) {
+            $query .= ", password = :password";
+            $params['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
         }
-        return $categories;
+
+        $query .= " WHERE id = :id";
+
+        $stmt = $this->dbh->prepare($query);
+        return $stmt->execute($params);
     }
 
-    public function getTotalUsers(): int
+    public function deleteUser(int $id): bool
     {
-        // Replace with actual database query to get total users
-        return 1000; // Example value
+        $stmt = $this->dbh->prepare("
+        DELETE FROM employee 
+        WHERE id = :id
+    ");
+
+        return $stmt->execute([
+            'id' => $id
+        ]);
     }
 
-    public function getActiveUsers(): int
+    public function getRoles(): array
     {
-        // Replace with actual database query to get active users
-        return 250; // Example value
+        $stmt = $this->dbh->prepare("SELECT id, name FROM role");
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
-    public function getNewSignUps(): int
+    public function getBranches(): array
     {
-        // Replace with actual database query to get new sign-ups for the month
-        return 50; // Example value
+        $stmt = $this->dbh->prepare("SELECT id, name FROM branch");
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function authenticate(string $email, string $password): ?array
+    {
+        $stmt = $this->dbh->prepare("
+            SELECT 
+                e.*,
+                r.name as role_name,
+                b.name as branch_name
+            FROM employee e
+            JOIN role r ON e.role_id = r.id
+            JOIN branch b ON e.branch_id = b.id
+            WHERE e.email = :email AND e.status = 1
+        ");
+
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+            unset($user['password']);
+            return $user;
+        }
+
+        return null;
+    }
+
+    public function updateStatus(int $id, int $status): bool
+    {
+        $stmt = $this->dbh->prepare("
+            UPDATE employee 
+            SET status = :status 
+            WHERE id = :id
+        ");
+
+        return $stmt->execute([
+            'id' => $id,
+            'status' => $status
+        ]);
     }
 }

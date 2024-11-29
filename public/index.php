@@ -1,5 +1,7 @@
 <?php
 
+use App\Utils;
+
 define('DEBUG', true);
 define('ROOT_PATH', realpath(__DIR__ . "/.."));
 define('APP_PATH', ROOT_PATH . "/app");
@@ -26,11 +28,11 @@ spl_autoload_register(function ($class) {
 });
 
 set_exception_handler(function ($e) {
-    App\View::render("errors/500");
     error_log($e->getMessage());
     if (DEBUG) {
-        echo $e->getMessage() . "<br>";
-        echo nl2br($e->getTraceAsString());
+        Utils::error(500, $e->getMessage() . "<br>" . nl2br($e->getTraceAsString()));
+    } else {
+        Utils::error(500);
     }
 });
 

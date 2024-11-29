@@ -45,12 +45,12 @@
 </style>
 
 <div class="error-container">
-  <h1>404</h1>
+  <h1>403</h1>
   <div class="error-message">
     <?php if (isset($message)): ?>
       <p><?php echo $message; ?></p>
     <?php else: ?>
-      <p>Page Not Found. The requested resource could not be found on this server.</p>
+      <p>Access Forbidden. You don't have permission to access this resource.</p>
     <?php endif; ?>
   </div>
   <a href="/" class="home-link">Return to Home</a>

@@ -97,10 +97,10 @@
                                             <tr data-product-id="<?= $product['id'] ?>" class="product-row">
                                                 <td class="product-cell">
                                                     <div class="product-info">
-                                                        <div class="product-image">
+                                                        <!-- <div class="product-image">
                                                             <img src="<?= $product['image'] ?? '/assets/default-product.png' ?>"
                                                                 alt="<?= htmlspecialchars($product['name']) ?>">
-                                                        </div>
+                                                        </div> -->
                                                         <div class="product-details">
                                                             <p class="product-name"><?= htmlspecialchars($product['name']) ?></p>
                                                             <span class="product-barcode">BARCODE: <?= htmlspecialchars($product['barcode']) ?></span>
@@ -134,6 +134,9 @@
                                                         </button>
                                                         <button class="action-btn" title="Add Stock" data-action="stock" onclick="openBatchModal()">
                                                             <span class="material-symbols-rounded">add_circle</span>
+                                                        </button>
+                                                        <button class="action-btn" title="Delete" data-action="delete" onclick="">
+                                                            <span class="material-symbols-rounded">delete</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -821,4 +824,37 @@
             openProductModal(true, productData);
         }
     }
+
+    async function deleteProduct(productId) {
+        if (!confirm('Are you sure you want to delete this product?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/products/delete?id=${productId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error('Failed to delete product');
+            }
+            window.location.reload();
+
+        } catch (error) {
+            console.error('Error deleting product:', error);
+            alert('Failed to delete product. Please try again.');
+        }
+    }
+
+    // Update the delete button onclick handler
+    document.querySelectorAll('.action-btn[data-action="delete"]').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const productId = btn.closest('.product-row').dataset.productId;
+            deleteProduct(productId);
+        };
+    });
 </script>

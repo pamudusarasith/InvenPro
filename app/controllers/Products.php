@@ -31,8 +31,36 @@ class Products
     {
         App\Utils::requireAuth();
 
-        header(Consts::HEADER_JSON);
-        echo json_encode(['success' => true, 'data' => 'Product added successfully']);
+        $data = $this->validateProductData($_POST, $_FILES);
+
+        $product = new App\Models\Product();
+        $product->createProduct($data);
+
+        exit();
+    }
+
+    public function updateProduct()
+    {
+        App\Utils::requireAuth();
+
+        $id = $_POST['id'];
+        $data = $this->validateProductData($_POST, $_FILES);
+
+        $product = new App\Models\Product();
+        $product->updateProduct($id, $data);
+
+        exit();
+    }
+
+    public function deleteProduct()
+    {
+        App\Utils::requireAuth();
+
+        $id = $_GET['id'];
+        $product = new App\Models\Product();
+        $product->deleteProduct($id);
+
+        exit();
     }
 
     public function newBatch()
@@ -74,8 +102,8 @@ class Products
         App\View::render('Template', [
             'title' => 'Product Details',
             'view' => 'ProductDetails',
-            'stylesheets' => ['productDetails', 'search'],
-            'scripts' => ['productDetails', 'search'],
+            // 'stylesheets' => ['productDetails', 'search'],
+            // 'scripts' => ['productDetails', 'search'],
             'data' => ['product' => $product]
         ]);
     }
@@ -90,5 +118,58 @@ class Products
 
         header(Consts::HEADER_JSON);
         echo json_encode($product);
+    }
+
+    private function validateProductData($input, $files) {
+        $errors = [];
+        
+        // Required fields
+        $required = ['name', 'description', 'measure_unit', 
+                    'min_threshold', 'max_threshold',
+                    'reorder_point', 'reorder_quantity'];
+                    
+        foreach ($required as $field) {
+            if (empty($input[$field])) {
+                $errors[] = "Missing required field: $field";
+            }
+        }
+
+        // Validate thresholds
+        if (!empty($input['min_threshold']) && !empty($input['max_threshold'])) {
+            $min = floatval($input['min_threshold']);
+            $max = floatval($input['max_threshold']);
+            $point = floatval($input['reorder_point']);
+            $qty = floatval($input['reorder_quantity']);
+
+            if ($min >= $max) {
+                $errors[] = "Minimum threshold must be less than maximum";
+            }
+            if ($point <= $min || $point >= $max) {
+                $errors[] = "Reorder point must be between thresholds";
+            }
+            if ($qty <= 0) {
+                $errors[] = "Reorder quantity must be greater than zero";
+            }
+        }
+
+        // Validate image
+        if (!empty($files['image'])) {
+            $image = $files['image'];
+            if ($image['error'] === 0) {
+                if ($image['size'] > 5242880) {
+                    $errors[] = "Image must be less than 5MB";
+                }
+                $allowed = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!in_array($image['type'], $allowed)) {
+                    $errors[] = "Invalid image format";
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            throw new \Exception(implode("\n", $errors));
+        }
+
+        return array_merge($input, ['image' => $files['image'] ?? null]);
     }
 }

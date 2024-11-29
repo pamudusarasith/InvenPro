@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App;
+use App\Consts;
 
 class Product
 {
@@ -78,15 +79,179 @@ class Product
         return $result;
     }
 
-    public function addProduct(array $product): void
+    public function createProduct(array $data)
     {
-        $stmt = $this->dbh->prepare("INSERT INTO product (id, name, description, measure_unit) VALUES (:id, :name, :description, :unit)");
-        $stmt->execute([
-            'id' => $product["id"],
-            'name' => $product["name"],
-            'description' => $product["description"],
-            'unit' => $product["unit"]
-        ]);
+        try {
+            $this->dbh->beginTransaction();
+
+            // Insert product
+            $query = "INSERT INTO product (
+                branch_id, name, description, measure_unit, 
+                weight, dimensions, shelf_life_days,
+                storage_requirements, barcode, image, is_active
+            ) VALUES (
+                :branch_id, :name, :description, :measure_unit,
+                :weight, :dimensions, :shelf_life_days,
+                :storage_requirements, :barcode, null, 1
+            )";
+
+            $stmt = $this->dbh->prepare($query);
+            $stmt->execute([
+                'branch_id' => $_SESSION['branch_id'],
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'measure_unit' => $data['measure_unit'],
+                'weight' => $data['weight'] ?? null,
+                'dimensions' => $data['dimensions'] ?? null,
+                'shelf_life_days' => $data['shelf_life_days'] ?? null,
+                'storage_requirements' => $data['storage_requirements'] ?? null,
+                'barcode' => $data['barcode'] ?? null
+            ]);
+
+            $productId = $this->dbh->lastInsertId();
+
+            // Insert threshold
+            $query = "INSERT INTO threshold (
+                product_id, min_threshold, max_threshold,
+                reorder_point, reorder_quantity, alert_email
+            ) VALUES (
+                :product_id, :min_threshold, :max_threshold,
+                :reorder_point, :reorder_quantity, :alert_email
+            )";
+
+            $stmt = $this->dbh->prepare($query);
+            $stmt->execute([
+                'product_id' => $productId,
+                'min_threshold' => $data['min_threshold'],
+                'max_threshold' => $data['max_threshold'],
+                'reorder_point' => $data['reorder_point'],
+                'reorder_quantity' => $data['reorder_quantity'],
+                'alert_email' => $data['alert_email'] ?? null
+            ]);
+
+            // Insert categories
+            if (!empty($data['categories'])) {
+                $query = "INSERT INTO product_category (product_id, category_id) 
+                         VALUES (:product_id, :category_id)";
+                $stmt = $this->dbh->prepare($query);
+
+                foreach (explode(',', $data['categories']) as $categoryId) {
+                    $stmt->execute([
+                        'product_id' => $productId,
+                        'category_id' => $categoryId
+                    ]);
+                }
+            }
+
+            $this->dbh->commit();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => true, 'data' => 'Product updated successfully']);
+        } catch (\Exception $e) {
+            $this->dbh->rollBack();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function updateProduct(int $id, array $data)
+    {
+        try {
+            $this->dbh->beginTransaction();
+            // Update product
+            $query = "UPDATE product SET 
+                name = :name,
+                description = :description,
+                measure_unit = :measure_unit,
+                weight = :weight,
+                dimensions = :dimensions,
+                shelf_life_days = :shelf_life_days,
+                storage_requirements = :storage_requirements,
+                barcode = :barcode" .
+                " WHERE id = :id AND branch_id = :branch_id";
+
+            $params = [
+                'id' => $id,
+                'branch_id' => $_SESSION['branch_id'],
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'measure_unit' => $data['measure_unit'],
+                'weight' => $data['weight'] ?? null,
+                'dimensions' => $data['dimensions'] ?? null,
+                'shelf_life_days' => $data['shelf_life_days'] ?? null,
+                'storage_requirements' => $data['storage_requirements'] ?? null,
+                'barcode' => $data['barcode'] ?? null
+            ];
+
+            $stmt = $this->dbh->prepare($query);
+            $stmt->execute($params);
+
+            // Update threshold
+            $query = "UPDATE threshold SET 
+                min_threshold = :min_threshold,
+                max_threshold = :max_threshold,
+                reorder_point = :reorder_point,
+                reorder_quantity = :reorder_quantity,
+                alert_email = :alert_email
+                WHERE product_id = :product_id";
+
+            $stmt = $this->dbh->prepare($query);
+            $stmt->execute([
+                'product_id' => $id,
+                'min_threshold' => $data['min_threshold'],
+                'max_threshold' => $data['max_threshold'],
+                'reorder_point' => $data['reorder_point'],
+                'reorder_quantity' => $data['reorder_quantity'],
+                'alert_email' => $data['alert_email'] ?? null
+            ]);
+
+            // Update categories
+            $stmt = $this->dbh->prepare("DELETE FROM product_category WHERE product_id = ?");
+            $stmt->execute([$id]);
+
+            if (!empty($data['categories'])) {
+                $categoryIds = [];
+                $stmt = $this->dbh->prepare("SELECT id FROM category WHERE name IN (?)");
+                foreach (explode(',', $data['categories']) as $categoryName) {
+                    $stmt->execute([$categoryName]);
+                    $categoryIds[] = $stmt->fetchColumn();
+                }
+
+                $query = "INSERT INTO product_category (product_id, category_id) 
+                         VALUES (:product_id, :category_id)";
+                $stmt = $this->dbh->prepare($query);
+
+                foreach ($categoryIds as $categoryId) {
+                    $stmt->execute([
+                        'product_id' => $id,
+                        'category_id' => $categoryId
+                    ]);
+                }
+            }
+
+            $this->dbh->commit();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => true, 'data' => 'Product updated successfully']);
+        } catch (\Exception $e) {
+            $this->dbh->rollBack();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function deleteProduct(int $id)
+    {
+        try {
+            $this->dbh->beginTransaction();
+            $stmt = $this->dbh->prepare("UPDATE product SET is_active = 0 WHERE id = ?");
+            $stmt->execute([$id]);
+            $this->dbh->commit();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => true, 'data' => 'Product deleted successfully']);
+        } catch (\Exception $e) {
+            $this->dbh->rollBack();
+            header(Consts::HEADER_JSON);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     public function search(string $query): array
