@@ -17,34 +17,34 @@ class User
     {
         $stmt = $this->dbh->prepare("
         SELECT
-            e.id,
-            e.email,
-            e.role_id,
-            e.branch_id,
-            e.full_name,
-            e.phone_number,
-            e.address,
-            e.joining_date,
-            e.last_login,
-            e.is_active,
-            e.failed_login_attempts,
-            e.account_locked_until,
+            u.id,
+            u.email,
+            u.role_id,
+            u.branch_id,
+            u.full_name,
+            u.phone_number,
+            u.address,
+            u.joining_date,
+            u.last_login,
+            u.is_active,
+            u.failed_login_attempts,
+            u.account_locked_until,
             r.name AS role_name,
             r.description AS role_description,
             GROUP_CONCAT(DISTINCT p.name) AS permissions,
             b.name AS branch_name
         FROM
-            employee e
-            LEFT JOIN role r ON e.role_id = r.id
+            user u
+            LEFT JOIN role r ON u.role_id = r.id
             LEFT JOIN role_permission rp ON r.id = rp.role_id
             LEFT JOIN permission p ON rp.permission_id = p.id
-            LEFT JOIN branch b ON e.branch_id = b.id
+            LEFT JOIN branch b ON u.branch_id = b.id
         WHERE
             1=1
         GROUP BY
-            e.id
+            u.id
         ORDER BY
-            e.joining_date DESC;
+            u.joining_date DESC;
         ");
         $stmt->execute();
         return $stmt->fetchAll();
@@ -54,13 +54,13 @@ class User
     {
         $stmt = $this->dbh->prepare("
             SELECT 
-                e.*,
+                u.*,
                 r.name as role_name,
                 b.name as branch_name
-            FROM employee e
-            JOIN role r ON e.role_id = r.id
-            JOIN branch b ON e.branch_id = b.id
-            WHERE e.id = :id
+            FROM user u
+            JOIN role r ON u.role_id = r.id
+            JOIN branch b ON u.branch_id = b.id
+            WHERE u.id = :id
         ");
         $stmt->execute(['id' => $id]);
         return $stmt->fetch();
@@ -70,13 +70,13 @@ class User
     {
         $stmt = $this->dbh->prepare("
             SELECT
-                e.*,
+                u.*,
                 r.name as role_name,
                 b.name as branch_name
-            FROM employee e
-            JOIN role r ON e.role_id = r.id
-            JOIN branch b ON e.branch_id = b.id
-            WHERE e.email = :email
+            FROM user u
+            JOIN role r ON u.role_id = r.id
+            JOIN branch b ON u.branch_id = b.id
+            WHERE u.email = :email
         ");
 
         $stmt->execute(['email' => $email]);
@@ -229,13 +229,13 @@ class User
     {
         $stmt = $this->dbh->prepare("
             SELECT 
-                e.*,
+                u.*,
                 r.name as role_name,
                 b.name as branch_name
-            FROM employee e
-            JOIN role r ON e.role_id = r.id
-            JOIN branch b ON e.branch_id = b.id
-            WHERE e.email = :email AND e.status = 1
+            FROM user u
+            JOIN role r ON u.role_id = r.id
+            JOIN branch b ON u.branch_id = b.id
+            WHERE u.email = :email AND u.status = 1
         ");
 
         $stmt->execute(['email' => $email]);

@@ -41,7 +41,11 @@ return [
         '/category/new' => ['controller' => App\Controllers\Products::class, 'action' => 'newCategory'],
         '/customer/new' => ['controller' => App\Controllers\Customer::class, 'action' => 'newCustomer'],
         '/suppliers/add' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'addSupplier'],
-        '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier']
+        '/suppliers/delete' => ['controller' => App\Controllers\Suppliers::class, 'action' => 'deleteSupplier'],
+        '/customer/delete' => ['controller' => App\Controllers\Customer::class, 'action' => 'delete'],
+        '/customer/update' => ['controller' => App\Controllers\Customer::class, 'action' => 'update'],
+        '/customer/retrieve' => ['controller' => App\Controllers\Customer::class, 'action' => 'retrieve']
+
     ]
 
 ];
