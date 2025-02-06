@@ -1,31 +1,52 @@
-window.onclick = (e) => {
-  document.querySelectorAll(".navbar .dropdown").forEach((element) => {
-    if (!element.contains(e.target)) {
-      element.querySelector(".dd-content").classList.remove("show");
+class Dropdown {
+    constructor(element) {
+        this.dropdown = element;
+        this.trigger = element.querySelector('.dropdown-trigger');
+        this.menu = element.querySelector('.dropdown-menu');
+        this.init();
     }
-  });
-};
 
-document.getElementById('profile-menu').addEventListener('click', function() {
-  const ddContent = this.querySelector('.dd-content');
-  ddContent.classList.toggle('show');
-});
+    init() {
+        // Toggle dropdown
+        this.trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggle();
+        });
 
-document.getElementById('notifications-btn').addEventListener('click', function() {
-  const ddContent = this.querySelector('.dd-content');
-  ddContent.classList.toggle('show');
-});
+        // Prevent menu clicks from closing dropdown
+        this.menu?.addEventListener('click', (e) => e.stopPropagation());
+    }
 
-function logout() {
-  window.location.href = "/logout";
+    toggle() {
+        // Close other dropdowns
+        document.querySelectorAll('.dropdown.active').forEach(d => {
+            if (d !== this.dropdown) {
+                d.classList.remove('active');
+            }
+        });
+
+        this.dropdown.classList.toggle('active');
+    }
+
+    close() {
+        this.dropdown.classList.remove('active');
+    }
+
+    static init() {
+        // Initialize all dropdowns
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(d => new Dropdown(d));
+
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown.active').forEach(d => {
+                d.classList.remove('active');
+            });
+        });
+    }
 }
 
-document.querySelectorAll(".modal-close").forEach((element) => {
-  element.addEventListener("click", (e) => {
-    let elem = e.target;
-    while (elem.tagName !== "DIALOG") {
-      elem = elem.parentElement;
-    }
-    elem.close();
-  });
+// Initialize dropdowns when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    Dropdown.init();
 });

@@ -1,40 +1,29 @@
 <?php
+session_start();
 
-define('DEBUG', true);
+use App\Core\{View, Router};
+
 define('ROOT_PATH', realpath(__DIR__ . "/.."));
-define('APP_PATH', ROOT_PATH . "/app");
+define('APP_PATH', ROOT_PATH . "/App");
 
 spl_autoload_register(function ($class) {
-    $parts = explode('\\', $class);
+  if (!str_starts_with($class, 'App')) {
+    return;
+  }
 
-    if (empty($parts) || $parts[0] != 'App') {
-        return;
-    }
+  $path = str_replace('\\', '/', $class);
 
-    $path = array_slice($parts, 1, -1);
-    $className = $parts[array_key_last($parts)];
+  $path = ROOT_PATH . "/" . $path . ".php";
 
-    $includePath = APP_PATH . "/";
-    if (count($path) != 0) {
-        $includePath = $includePath . strtolower(implode('/', $path)) . "/";
-    }
-    $includePath = $includePath . $className . ".php";
-
-    if (is_file($includePath)) {
-        include_once $includePath;
-    }
+  if (is_readable($path)) {
+    require_once $path;
+  }
 });
 
 set_exception_handler(function ($e) {
-    App\View::render("errors/500");
-    error_log($e->getMessage());
-    if (DEBUG) {
-        echo $e->getMessage() . "<br>";
-        echo nl2br($e->getTraceAsString());
-    }
+  error_log($e->getMessage() . "\n" . $e->getTraceAsString());
+  View::redirect("/500.html");
 });
 
-session_start();
-
-$router = new App\Router();
+$router = new Router();
 $router->dispatch();

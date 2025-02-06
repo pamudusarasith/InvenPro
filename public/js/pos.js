@@ -1,20 +1,164 @@
-document.getElementById("availability").onclick = (e) => {
-  document.getElementById("branch-form-modal").showModal();
+//update-customer-details
+document.getElementById("edit-customer-profile").onclick = (e) => {
+  document.getElementById("customerProfile-modal").close();
+  const profileInfo = document.querySelector(".profile-info");
+  const name = profileInfo
+    .querySelector("p:nth-child(1)")
+    .textContent.split(":")[1]
+    .trim();
+  const email = profileInfo
+    .querySelector("p:nth-child(2)")
+    .textContent.split(":")[1]
+    .trim();
+  const phone = profileInfo
+    .querySelector("p:nth-child(3)")
+    .textContent.split(":")[1]
+    .trim();
+  const address = profileInfo
+    .querySelector("p:nth-child(4)")
+    .textContent.split(":")[1]
+    .trim();
+  const dob = new Date(
+    Date.parse(
+      profileInfo
+        .querySelector("p:nth-child(5)")
+        .textContent.split(":")[1]
+        .trim()
+    )
+  )
+    .toISOString()
+    .split("T")[0];
+  const gender = profileInfo
+    .querySelector("p:nth-child(6)")
+    .textContent.split(":")[1]
+    .trim();
+
+  document.getElementById("edit-customer-form-modal").showModal();
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("input[name='name']").value = name;
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("input[name='email']").value = email;
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("input[name='phone']").value = phone;
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("textarea[name='address']").value = address;
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("input[name='dob']").value = dob;
+  document
+    .getElementById("edit-customer-form")
+    .querySelector("select[name='gender']").value = gender;
 };
 
-document.getElementById("branch-form").onsubmit = async (e) => {
+document
+  .getElementById("edit-customer-form")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    fetch("/customer/update", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Customer updated successfully");
+          location.reload();
+        } else {
+          document.getElementById("error-msg").textContent = data.message;
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+
+document
+  .getElementById("add-phone-no-button")
+  .addEventListener("click", function (event) {
+    event.preventDefault();
+    const phone = event.target.parentNode.querySelector("input").value;
+    const formData = new FormData();
+    formData.append("phone", phone);
+    fetch("/customer/retrieve", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log(data);
+        } else {
+          console.log(data);
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  });
+
+//Item Return form
+document.getElementById("returns").onclick = (e) => {
+  document.getElementById("ItemReturn-form-modal").showModal();
+};
+
+document.getElementById("ItemReturn-form").onsubmit = async (e) => {
   e.preventDefault();
-  const branchTable = document.getElementById("branch-table");
-  branchTable.style.display = "block";
+  document.getElementById("ItemReturn-form-modal").close();
+  document.getElementById("Authorization-form-modal").showModal();
 };
-document.querySelector(".modal-close-btn").onclick = (e) => {
-  document.getElementById("branch-form-modal").close();
-  const branchTable = document.getElementById("branch-table");
-  branchTable.style.display = "none";
+
+//customer profile
+document.getElementById("customer-profile").onclick = (e) => {
+  document.getElementById("customerProfile-modal").showModal();
 };
+
+//customer profile
+document.getElementById("add-phone-no-button").onclick = (e) => {
+  document.getElementById("customerProfile-modal").showModal();
+};
+
+document
+  .querySelector(".btn-secondary.delete-customer")
+  .addEventListener("click", async () => {
+    const phoneNumber = document
+      .querySelector(".profile-info p:nth-child(3)")
+      .textContent.split(":")[1]
+      .trim();
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this customer?"
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(`/customer/delete`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phone: phoneNumber }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          alert("Customer deleted successfully!");
+          document.getElementById("customerProfile-modal").close();
+          window.location.reload();
+        } else {
+          alert("Failed to delete the customer.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred while deleting the customer.");
+      }
+    }
+  });
 
 //add customer form
-document.getElementById("add-customer").onclick = (e) => {
+document.getElementById("new-customer").onclick = (e) => {
   document.getElementById("customer-form-modal").showModal();
 };
 
@@ -133,6 +277,29 @@ document.querySelector("#prod-search input").onkeydown = async (e) => {
   }
 };
 
+document.addEventListener("DOMContentLoaded", async (e) => {
+  const response = await fetch(`/pos/search?q=`);
+  const data = await response.json();
+
+  const resultsContainer = document.querySelector(".items-results");
+  resultsContainer.innerHTML = "";
+
+  data.data.results.slice(0, 6).forEach((item) => {
+    const div = document.createElement("div");
+    div.classList.add("item-card");
+    div.innerHTML = `
+         <img id="item-img" src=${item.image} alt="">
+         <div class="item-details">
+              <p>${item.id}</p>
+              <h4><b>${item.name}</b></h4>
+         </div>`;
+    div.addEventListener("click", (e) => {
+      handleProductSelect(div, item);
+    });
+    resultsContainer.appendChild(div);
+  });
+});
+
 document.getElementById("item-form").onsubmit = (e) => {
   e.preventDefault();
   const tableContainer = document.getElementById("items-table");
@@ -178,3 +345,24 @@ document.getElementById("item-form").onsubmit = (e) => {
   }
   document.querySelector(".item-total-value").innerText = "Rs. " + total;
 };
+
+document.getElementById("add-customer").addEventListener("click", function () {
+  document.querySelector(".customer-details").style.display = "block";
+});
+
+document.getElementById("phone").addEventListener("input", function (e) {
+  let value = e.target.value;
+  if (!/^\d*$/.test(value)) {
+    document.getElementById("phone-error").style.display = "block";
+    document.getElementById("phone-error").textContent =
+      "Please enter numbers only";
+    e.target.value = value.replace(/\D/g, "");
+  } else {
+    document.getElementById("phone-error").style.display = "none";
+  }
+});
+
+function toggleDropdown(id) {
+  let content = document.querySelector(`#${id} .dd-content`);
+  content.classList.toggle("show");
+}
