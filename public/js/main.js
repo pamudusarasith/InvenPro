@@ -12,9 +12,6 @@ class Dropdown {
             e.stopPropagation();
             this.toggle();
         });
-
-        // Prevent menu clicks from closing dropdown
-        this.menu?.addEventListener('click', (e) => e.stopPropagation());
     }
 
     toggle() {

@@ -20,6 +20,7 @@ return [
     '/reports' => 'App\Controllers\ReportController::index',
     '/employees' => 'App\Controllers\EmployeeController::index',
     '/pos' => 'App\Controllers\POSController::index',
+    '/api/pos/search' => 'App\Controllers\POSController::searchProducts',
   ],
 
   'POST' => [
