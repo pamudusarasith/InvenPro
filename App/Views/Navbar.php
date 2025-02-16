@@ -42,8 +42,8 @@
             <div id="profile" class="dropdown">
                 <button class="dropdown-trigger profile-btn">
                     <div class="profile-info">
-                        <p class="profile-name"><?= $_SESSION["display_name"] ?></p>
-                        <p class="profile-role"><?= $_SESSION["role_name"] ?></p>
+                        <p class="profile-name"><?= $_SESSION['user']["display_name"] ?></p>
+                        <p class="profile-role"><?= $_SESSION['user']["role_name"] ?></p>
                     </div>
                     <span class="icon">expand_more</span>
                 </button>

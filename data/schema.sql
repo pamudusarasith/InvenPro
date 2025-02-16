@@ -235,7 +235,6 @@ CREATE TABLE loyalty_transaction (
 
 CREATE TABLE sale (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    sale_number VARCHAR(50) NOT NULL UNIQUE,
     branch_id INT NOT NULL,
     customer_id INT,
     user_id INT NOT NULL,

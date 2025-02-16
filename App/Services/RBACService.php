@@ -29,7 +29,7 @@ class RBACService
   public static function hasPermission(string $permissionName): bool
   {
     return true;
-    $roleId = $_SESSION['role_id'] ?? -1;
+    $roleId = $_SESSION['user']['role_id'] ?? -1;
     return self::getModel()->checkRolePermission($roleId, $permissionName);
   }
 
@@ -39,7 +39,7 @@ class RBACService
    */
   public static function requireAuthentication()
   {
-    if (!isset($_SESSION['id']) || empty($_SESSION['id'])) {
+    if (!isset($_SESSION['user']['id']) || empty($_SESSION['user']['id'])) {
       View::redirect('/');
     }
   }

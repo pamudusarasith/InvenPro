@@ -2,23 +2,23 @@
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Core\{Controller, View};
 use App\Services\RBACService;
 
-class DashboardController
+class DashboardController extends Controller
 {
     public function index()
     {
         RBACService::requireAuthentication();
 
-        if ($_SESSION['role_name'] === 'System Admin') {
+        if ($_SESSION['user']['role_name'] === 'System Admin') {
             View::renderTemplate(
                 'AdminDashboard',
                 [
                     'title' => 'Dashboard'
                 ]
             );
-        } elseif ($_SESSION['role_name'] === 'Inventory Manager') {
+        } elseif ($_SESSION['user']['role_name'] === 'Inventory Manager') {
             View::render('Template', [
                 'title' => 'Invenpro',
                 'view' => 'InventoryManagerDashboard',
@@ -26,7 +26,7 @@ class DashboardController
                     'dashboard'
                 ],
             ]);
-        } elseif ($_SESSION['role_name'] === 'Branch Manager') {
+        } elseif ($_SESSION['user']['role_name'] === 'Branch Manager') {
             View::render('Template', [
                 'title' => 'Invenpro',
                 'view' => 'BranchManagerDashboard',

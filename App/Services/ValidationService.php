@@ -30,6 +30,23 @@ class ValidationService
     }
   }
 
+  public function validateCheckout(array $data): bool
+  {
+    $this->error = '';
+
+    if (!array_key_exists('items', $data) || empty($data['items'])) {
+      $this->error = 'Items are required';
+    } elseif (!is_array($data['items'])) {
+      $this->error = 'Items must be an array';
+    } elseif (count($data['items']) === 0) {
+      $this->error = 'Items cannot be empty';
+    } elseif (!array_key_exists('payment_method', $data) || empty($data['payment_method'])) {
+      $this->error = 'Payment method is required';
+    }
+
+    return $this->error === '';
+  }
+
   /**
    * Get validation error
    *

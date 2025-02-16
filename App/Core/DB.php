@@ -56,6 +56,11 @@ class DB
     }
   }
 
+  public function lastInsertId()
+  {
+    return $this->connection->lastInsertId();
+  }
+
   public function beginTransaction()
   {
     return $this->connection->beginTransaction();

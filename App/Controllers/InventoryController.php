@@ -2,9 +2,9 @@
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Core\{Controller, View};
 
-class InventoryController
+class InventoryController extends Controller
 {
   public function index()
   {
