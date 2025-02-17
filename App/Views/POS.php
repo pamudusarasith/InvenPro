@@ -293,7 +293,7 @@ use App\Services\RBACService;
                 <div class="product-info">
                     <div class="product-name">${product.product_name}</div>
                     <div class="product-code">${product.product_code}</div>
-                    <div class="product-price">Rs. ${product.batch.unit_price}</div>
+                    <div class="product-price">Rs. ${product.price}</div>
                 </div>
             `;
 
@@ -318,11 +318,11 @@ use App\Services\RBACService;
         renderSearchResults(products) {
             document.querySelector(".products-grid").innerHTML = "";
             products.forEach((product) => {
-                product.batches.forEach((batch) => {
+                product.prices.forEach((price) => {
                     const productCard = this.createProductCard({
-                        key: `${product.id}/${batch.id}`,
+                        key: `${product.id}/${price}`,
                         ...product,
-                        batch,
+                        price,
                     });
                     document.querySelector(".products-grid").appendChild(productCard);
                 });
@@ -360,13 +360,13 @@ use App\Services\RBACService;
             cartItem.innerHTML = `
                 <div class="cart-item-info">
                     <div class="cart-item-name">${product.product_name}</div>
-                    <div class="cart-item-price">Rs. ${product.batch.unit_price}</div>
+                    <div class="cart-item-price">Rs. ${product.price}</div>
                 </div>
-                <div class="cart-item-quantity">Qty: ${product.batch.quantity.toFixed(
+                <div class="cart-item-quantity">Qty: ${product.quantity.toFixed(
                     3
                 )}</div>
                 <div class="cart-item-subtotal">$${(
-                    product.batch.unit_price * product.batch.quantity
+                    product.price * product.quantity
                 ).toFixed(2)}</div>
             `;
 
@@ -389,9 +389,9 @@ use App\Services\RBACService;
 
         addToCart(product) {
             if (this.cart.has(product.key)) {
-                this.cart.get(product.key).batch.quantity++;
+                this.cart.get(product.key).quantity++;
             } else {
-                product.batch.quantity = 1;
+                product.quantity = 1;
                 this.cart.set(product.key, product);
             }
 
@@ -411,7 +411,7 @@ use App\Services\RBACService;
 
             this.cartSubtotal = 0;
             this.cart.forEach((product, _) => {
-                this.cartSubtotal += product.batch.unit_price * product.batch.quantity;
+                this.cartSubtotal += product.price * product.quantity;
             });
 
             document.querySelector(
@@ -438,12 +438,11 @@ use App\Services\RBACService;
         openCartItemEdit(product) {
             const form = document.getElementById("cartItemEditForm");
 
-            form.elements["quantity"].value = product.batch.quantity || 1;
+            form.elements["quantity"].value = product.quantity || 1;
 
             form.onsubmit = (e) => {
                 e.preventDefault();
-                const quantity = parseFloat(form.elements["quantity"].value);
-                product.batch.quantity = quantity;
+                product.quantity = parseFloat(form.elements["quantity"].value);
                 this.cart.set(product.key, product);
                 this.updateCart();
                 this.closeCartItemEdit();
@@ -504,8 +503,8 @@ use App\Services\RBACService;
                 this.cart.values().map((product) => {
                     return {
                         product_id: product.id,
-                        batch_id: product.batch.id,
-                        quantity: product.batch.quantity,
+                        price: product.price,
+                        quantity: product.quantity,
                     };
                 })
             );

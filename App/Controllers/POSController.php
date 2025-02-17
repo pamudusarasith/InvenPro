@@ -19,7 +19,8 @@ class POSController extends Controller
     if (empty($query)) {
       self::sendJSON(["success" => false, "message" => "Query cannot be empty"]);
     }
-    $products = $productModel->searchPOSProduct($_GET['q']);
+
+    $products = $productModel->searchPOSProducts($query);
 
     self::sendJSON([
       "success" => true,
@@ -31,7 +32,10 @@ class POSController extends Controller
   {
     $result = [];
     foreach ($items as $item) {
-      $batches = $productModel->getSamePriceBatches($item['batch_id']);
+      $batches = $productModel->getSamePriceBatches(
+        $item['product_id'],
+        number_format($item['price'], 2, '.', '')
+      );
       while ($item['quantity'] > 0) {
         $batch = array_shift($batches);
         if ($batch === null) {
@@ -75,6 +79,7 @@ class POSController extends Controller
     $productModel = new ProductModel();
 
     $data['items'] = $this->getCheckoutItems($data['items'], $productModel);
+
     $subtotal = array_reduce($data['items'], function ($carry, $item) {
       return $carry + $item['quantity'] * $item['unit_price'];
     }, 0);

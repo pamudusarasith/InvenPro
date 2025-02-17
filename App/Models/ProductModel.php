@@ -23,19 +23,7 @@ class ProductModel extends Model
     return $product;
   }
 
-  public function getBatchById(int $id): array
-  {
-    $sql = '
-      SELECT
-        *
-      FROM product_batch
-      WHERE id = ?
-    ';
-    $stmt = self::$db->query($sql, [$id]);
-    return $stmt->fetch();
-  }
-
-  public function getSamePriceBatches(int $batchId): array
+  public function getSamePriceBatches(int $productId, string $price): array
   {
     $sql = '
       SELECT
@@ -43,11 +31,11 @@ class ProductModel extends Model
       FROM product_batch
       WHERE deleted_at IS NULL
         AND branch_id = ?
-        AND product_id = (SELECT product_id FROM product_batch WHERE id = ?)
-        AND unit_price = (SELECT unit_price FROM product_batch WHERE id = ?)
+        AND product_id = ?
+        AND unit_price = ?
       ORDER BY expiry_date ASC
     ';
-    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $batchId, $batchId]);
+    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $productId, $price]);
     return $stmt->fetchAll();
   }
 
@@ -90,29 +78,31 @@ class ProductModel extends Model
     return array_values($products);
   }
 
-  public function searchPOSProduct(string $query): array
+  public function searchPOSProducts(string $query): array
   {
-    $products = $this->searchProduct($query);
-    $products = self::filterFields(
-      $products,
-      ['id', 'product_code', 'product_name', 'unit_symbol', 'batches']
-    );
+    $sql = '
+      SELECT
+        p.id,
+        p.product_code,
+        p.product_name,
+        GROUP_CONCAT(DISTINCT pb.unit_price) AS prices
+      FROM product p
+      INNER JOIN product_batch pb ON p.id = pb.product_id
+      WHERE p.deleted_at IS NULL
+        AND pb.deleted_at IS NULL
+        AND pb.branch_id = ?
+        AND (
+          p.product_name LIKE ? OR
+          p.product_code LIKE ?
+        )
+      GROUP BY p.id
+    ';
+
+    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], "%$query%", "%$query%"]);
+    $products = $stmt->fetchAll();
 
     foreach ($products as &$product) {
-      $product['batches'] = self::filterFields(
-        $product['batches'],
-        ['id', 'batch_code', 'unit_price']
-      );
-
-      $prices = [];
-      foreach ($product['batches'] as $i => $batch) {
-        if (isset($prices[$batch['unit_price']])) {
-          unset($product['batches'][$i]);
-        } else {
-          $prices[$batch['unit_price']] = true;
-        }
-      }
-      $product['batches'] = array_values($product['batches']);
+      $product['prices'] = array_map('floatval', explode(',', $product['prices']));
     }
 
     return $products;
