@@ -29,5 +29,6 @@ return [
     '/users/{id}/update' => 'App\Controllers\UserController::updateUser',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
+    '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
   ],
 ];

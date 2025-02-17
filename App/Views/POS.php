@@ -5,7 +5,7 @@ use App\Services\RBACService;
 
 ?>
 
-<div class="pos-body">
+<div class="body pos">
     <?php View::render("Navbar"); ?>
 
     <div class="main">
@@ -38,10 +38,10 @@ use App\Services\RBACService;
                                     <span class="icon">remove_shopping_cart</span>
                                     Clear Cart
                                 </button>
-                                <?php if (RBACService::hasPermission('add_customer') && $_SESSION['id'] != $user['id']): ?>
+                                <?php if (RBACService::hasPermission('add_customer') && $_SESSION['user']['id'] != $user['id']): ?>
                                     <button class="dropdown-item" onclick="deleteUser(<?= $user['id'] ?>)">
                                         <span class="icon">person_add</span>
-                                        Add New Customer
+                                        New Customer
                                     </button>
                                 <?php endif; ?>
                                 <button class="dropdown-item" onclick="showCustomerSearch()">
@@ -54,8 +54,12 @@ use App\Services\RBACService;
                     <div class="cart-items-list"></div>
                 </div>
 
-                <div class="cart-totals card glass">
-                    <div class="cart-row">
+                <div class="cart-summary card glass">
+                    <div class="summary-item">
+                        <span>Customer</span>
+                        <span>John Doe</span>
+                    </div>
+                    <div class="summary-item">
                         <span>Subtotal</span>
                         <span class="cart-subtotal">Rs. 0.00</span>
                     </div>
@@ -82,15 +86,9 @@ use App\Services\RBACService;
         </div>
         <form id="cartItemEditForm" class="modal-body">
             <div class="form-grid">
-                <div class="form-field">
+                <div class="form-field span-2">
                     <label for="quantity">Quantity</label>
                     <input type="number" id="quantity" name="quantity" min="0" step="0.001" required>
-                </div>
-                <div class="form-field">
-                    <label for="batch">Batch</label>
-                    <select id="batch" name="batch_id" required>
-                        <!-- Batches will be populated dynamically -->
-                    </select>
                 </div>
             </div>
             <div class="form-actions">
@@ -185,10 +183,6 @@ use App\Services\RBACService;
                         <option value="card">Card</option>
                     </select>
                 </div>
-                <div class="form-field span-2" id="paymentReference" style="display: none;">
-                    <label for="reference">Payment Reference</label>
-                    <input type="text" id="reference" name="payment_reference">
-                </div>
                 <div class="form-field span-2">
                     <label for="notes">Notes</label>
                     <textarea id="notes" name="notes" rows="3"></textarea>
@@ -231,6 +225,10 @@ use App\Services\RBACService;
                 </div> -->
             </div>
             <div class="checkout-summary">
+                <div class="summary-row">
+                    <span>Customer</span>
+                    <span>John Doe</span>
+                </div>
                 <div class="summary-row">
                     <span>Subtotal</span>
                     <span class="checkout-subtotal">Rs. 0.00</span>
@@ -280,18 +278,24 @@ use App\Services\RBACService;
             document
                 .getElementById("checkout-btn")
                 .addEventListener("click", () => this.openCheckout());
+
+            const cartData = sessionStorage.getItem("cart");
+            if (cartData) {
+                this.cart = new Map(JSON.parse(cartData));
+                this.updateCart();
+            }
         }
 
         createProductCard(product) {
             const productCard = document.createElement("div");
             productCard.classList.add("product-card", "card", "glass");
             productCard.innerHTML = `
-        <div class="product-info">
-            <div class="product-name">${product.product_name}</div>
-            <div class="product-code">${product.product_code}</div>
-            <div class="product-price">Rs. ${product.batches[0].unit_price}</div>
-        </div>
-    `;
+                <div class="product-info">
+                    <div class="product-name">${product.product_name}</div>
+                    <div class="product-code">${product.product_code}</div>
+                    <div class="product-price">Rs. ${product.price}</div>
+                </div>
+            `;
 
             const productActions = document.createElement("div");
             productActions.classList.add("product-actions");
@@ -314,8 +318,14 @@ use App\Services\RBACService;
         renderSearchResults(products) {
             document.querySelector(".products-grid").innerHTML = "";
             products.forEach((product) => {
-                const productCard = this.createProductCard(product);
-                document.querySelector(".products-grid").appendChild(productCard);
+                product.prices.forEach((price) => {
+                    const productCard = this.createProductCard({
+                        key: `${product.id}/${price}`,
+                        ...product,
+                        price,
+                    });
+                    document.querySelector(".products-grid").appendChild(productCard);
+                });
             });
         }
 
@@ -327,9 +337,18 @@ use App\Services\RBACService;
                     return;
                 }
                 const response = await fetch(`/api/pos/search?q=${query}`);
-                const products = await response.json();
+                const data = await response.json();
 
-                this.renderSearchResults(products);
+                if (document.getElementById("productSearch").value !== query) {
+                    return;
+                }
+
+                if (data.success === false) {
+                    alert(data.message);
+                    return;
+                }
+
+                this.renderSearchResults(data.data);
             } catch (error) {
                 console.error(error);
             }
@@ -339,19 +358,17 @@ use App\Services\RBACService;
             const cartItem = document.createElement("div");
             cartItem.classList.add("cart-item");
             cartItem.innerHTML = `
-        <div class="cart-item-info">
-            <div class="cart-item-name">${product.product_name}</div>
-            <div class="cart-item-price">Rs. ${
-              product.batches[0].unit_price
-            }</div>
-        </div>
-        <div class="cart-item-quantity">Qty: ${product.batches[0].quantity.toFixed(
-          3
-        )}</div>
-        <div class="cart-item-subtotal">$${(
-          product.batches[0].unit_price * product.batches[0].quantity
-        ).toFixed(2)}</div>
-    `;
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${product.product_name}</div>
+                    <div class="cart-item-price">Rs. ${product.price}</div>
+                </div>
+                <div class="cart-item-quantity">Qty: ${product.quantity.toFixed(
+                    3
+                )}</div>
+                <div class="cart-item-subtotal">$${(
+                    product.price * product.quantity
+                ).toFixed(2)}</div>
+            `;
 
             const editButton = document.createElement("button");
             editButton.classList.add("icon-btn");
@@ -363,7 +380,7 @@ use App\Services\RBACService;
             deleteButton.classList.add("icon-btn", "danger");
             deleteButton.innerHTML = `<span class="icon">delete</span>`;
             deleteButton.addEventListener("click", () =>
-                this.removeFromCart(product.id)
+                this.removeFromCart(product.key)
             );
             cartItem.appendChild(deleteButton);
 
@@ -371,26 +388,30 @@ use App\Services\RBACService;
         }
 
         addToCart(product) {
-            if (this.cart.has(product.id)) {
-                this.cart.get(product.id).batches[0].quantity++;
+            if (this.cart.has(product.key)) {
+                this.cart.get(product.key).quantity++;
             } else {
-                product.batches[0].quantity = 1;
-                this.cart.set(product.id, product);
+                product.quantity = 1;
+                this.cart.set(product.key, product);
             }
 
             this.updateCart();
         }
 
-        removeFromCart(id) {
-            this.cart.delete(id);
+        removeFromCart(key) {
+            this.cart.delete(key);
             this.updateCart();
         }
 
         updateCart() {
+            sessionStorage.setItem(
+                "cart",
+                JSON.stringify(Array.from(this.cart.entries()))
+            );
+
             this.cartSubtotal = 0;
             this.cart.forEach((product, _) => {
-                this.cartSubtotal +=
-                    product.batches[0].unit_price * product.batches[0].quantity;
+                this.cartSubtotal += product.price * product.quantity;
             });
 
             document.querySelector(
@@ -417,22 +438,12 @@ use App\Services\RBACService;
         openCartItemEdit(product) {
             const form = document.getElementById("cartItemEditForm");
 
-            form.elements["quantity"].value = product.batches[0].quantity || 1;
-            const batchSelect = form.elements["batch"];
-            batchSelect.innerHTML = "";
-            for (const batch of product.batches) {
-                console.log(batch);
-                const option = document.createElement("option");
-                option.value = batch.id;
-                option.text = batch.batch_code;
-                batchSelect.appendChild(option);
-            }
+            form.elements["quantity"].value = product.quantity || 1;
 
             form.onsubmit = (e) => {
                 e.preventDefault();
-                const quantity = parseFloat(form.elements["quantity"].value);
-                product.batches[0].quantity = quantity;
-                this.cart.set(product.id, product);
+                product.quantity = parseFloat(form.elements["quantity"].value);
+                this.cart.set(product.key, product);
                 this.updateCart();
                 this.closeCartItemEdit();
             };
@@ -485,9 +496,48 @@ use App\Services\RBACService;
             document.getElementById("checkoutForm").reset();
             document.getElementById("checkoutDialog").close();
         }
+
+        async checkout() {
+            const form = document.getElementById("checkoutForm");
+            const items = Array.from(
+                this.cart.values().map((product) => {
+                    return {
+                        product_id: product.id,
+                        price: product.price,
+                        quantity: product.quantity,
+                    };
+                })
+            );
+            const data = {
+                customer_id: this.customer ? this.customer.id : null,
+                items,
+                payment_method: form.elements["payment_method"].value,
+                notes: form.elements["notes"].value,
+                discounts: [],
+            };
+
+            const response = await fetch("/api/pos/checkout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.clearCart();
+                this.closeCheckout();
+                openPopupWithMessage(result.message, "success");
+            } else {
+                this.closeCheckout();
+                openPopupWithMessage(result.message, "error");
+            }
+        }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
         const pos = new POS();
         pos.init();
     });
