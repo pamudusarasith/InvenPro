@@ -6,6 +6,13 @@ use App\Core\Model;
 
 class ProductModel extends Model
 {
+  public function getMeasuringUnits(): array
+  {
+    $sql = 'SELECT * FROM unit';
+    $stmt = self::$db->query($sql);
+    return $stmt->fetchAll();
+  }
+
   public function getProductById(int $id): array
   {
     $sql = '
@@ -106,5 +113,51 @@ class ProductModel extends Model
     }
 
     return $products;
+  }
+
+  public function getProductsByCategoryId(int $categoryId): array
+  {
+    $sql = '
+      SELECT
+        p.id,
+        p.product_code,
+        p.product_name,
+        SUM(pb.current_quantity) AS quantity,
+        IF(COUNT(DISTINCT pb.unit_price) > 1, "Multiple", pb.unit_price) AS price,
+        (CASE
+          WHEN SUM(pb.current_quantity) > bp.reorder_level THEN "In Stock"
+          WHEN SUM(pb.current_quantity) > 0 THEN "Low Stock"
+          ELSE "Out of Stock"
+        END) AS status
+      FROM product p
+      INNER JOIN product_category pc ON p.id = pc.product_id
+      INNER JOIN category c ON pc.category_id = c.id
+      INNER JOIN branch_product bp ON p.id = bp.product_id
+      INNER JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+      WHERE p.deleted_at IS NULL
+        AND bp.branch_id = ?
+        AND (pc.category_id = ? OR c.parent_id = ?)
+      GROUP BY p.id
+      LIMIT 10
+    ';
+    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $categoryId, $categoryId]);
+    return $stmt->fetchAll();
+  }
+
+  public function getCountByCategoryId(int $categoryId): int
+  {
+    $sql = '
+      SELECT
+        COUNT(DISTINCT p.id) AS count
+      FROM product p
+      INNER JOIN product_category pc ON p.id = pc.product_id
+      INNER JOIN category c ON pc.category_id = c.id
+      INNER JOIN branch_product bp ON p.id = bp.product_id
+      WHERE p.deleted_at IS NULL
+        AND bp.branch_id = ?
+        AND (pc.category_id = ? OR c.parent_id = ?)
+    ';
+    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $categoryId, $categoryId]);
+    return $stmt->fetch()['count'];
   }
 }
