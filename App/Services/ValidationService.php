@@ -71,6 +71,56 @@ class ValidationService
     return $this->error === '';
   }
 
+  public function validateCheckout(array $data): bool
+  {
+    $this->error = '';
+
+    if (!array_key_exists('items', $data) || empty($data['items'])) {
+      $this->error = 'Items are required';
+    } elseif (!array_key_exists('payment_method', $data) || empty($data['payment_method'])) {
+      $this->error = 'Payment method is required';
+    }
+
+    foreach ($data['items'] as $item) {
+      if (!array_key_exists('product_id', $item) || empty($item['product_id'])) {
+        $this->error = 'Product ID is required';
+        break;
+      } elseif (!array_key_exists('quantity', $item) || empty($item['quantity'])) {
+        $this->error = 'Quantity is required';
+        break;
+      } elseif (!array_key_exists('price', $item) || empty($item['price'])) {
+        $this->error = 'Price is required';
+        break;
+      } elseif ($item['quantity'] <= 0) {
+        $this->error = 'Quantity must be greater than 0';
+        break;
+      } elseif ($item['price'] <= 0) {
+        $this->error = 'Price must be greater than 0';
+        break;
+      }
+    }
+
+    return $this->error === '';
+  }
+
+  public function validateCreateCustomer(array $data): bool
+  {
+    $this->error = '';
+
+    $this->validateEmail($data);
+    if (!array_key_exists('first_name', $data) || empty($data['first_name'])) {
+      $this->error = 'First name is required';
+    } elseif (!array_key_exists('last_name', $data) || empty($data['last_name'])) {
+      $this->error = 'Last name is required';
+    } elseif (!array_key_exists('phone', $data) || empty($data['phone'])) {
+      $this->error = 'Phone is required';
+    } elseif (!array_key_exists('address', $data) || empty($data['address'])) {
+      $this->error = 'Address is required';
+    }
+
+    return $this->error === '';
+  }
+
   public function validateEmail(array $data): void
   {
     if (!array_key_exists('email', $data) || empty($data['email'])) {
