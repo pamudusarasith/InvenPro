@@ -21,6 +21,36 @@ class ValidationService
     return $this->error === '';
   }
 
+  public function validateCreateUser(array $data): bool
+  {
+    $this->error = '';
+
+    $this->validateEmail($data);
+    if (!array_key_exists('role_id', $data) || empty($data['role_id'])) {
+      $this->error = 'Role is required';
+    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
+      $this->error = 'Branch is required';
+    }
+
+    return $this->error === '';
+  }
+
+  public function validateUpdateUser(array $data): bool
+  {
+    $this->error = '';
+
+    $this->validateEmail($data);
+    if (!array_key_exists('role_id', $data) || empty($data['role_id'])) {
+      $this->error = 'Role is required';
+    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
+      $this->error = 'Branch is required';
+    } elseif (!array_key_exists('status', $data) || empty($data['status'])) {
+      $this->error = 'Status is required';
+    }
+
+    return $this->error === '';
+  }
+
   public function validateEmail(array $data): void
   {
     if (!array_key_exists('email', $data) || empty($data['email'])) {
@@ -28,23 +58,6 @@ class ValidationService
     } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
       $this->error = 'Invalid email format';
     }
-  }
-
-  public function validateCheckout(array $data): bool
-  {
-    $this->error = '';
-
-    if (!array_key_exists('items', $data) || empty($data['items'])) {
-      $this->error = 'Items are required';
-    } elseif (!is_array($data['items'])) {
-      $this->error = 'Items must be an array';
-    } elseif (count($data['items']) === 0) {
-      $this->error = 'Items cannot be empty';
-    } elseif (!array_key_exists('payment_method', $data) || empty($data['payment_method'])) {
-      $this->error = 'Payment method is required';
-    }
-
-    return $this->error === '';
   }
 
   /**
