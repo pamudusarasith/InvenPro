@@ -51,6 +51,26 @@ class ValidationService
     return $this->error === '';
   }
 
+  public function validateCreateSupplier(array $data): bool
+  {
+    $this->error = '';
+
+    $this->validateEmail($data);
+    if (!array_key_exists('supplier_name', $data) || empty($data['supplier_name'])) {
+      $this->error = 'Supplier name is required';
+    } elseif (!array_key_exists('contact_person', $data) || empty($data['contact_person'])) {
+      $this->error = 'Contact person is required';
+    } elseif (!array_key_exists('phone', $data) || empty($data['phone'])) {
+      $this->error = 'Phone is required';
+    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
+      $this->error = 'Branch is required';
+    } elseif (!array_key_exists('address', $data) || empty($data['address'])) {
+      $this->error = 'Address is required';
+    }
+
+    return $this->error === '';
+  }
+
   public function validateEmail(array $data): void
   {
     if (!array_key_exists('email', $data) || empty($data['email'])) {
