@@ -11,6 +11,7 @@ return [
     '/roles' => 'App\Controllers\RoleController::index',
     '/categories' => 'App\Controllers\CategoryController::index',
     '/inventory' => 'App\Controllers\InventoryController::index',
+    '/products/{id}' => 'App\Controllers\ProductsController::details',
     '/customers' => 'App\Controllers\CustomerController::index',
     '/suppliers' => 'App\Controllers\SupplierController::index',
     '/suppliers/{id}' => 'App\Controllers\SupplierController::details',
