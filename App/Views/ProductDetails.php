@@ -59,12 +59,10 @@ use App\Services\RBACService;
                   <span class="icon">add_box</span>
                   Add Batch
                 </button>
-                <?php if (!$product['deleted_at']): ?>
-                  <button class="dropdown-item danger" onclick="deleteProduct(<?= $product['id'] ?>)">
-                    <span class="icon">delete</span>
-                    Delete Product
-                  </button>
-                <?php endif; ?>
+                <button class="dropdown-item danger" onclick="deleteProduct(<?= $product['id'] ?>)">
+                  <span class="icon">delete</span>
+                  Delete Product
+                </button>
               </div>
             </div>
           <?php endif; ?>
@@ -112,7 +110,7 @@ use App\Services\RBACService;
       <button class="tab-btn" onclick="switchTab('history')">History</button>
     </div>
 
-    <form id="details-form" method="POST" action="/products/<?= $product['id'] ?>/update" enctype="multipart/form-data">
+    <form id="details-form" method="POST" action="/products/<?= $product['id'] ?>/update">
       <div id="overview" class="tab-content active">
         <div class="card">
           <h3>Product Information</h3>
@@ -147,6 +145,37 @@ use App\Services\RBACService;
             <div class="form-field span-2">
               <label for="description">Description</label>
               <textarea id="description" name="description" rows="3" disabled><?= htmlspecialchars($product['description']) ?></textarea>
+            </div>
+            <div class="form-field span-2">
+              <label for="product-categories">Categories</label>
+              <div id="product-categories" class="search-bar" style="display: none;">
+                <span class="icon">search</span>
+                <input type="text" placeholder="Search Categories..." oninput="searchCategories(event)">
+                <div class="search-results"></div>
+              </div>
+            </div>
+            <div class="form-field span-2 chip-container">
+              <?php foreach ($product['categories'] as $category): ?>
+                <div class="chip">
+                  <?= htmlspecialchars($category['category_name']) ?>
+                  <input type="hidden" name="categories[]" value="<?= $category['id'] ?>">
+                  <button type="button" class="chip-delete" title="Remove Category" style="display: none;">
+                    <span class="icon">close</span>
+                  </button>
+                </div>
+              <?php endforeach; ?>
+            </div>
+            <div class="form-field">
+              <label for="reorder-level">Reorder Level</label>
+              <input type="number" id="reorder-level" name="reorder_level"
+                value="<?= $product['reorder_level'] ?>"
+                disabled>
+            </div>
+            <div class="form-field">
+              <label for="reorder-quantity">Reorder Quantity</label>
+              <input type="number" id="reorder-quantity" name="reorder_quantity"
+                value="<?= $product['reorder_quantity'] ?>"
+                disabled>
             </div>
           </div>
         </div>
@@ -276,6 +305,15 @@ use App\Services\RBACService;
       input.disabled = false;
     });
 
+    document.getElementById('product-categories').style.display = 'flex';
+
+    document.querySelectorAll('.chip-delete').forEach(btn => {
+      btn.style.display = 'inline-flex';
+      btn.onclick = function() {
+        btn.parentElement.remove();
+      };
+    });
+
     // Scroll to form
     document.querySelector('.tab-content.active').scrollIntoView({
       behavior: 'smooth'
@@ -293,5 +331,79 @@ use App\Services\RBACService;
       return;
     }
     document.getElementById('details-form').submit();
+  }
+
+  function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+      return;
+    }
+    window.location.href = `/products/${productId}/delete`;
+  }
+
+  function createCategoryChip(category) {
+    const chipContainer = document.querySelector(
+      "#details-form .chip-container"
+    );
+    const chip = document.createElement("div");
+    chip.classList.add("chip");
+    chip.innerHTML = category.category_name;
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "categories[]";
+    input.value = category.id;
+    chip.appendChild(input);
+
+    const chipDelete = document.createElement("button");
+    chipDelete.type = "button";
+    chipDelete.classList.add("chip-delete");
+    chipDelete.innerHTML = `<span class="icon">close</span>`;
+    chipDelete.addEventListener("click", () => {
+      chip.remove();
+    });
+    chip.appendChild(chipDelete);
+
+    chipContainer.appendChild(chip);
+  }
+
+  function renderCategorySearchResults(results) {
+    const searchResults = document.querySelector(
+      "#details-form #product-categories .search-results"
+    );
+    searchResults.innerHTML = "";
+
+    results.forEach((category) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.classList.add("search-result");
+      button.innerHTML = `<span>${category.category_name}</span>`;
+      button.addEventListener("click", () => {
+        createCategoryChip(category);
+        searchResults.innerHTML = "";
+        document.querySelector("#details-form #product-categories input").value =
+          "";
+      });
+
+      searchResults.appendChild(button);
+    });
+  }
+
+  async function searchCategories(e) {
+    const query = e.target.value;
+
+    if (!query) {
+      renderCategorySearchResults([]);
+      return;
+    }
+
+    const res = await fetch(`/api/category/search?q=${query}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      openPopupWithMessage(data.message);
+      return;
+    }
+
+    renderCategorySearchResults(data.data);
   }
 </script>

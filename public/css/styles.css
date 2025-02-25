@@ -648,6 +648,8 @@ body {
 }
 
 .search-results {
+  display: flex;
+  flex-direction: column;
   position: absolute;
   top: calc(100% + 0.5rem);
   left: 0;
@@ -664,6 +666,8 @@ body {
   padding: 1rem;
   cursor: pointer;
   transition: background 0.2s;
+  border: 0;
+  text-align: left;
 }
 
 .search-result:hover {
@@ -1750,7 +1754,7 @@ dialog::backdrop {
   background: var(--surface-white);
   box-shadow: var(--shadow-lg);
   max-width: 360px;
-  z-index: 1000;
+  z-index: 9999;
   transition: right 0.3s ease-in-out;
 }
 

@@ -12,6 +12,7 @@ return [
     '/categories' => 'App\Controllers\CategoryController::index',
     '/inventory' => 'App\Controllers\InventoryController::index',
     '/products/{id}' => 'App\Controllers\ProductsController::details',
+    '/products/{id}/delete' => 'App\Controllers\ProductsController::deleteProduct',
     '/customers' => 'App\Controllers\CustomerController::index',
     '/suppliers' => 'App\Controllers\SupplierController::index',
     '/suppliers/{id}' => 'App\Controllers\SupplierController::details',
@@ -22,6 +23,7 @@ return [
     '/employees' => 'App\Controllers\EmployeeController::index',
     '/pos' => 'App\Controllers\POSController::index',
     '/api/pos/search' => 'App\Controllers\POSController::searchProducts',
+    '/api/category/search' => 'App\Controllers\CategoryController::search',
   ],
 
   'POST' => [
@@ -30,6 +32,8 @@ return [
     '/users/{id}/update' => 'App\Controllers\UserController::updateUser',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
+    '/products/new' => 'App\Controllers\ProductsController::createProduct',
+    '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
   ],
 ];

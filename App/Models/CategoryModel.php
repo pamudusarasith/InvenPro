@@ -19,4 +19,18 @@ class CategoryModel extends Model
     $stmt = self::$db->query($sql);
     return $stmt->fetchAll();
   }
+
+  public function search(string $query): array
+  {
+    $sql = '
+      SELECT
+        id,
+        category_name,
+        description
+      FROM category
+      WHERE deleted_at IS NULL AND category_name LIKE :query
+    ';
+    $stmt = self::$db->query($sql, ['query' => "%$query%"]);
+    return $stmt->fetchAll();
+  }
 }

@@ -69,8 +69,8 @@ use App\Services\RBACService; ?>
                                         <tr data-id="<?= $product['id'] ?>">
                                             <td><?php echo $product['product_code']; ?></td>
                                             <td><?php echo $product['product_name']; ?></td>
-                                            <td><?php echo $product['quantity']; ?></td>
-                                            <td><?php echo $product['price']; ?></td>
+                                            <td><?php echo $product['quantity'] ?? "0"; ?></td>
+                                            <td><?php echo $product['price'] ?? "N/A"; ?></td>
                                             <td>
                                                 <span class="badge <?php echo $product['status'] === 'In Stock' ? 'success' : ($product['status'] === 'Low Stock' ? 'warning' : 'danger'); ?>">
                                                     <?php echo $product['status']; ?>
@@ -172,50 +172,26 @@ use App\Services\RBACService; ?>
                     </div>
                     <div class="form-field">
                         <label for="product-unit">Unit *</label>
-                        <input type="text" id="product-unit" name="unit" required>
+                        <select id="product-unit" name="unit_id" required>
+                            <option value="">Select Unit</option>
+                            <?php foreach ($units as $unit): ?>
+                                <option value="<?= $unit['id'] ?>"><?= $unit['unit_name'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-field">
                         <label for="product-image">Image</label>
                         <input type="file" id="product-image" name="image">
                     </div>
                     <div class="form-field span-2">
-                        <label for="product-category">Category *</label>
-                        <div id="product-category" class="search-bar">
+                        <label for="product-categories">Categories *</label>
+                        <div id="product-categories" class="search-bar">
                             <span class="icon">search</span>
-                            <input type="text" id="searchInput" placeholder="Search Categories...">
-                            <!-- <div class="search-results">
-                                <div class="search-result">
-                                    <span>Electronics</span>
-                                </div>
-                                <div class="search-result">
-                                    <span>Phones & Tablets</span>
-                                </div>
-                                <div class="search-result">
-                                    <span>Computers</span>
-                                </div>
-                            </div> -->
+                            <input type="text" placeholder="Search Categories..." oninput="searchCategories(event)">
+                            <div class="search-results"></div>
                         </div>
                     </div>
-                    <div class="form-field span-2 chip-container">
-                        <div class="chip">
-                            Electronics
-                            <button class="chip-delete">
-                                <span class="icon">close</span>
-                            </button>
-                        </div>
-                        <div class="chip">
-                            Phones & Tablets
-                            <button class="chip-delete">
-                                <span class="icon">close</span>
-                            </button>
-                        </div>
-                        <div class="chip">
-                            Computers
-                            <button class="chip-delete">
-                                <span class="icon">close</span>
-                            </button>
-                        </div>
-                    </div>
+                    <div class="form-field span-2 chip-container"></div>
                     <div class="form-field">
                         <label for="product-reorder-level">Reorder Level *</label>
                         <input type="number" id="product-reorder-level" name="reorder_level" required>
@@ -267,7 +243,73 @@ use App\Services\RBACService; ?>
         document.getElementById("addProductModal").close();
     }
 
-    // Initialize tables when document loads
+    function createCategoryChip(category) {
+        const chipContainer = document.querySelector(
+            "#addProductForm .chip-container"
+        );
+        const chip = document.createElement("div");
+        chip.classList.add("chip");
+        chip.innerHTML = category.category_name;
+
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "categories[]";
+        input.value = category.id;
+        chip.appendChild(input);
+
+        const chipDelete = document.createElement("button");
+        chipDelete.type = "button";
+        chipDelete.classList.add("chip-delete");
+        chipDelete.innerHTML = `<span class="icon">close</span>`;
+        chipDelete.addEventListener("click", () => {
+            chip.remove();
+        });
+        chip.appendChild(chipDelete);
+
+        chipContainer.appendChild(chip);
+    }
+
+    function renderCategorySearchResults(results) {
+        const searchResults = document.querySelector(
+            "#addProductForm #product-categories .search-results"
+        );
+        searchResults.innerHTML = "";
+
+        results.forEach((category) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.classList.add("search-result");
+            button.innerHTML = `<span>${category.category_name}</span>`;
+            button.addEventListener("click", () => {
+                createCategoryChip(category);
+                searchResults.innerHTML = "";
+                document.querySelector("#addProductForm #product-categories input").value =
+                    "";
+            });
+
+            searchResults.appendChild(button);
+        });
+    }
+
+    async function searchCategories(e) {
+        const query = e.target.value;
+
+        if (!query) {
+            renderCategorySearchResults([]);
+            return;
+        }
+
+        const res = await fetch(`/api/category/search?q=${query}`);
+        const data = await res.json();
+
+        if (!data.success) {
+            openPopupWithMessage(data.message);
+            return;
+        }
+
+        renderCategorySearchResults(data.data);
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".category-header").forEach((header) => {
             header.addEventListener("click", () => {
