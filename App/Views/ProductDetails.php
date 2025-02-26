@@ -55,7 +55,7 @@ use App\Services\RBACService;
                   <span class="icon">edit</span>
                   Edit Product
                 </button>
-                <button class="dropdown-item" onclick="addBatch()">
+                <button class="dropdown-item" onclick="openAddBatchDetailsDialog()">
                   <span class="icon">add_box</span>
                   Add Batch
                 </button>
@@ -187,12 +187,21 @@ use App\Services\RBACService;
           <div class="content">
             <div class="batch-grid">
               <?php foreach ($product['batches'] as $batch): ?>
-                <div class="batch-card card glass">
+                <div class="batch-card card glass" data-batch-id="<?= $batch['id'] ?>">
                   <div class="batch-header">
                     <span class="batch-title"><?= htmlspecialchars($batch['batch_code']) ?></span>
-                    <button type="button" class="icon-btn" title="Edit Batch">
-                      <span class="icon">edit</span>
-                    </button>
+                    <div>
+                      <?php if (RBACService::hasPermission('edit_batch')): ?>
+                        <button type="button" class="icon-btn" title="Edit Batch" onclick="openEditBatchDetailsDialog(event)">
+                          <span class=" icon">edit</span>
+                        </button>
+                      <?php endif; ?>
+                      <?php if (RBACService::hasPermission('delete_batch')): ?>
+                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="openEditBatchDetailsDialog(event)">
+                          <span class=" icon">delete</span>
+                        </button>
+                      <?php endif; ?>
+                    </div>
                   </div>
                   <div class="batch-status">
                     <?php if ($batch['current_quantity'] <= 0): ?>
@@ -206,19 +215,19 @@ use App\Services\RBACService;
                   <div class="batch-details">
                     <div class="batch-info">
                       <span class="info-label">Current Stock</span>
-                      <span class="info-value"><?= number_format($batch['current_quantity'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></span>
+                      <span class="info-value current-stock"><?= number_format($batch['current_quantity'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></span>
                     </div>
                     <div class="batch-info">
                       <span class="info-label">Unit Price</span>
-                      <span class="info-value">$<?= number_format($batch['unit_price'], 2) ?></span>
+                      <span class="info-value unit-value">Rs. <?= number_format($batch['unit_price'], 2) ?></span>
                     </div>
                     <div class="batch-info">
                       <span class="info-label">Manufacturing Date</span>
-                      <span class="info-value"><?= $batch['manufactured_date'] ? date('M d, Y', strtotime($batch['manufactured_date'])) : '-' ?></span>
+                      <span class="info-value mfg"><?= $batch['manufactured_date'] ? date('M d, Y', strtotime($batch['manufactured_date'])) : '-' ?></span>
                     </div>
                     <div class="batch-info">
                       <span class="info-label">Expiry Date</span>
-                      <span class="info-value"><?= $batch['expiry_date'] ? date('M d, Y', strtotime($batch['expiry_date'])) : '-' ?></span>
+                      <span class="info-value exp"><?= $batch['expiry_date'] ? date('M d, Y', strtotime($batch['expiry_date'])) : '-' ?></span>
                     </div>
                   </div>
                   <?php if ($batch['current_quantity'] > 0 && $batch['current_quantity'] <= $product['reorder_level']): ?>
@@ -279,6 +288,55 @@ use App\Services\RBACService;
     </form>
   </div>
 </div>
+
+<!-- Batch Details dialog-->
+<dialog id="batchDetailsDialog" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2></h2>
+      <button type="button" class="close-btn" onclick="closeBatchDetailsDialog()">
+        <span class="icon">close</span>
+      </button>
+    </div>
+    <form id="batchDetailsForm" class="modal-body" method="post">
+      <div class="form-grid">
+        <input type="text" name="product_id" value="<?= $product['id'] ?>" hidden>
+        <div class="form-field">
+          <label for="po_number">Purchase Order Number</label>
+          <input type="text" name="po_number">
+        </div>
+        <div class="form-field">
+          <label for="batch_code">Batch Code</label>
+          <input type="text" name="batch_code">
+        </div>
+        <div class="form-field">
+          <label for="quantity">Quantity</label>
+          <input type="number" name="quantity">
+        </div>
+        <div class="form-field">
+          <label for="unitprice">Unit Price</label>
+          <input type="number" name="unit_price">
+        </div>
+        <div class="form-field">
+          <label for="manufactured_date">Manufacturing Date</label>
+          <input type="date" name="manufactured_date">
+        </div>
+        <div class="form-field">
+          <label for="expiry_date">Expiry Date</label>
+          <input type="date" name="expiry_date">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeBatchDetailsDialog()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
 
 <?php if (RBACService::hasPermission('edit_product')): ?>
   <dialog id="addBatchModal" class="modal">
@@ -405,5 +463,39 @@ use App\Services\RBACService;
     }
 
     renderCategorySearchResults(data.data);
+  }
+
+  function openEditBatchDetailsDialog(e) {
+    document.querySelector('#batchDetailsDialog .modal-header h2').innerHTML = 'Edit Batch Details';
+    const batchCard = e.target.closest('.batch-card');
+    const batchCode = batchCard.querySelector('.batch-title').textContent;
+    const currentStock = batchCard.querySelector('.current-stock').textContent.split(" ")[0];
+    const unitPrice = batchCard.querySelector('.unit-value').textContent.slice(4).replace(/,/g, '');
+    const mfgDate = new Date(batchCard.querySelector('.mfg').textContent).toISOString().split('T')[0];
+    const expDate = new Date(batchCard.querySelector('.exp').textContent).toISOString().split('T')[0];
+
+    const form = document.getElementById('batchDetailsForm');
+    form.action = `/batch/${batchCard.dataset.batchId}/update`;
+    form.querySelector('input[name="po_number"]').parentElement.style.display = 'none';
+    form.querySelector('input[name="batch_code"]').value = batchCode;
+    form.querySelector('input[name="quantity"]').value = currentStock;
+    form.querySelector('input[name="unit_price"]').value = unitPrice;
+    form.querySelector('input[name="manufactured_date"]').value = mfgDate;
+    form.querySelector('input[name="expiry_date"]').value = expDate;
+    document.getElementById('batchDetailsDialog').showModal();
+  }
+
+  function openAddBatchDetailsDialog() {
+    const form = document.getElementById('batchDetailsForm');
+    form.action = '/batch/new';
+    form.querySelector('input[name="po_number"]').parentElement.style.display = 'flex';
+    document.querySelector('#batchDetailsDialog .modal-header h2').innerHTML = 'Add New Batch';
+    document.getElementById('batchDetailsDialog').showModal();
+
+  }
+
+  function closeBatchDetailsDialog() {
+    document.getElementById('batchDetailsForm').reset();
+    document.getElementById('batchDetailsDialog').close();
   }
 </script>
