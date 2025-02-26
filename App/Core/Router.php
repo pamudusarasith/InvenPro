@@ -49,7 +49,7 @@ class Router
 
     if (!$match) {
       error_log("Route '$method $url' not found");
-      View::redirect("/404.html");
+      View::renderError(404);
       return;
     }
 
@@ -58,7 +58,7 @@ class Router
 
     if (!$controller || !class_exists($controller)) {
       error_log("Controller $controller not found");
-      View::redirect("/500.html");
+      View::renderError(500);
       return;
     }
 
@@ -66,7 +66,7 @@ class Router
 
     if (!method_exists($controllerObj, $action)) {
       error_log("Action $action not found in $controller");
-      View::redirect("/500.html");
+      View::renderError(500);
       return;
     }
 

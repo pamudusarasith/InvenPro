@@ -17,7 +17,7 @@ class Utils
 
     if (!file_exists($path)) {
       error_log('.env file not found');
-      View::redirect('/500.html');
+      View::renderError(500);
     }
 
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);

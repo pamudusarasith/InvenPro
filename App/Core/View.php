@@ -19,7 +19,7 @@ class View
       require $content;
     } else {
       error_log("View not found: $view");
-      self::redirect("/500.html");
+      self::renderError(500);
     }
   }
 
@@ -34,6 +34,19 @@ class View
   {
     $data["view"] = $view;
     self::render("Template", $data);
+  }
+
+  /**
+   * Renders an error page.
+   *
+   * @param int $code The HTTP status code.
+   * @return void
+   */
+  public static function renderError(int $code): void
+  {
+    http_response_code($code);
+    self::render("errors/$code");
+    exit;
   }
 
   /**
