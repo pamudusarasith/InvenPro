@@ -635,6 +635,7 @@ body {
   background: var(--surface-light);
   border-radius: 8px;
   border: 1px solid var(--border-light);
+  position: relative;
 }
 
 .search-bar input {
@@ -644,6 +645,33 @@ body {
   background: transparent;
   color: var(--text-primary);
   font-size: 0.875rem;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  width: 100%;
+  background: var(--surface-mild);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-md);
+  max-height: 5rem;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.search-result {
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 0;
+  text-align: left;
+}
+
+.search-result:hover {
+  background: var(--surface-medium);
 }
 
 .filters {
@@ -724,7 +752,7 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.form-field input,
+.form-field input:not(.search-bar input),
 .form-field select,
 .form-field textarea {
   padding: 0.75rem 1rem;
@@ -752,7 +780,7 @@ body {
   box-shadow: 0 0 0 2px var(--accent-light);
 }
 
-.form-field input:focus,
+.form-field input:not(.search-bar input):focus,
 .form-field select:focus,
 .form-field textarea:focus {
   outline: none;
@@ -760,13 +788,13 @@ body {
   box-shadow: 0 0 0 3px var(--primary-100);
 }
 
-.form-field input:hover,
+.form-field input:not(.search-bar input):hover,
 .form-field select:hover,
 .form-field textarea:hover {
   border-color: var(--primary-300);
 }
 
-.form-field input::placeholder {
+.form-field input:not(.search-bar input)::placeholder {
   color: var(--text-tertiary);
 }
 
@@ -1017,6 +1045,48 @@ dialog::backdrop {
 .data-table tr td:last-child,
 .data-table tr th:last-child {
   padding-right: 1.5rem;
+}
+
+/* Chip styles */
+.chip-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: var(--surface-mild);
+  border-radius: 16px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  transition: background-color 0.2s;
+}
+
+.chip:hover {
+  background-color: var(--surface-medium);
+}
+
+.chip-delete {
+  background: none;
+  border: none;
+  margin-left: 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.6;
+}
+
+.chip-delete:hover {
+  opacity: 1;
+}
+
+.chip .icon {
+  font-size: 1rem;
+  line-height: 1;
 }
 
 /* Pagination styles */
@@ -1684,7 +1754,7 @@ dialog::backdrop {
   background: var(--surface-white);
   box-shadow: var(--shadow-lg);
   max-width: 360px;
-  z-index: 1000;
+  z-index: 9999;
   transition: right 0.3s ease-in-out;
 }
 

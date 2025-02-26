@@ -32,9 +32,12 @@ class InventoryController extends Controller
       }
     }
 
+    $units = $productModel->getMeasuringUnits();
+
     View::renderTemplate('Inventory', [
       'title' => 'Inventory',
-      'categories' => $categories
+      'categories' => $categories,
+      'units' => $units
     ]);
   }
 }

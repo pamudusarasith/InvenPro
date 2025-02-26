@@ -19,15 +19,35 @@ class ProductModel extends Model
       SELECT
         p.*,
         u.unit_name,
-        u.unit_symbol
+        u.unit_symbol,
+        bp.reorder_level,
+        bp.reorder_quantity
       FROM product p
       INNER JOIN unit u ON p.unit_id = u.id
-      WHERE p.id = ?
+      INNER JOIN branch_product bp ON p.id = bp.product_id
+      WHERE deleted_at IS NULL
+        AND p.id = ?
+        AND bp.branch_id = ?
     ';
-    $stmt = self::$db->query($sql, [$id]);
+    $stmt = self::$db->query($sql, [$id, $_SESSION['user']['branch_id']]);
     $product = $stmt->fetch();
+    $product['categories'] = $this->getCategoriesByProductId($id);
     $product['batches'] = $this->getBatchesByProductId($id);
     return $product;
+  }
+
+  public function getCategoriesByProductId(int $id): array
+  {
+    $sql = '
+      SELECT
+        c.id,
+        c.category_name
+      FROM category c
+      INNER JOIN product_category pc ON c.id = pc.category_id
+      WHERE pc.product_id = ?
+    ';
+    $stmt = self::$db->query($sql, [$id]);
+    return $stmt->fetchAll();
   }
 
   public function getSamePriceBatches(int $productId, string $price): array
@@ -133,7 +153,7 @@ class ProductModel extends Model
       INNER JOIN product_category pc ON p.id = pc.product_id
       INNER JOIN category c ON pc.category_id = c.id
       INNER JOIN branch_product bp ON p.id = bp.product_id
-      INNER JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+      LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
       WHERE p.deleted_at IS NULL
         AND bp.branch_id = ?
         AND (pc.category_id = ? OR c.parent_id = ?)
@@ -159,5 +179,88 @@ class ProductModel extends Model
     ';
     $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $categoryId, $categoryId]);
     return $stmt->fetch()['count'];
+  }
+
+  public function createProduct(array $data): void
+  {
+    self::$db->beginTransaction();
+    $sql = '
+      INSERT INTO product (product_code, product_name, description, unit_id, image_path)
+      VALUES (?, ?, ?, ?, ?)
+    ';
+    self::$db->query($sql, [
+      $data['product_code'],
+      $data['product_name'],
+      $data['description'],
+      $data['unit_id'],
+      $data['image_path']
+    ]);
+
+    $productId = self::$db->lastInsertId();
+
+    $sql = '
+      INSERT INTO product_category (product_id, category_id)
+      VALUES (?, ?)
+    ';
+    foreach ($data['categories'] as $categoryId) {
+      self::$db->query($sql, [$productId, $categoryId]);
+    }
+
+    $sql = '
+      INSERT INTO branch_product (branch_id, product_id, reorder_level, reorder_quantity)
+      VALUES (?, ?, ?, ?)
+    ';
+    self::$db->query($sql, [$_SESSION['user']['branch_id'], $productId, $data['reorder_level'], $data['reorder_quantity']]);
+    self::$db->commit();
+  }
+
+  public function updateProduct(int $id, array $data): void
+  {
+    self::$db->beginTransaction();
+    $sql = '
+      UPDATE product
+      SET product_code = ?, product_name = ?, description = ?, unit_id = ?, image_path = ?
+      WHERE id = ?
+    ';
+    self::$db->query($sql, [
+      $data['product_code'],
+      $data['product_name'],
+      $data['description'],
+      $data['unit_id'],
+      $data['image_path'],
+      $id
+    ]);
+
+    $sql = '
+      DELETE FROM product_category
+      WHERE product_id = ?
+    ';
+    self::$db->query($sql, [$id]);
+
+    $sql = '
+      INSERT INTO product_category (product_id, category_id)
+      VALUES (?, ?)
+    ';
+    foreach ($data['categories'] as $categoryId) {
+      self::$db->query($sql, [$id, $categoryId]);
+    }
+
+    $sql = '
+      UPDATE branch_product
+      SET reorder_level = ?, reorder_quantity = ?
+      WHERE product_id = ? AND branch_id = ?
+    ';
+    self::$db->query($sql, [$data['reorder_level'], $data['reorder_quantity'], $id, $_SESSION['user']['branch_id']]);
+    self::$db->commit();
+  }
+
+  public function deleteProduct(int $id): void
+  {
+    $sql = '
+      UPDATE product
+      SET deleted_at = NOW()
+      WHERE id = ?
+    ';
+    self::$db->query($sql, [$id]);
   }
 }
