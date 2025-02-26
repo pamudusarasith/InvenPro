@@ -121,6 +121,48 @@ class ValidationService
     return $this->error === '';
   }
 
+  public function validateCreateProduct(array $data): bool
+  {
+    $this->error = '';
+
+    if (!array_key_exists('product_name', $data) || empty($data['product_name'])) {
+      $this->error = 'Product name is required';
+    } elseif (!array_key_exists('product_code', $data) || empty($data['product_code'])) {
+      $this->error = 'Product code is required';
+    } elseif (!array_key_exists('unit_id', $data) || empty($data['unit_id'])) {
+      $this->error = 'Unit is required';
+    } elseif (!array_key_exists('categories', $data) || empty($data['categories'])) {
+      $this->error = 'Category is required';
+    } elseif (!array_key_exists('reorder_level', $data) || empty($data['reorder_level'])) {
+      $this->error = 'Reorder level is required';
+    } elseif (!array_key_exists('reorder_quantity', $data) || empty($data['reorder_quantity'])) {
+      $this->error = 'Reorder quantity is required';
+    }
+
+    return $this->error === '';
+  }
+
+  public function validateUpdateProduct(array $data): bool
+  {
+    $this->error = '';
+
+    if (!array_key_exists('product_name', $data) || empty($data['product_name'])) {
+      $this->error = 'Product name is required';
+    } elseif (!array_key_exists('product_code', $data) || empty($data['product_code'])) {
+      $this->error = 'Product code is required';
+    } elseif (!array_key_exists('unit_id', $data) || empty($data['unit_id'])) {
+      $this->error = 'Unit is required';
+    } elseif (!array_key_exists('categories', $data) || empty($data['categories'])) {
+      $this->error = 'Category is required';
+    } elseif (!array_key_exists('reorder_level', $data) || empty($data['reorder_level'])) {
+      $this->error = 'Reorder level is required';
+    } elseif (!array_key_exists('reorder_quantity', $data) || empty($data['reorder_quantity'])) {
+      $this->error = 'Reorder quantity is required';
+    }
+
+    return $this->error === '';
+  }
+
   public function validateEmail(array $data): void
   {
     if (!array_key_exists('email', $data) || empty($data['email'])) {
