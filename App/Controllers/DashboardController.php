@@ -35,7 +35,7 @@ class DashboardController extends Controller
                 ],
             ]);
         } else {
-            View::redirect('403.html');
+            View::renderError(403);
         }
     }
 }

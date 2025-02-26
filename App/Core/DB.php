@@ -24,7 +24,7 @@ class DB
       $this->connection = new PDO($dsn, getenv('DB_USER'), getenv('DB_PASS'), $options);
     } catch (PDOException $e) {
       error_log($e->getMessage() . "\n" . $e->getTraceAsString());
-      View::redirect("/500.html");
+      View::renderError(500);
     }
   }
 
@@ -52,7 +52,7 @@ class DB
       return $stmt;
     } catch (PDOException $e) {
       error_log($e->getMessage() . "\n" . $e->getTraceAsString());
-      View::redirect("/500.html");
+      View::renderError(500);
     }
   }
 

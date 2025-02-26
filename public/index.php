@@ -22,7 +22,7 @@ spl_autoload_register(function ($class) {
 
 set_exception_handler(function ($e) {
   error_log($e->getMessage() . "\n" . $e->getTraceAsString());
-  View::redirect("/500.html");
+  View::renderError(500);
 });
 
 $router = new Router();
