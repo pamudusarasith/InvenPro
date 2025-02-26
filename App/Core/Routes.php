@@ -24,10 +24,12 @@ return [
     '/pos' => 'App\Controllers\POSController::index',
     '/api/pos/search' => 'App\Controllers\POSController::searchProducts',
     '/api/category/search' => 'App\Controllers\CategoryController::search',
+    '/api/pos/customer/search' => 'App\Controllers\CustomerController::search',
   ],
 
   'POST' => [
     '/' => 'App\Controllers\AuthController::login',
+    '/customers/new' => 'App\Controllers\CustomerController::createCustomer',
     '/users/new' => 'App\Controllers\UserController::createUser',
     '/users/{id}/update' => 'App\Controllers\UserController::updateUser',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
