@@ -33,18 +33,18 @@ use App\Services\RBACService;
                             <button class="dropdown-trigger icon-btn" title="More options">
                                 <span class="icon">more_vert</span>
                             </button>
-                            <div class="dropdown-menu">
-                                <button id="cart-clear-btn" class="dropdown-item danger">
+                            <div id="cart-menu" class="dropdown-menu">
+                                <button id="cart-clear-btn" class="dropdown-item danger" onclick="pos.clearCart()">
                                     <span class="icon">remove_shopping_cart</span>
                                     Clear Cart
                                 </button>
                                 <?php if (RBACService::hasPermission('add_customer') && $_SESSION['user']['id'] != $user['id']): ?>
-                                    <button class="dropdown-item" onclick="deleteUser(<?= $user['id'] ?>)">
+                                    <button id="add-customer-btn" class="dropdown-item" onclick="pos.openNewCustomerDialog()">
                                         <span class="icon">person_add</span>
                                         New Customer
                                     </button>
                                 <?php endif; ?>
-                                <button class="dropdown-item" onclick="showCustomerSearch()">
+                                <button class="dropdown-item" onclick="pos.openCustomerSearchDialog()">
                                     <span class="icon">search</span>
                                     Find Customer
                                 </button>
@@ -56,16 +56,12 @@ use App\Services\RBACService;
 
                 <div class="cart-summary card glass">
                     <div class="summary-item">
-                        <span>Customer</span>
-                        <span>John Doe</span>
-                    </div>
-                    <div class="summary-item">
                         <span>Subtotal</span>
                         <span class="cart-subtotal">Rs. 0.00</span>
                     </div>
 
                     <div class="cart-actions">
-                        <button id="checkout-btn" class="btn btn-primary btn-large">
+                        <button id="checkout-btn" class="btn btn-primary btn-large" onclick="pos.openCheckoutDialog()">
                             <span class="icon">point_of_sale</span>
                             Checkout
                         </button>
@@ -108,20 +104,26 @@ use App\Services\RBACService;
     <div class="modal-content">
         <div class="modal-header">
             <h2>Find Customer</h2>
-            <button class="close-btn" onclick="closeCustomerSearch()">
+            <button class="close-btn" onclick="pos.closeCustomerSearchDialog()">
                 <span class="icon">close</span>
             </button>
         </div>
-        <div class="modal-body">
-            <div class="search-bar">
-                <span class="icon">search</span>
-                <input type="text" id="customerSearch"
-                    placeholder="Search by phone number or name...">
+        <form id="customerSearchForm" class="modal-body" onsubmit="pos.searchCustomer(event)">
+            <div class="form-grid">
+                <div class="form-field span-2">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
             </div>
-            <div class="search-results">
-                <!-- Results will be populated dynamically -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="pos.closeCustomerSearchDialog()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Search
+                </button>
             </div>
-        </div>
+        </form>
     </div>
 </dialog>
 
@@ -130,11 +132,11 @@ use App\Services\RBACService;
     <div class="modal-content">
         <div class="modal-header">
             <h2>New Customer</h2>
-            <button class="close-btn" onclick="closeNewCustomer()">
+            <button class="close-btn" onclick="pos.closeNewCustomerDialog()">
                 <span class="icon">close</span>
             </button>
         </div>
-        <form id="newCustomerForm" class="modal-body">
+        <form id="newCustomerForm" class="modal-body" method="post" action="/customers/new">
             <div class="form-grid">
                 <div class="form-field">
                     <label for="firstName">First Name</label>
@@ -152,9 +154,13 @@ use App\Services\RBACService;
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email">
                 </div>
+                <div class="form-field span-2">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" rows="3"></textarea>
+                </div>
             </div>
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeNewCustomer()">
+                <button type="button" class="btn btn-secondary" onclick="pos.closeNewCustomerDialog()">
                     Cancel
                 </button>
                 <button type="submit" class="btn btn-primary">
@@ -174,7 +180,7 @@ use App\Services\RBACService;
                 <span class="icon">close</span>
             </button>
         </div>
-        <form id="checkoutForm" class="modal-body">
+        <form id="checkoutForm" class="modal-body" onsubmit="pos.checkout(event)">
             <div class="form-grid">
                 <div class="form-field span-2">
                     <label for="paymentMethod">Payment Method</label>
@@ -225,19 +231,15 @@ use App\Services\RBACService;
                 </div> -->
             </div>
             <div class="checkout-summary">
-                <div class="summary-row">
-                    <span>Customer</span>
-                    <span>John Doe</span>
-                </div>
-                <div class="summary-row">
+                <div class="summary-item">
                     <span>Subtotal</span>
                     <span class="checkout-subtotal">Rs. 0.00</span>
                 </div>
-                <div class="summary-row">
+                <div class="summary-item">
                     <span>Discount</span>
                     <span class="checkout-discount">Rs. 0.00</span>
                 </div>
-                <div class="summary-row total">
+                <div class="summary-item total">
                     <span>Total</span>
                     <span class="checkout-total">Rs. 0.00</span>
                 </div>
@@ -271,19 +273,15 @@ use App\Services\RBACService;
                 .getElementById("productSearch")
                 .addEventListener("input", (e) => this.searchProducts(e));
 
-            document
-                .getElementById("cart-clear-btn")
-                .addEventListener("click", () => this.clearCart());
-
-            document
-                .getElementById("checkout-btn")
-                .addEventListener("click", () => this.openCheckout());
-
             const cartData = sessionStorage.getItem("cart");
             if (cartData) {
                 this.cart = new Map(JSON.parse(cartData));
-                this.updateCart();
             }
+            const customerData = sessionStorage.getItem("customer");
+            if (customerData) {
+                this.customer = JSON.parse(customerData);
+            }
+            this.updateCart();
         }
 
         createProductCard(product) {
@@ -363,10 +361,10 @@ use App\Services\RBACService;
                     <div class="cart-item-price">Rs. ${product.price}</div>
                 </div>
                 <div class="cart-item-quantity">Qty: ${product.quantity.toFixed(
-                    3
+                3
                 )}</div>
                 <div class="cart-item-subtotal">$${(
-                    product.price * product.quantity
+                product.price * product.quantity
                 ).toFixed(2)}</div>
             `;
 
@@ -409,6 +407,8 @@ use App\Services\RBACService;
                 JSON.stringify(Array.from(this.cart.entries()))
             );
 
+            sessionStorage.setItem("customer", JSON.stringify(this.customer));
+
             this.cartSubtotal = 0;
             this.cart.forEach((product, _) => {
                 this.cartSubtotal += product.price * product.quantity;
@@ -419,6 +419,7 @@ use App\Services\RBACService;
             ).textContent = `Rs. ${this.cartSubtotal.toFixed(2)}`;
 
             this.renderCartItems();
+            this.renderCustomerData();
         }
 
         renderCartItems() {
@@ -460,7 +461,7 @@ use App\Services\RBACService;
             document.getElementById("cartItemEditDialog").close();
         }
 
-        openCheckout() {
+        openCheckoutDialog() {
             if (this.cart.size === 0) {
                 alert("Cart is empty");
                 return;
@@ -478,27 +479,22 @@ use App\Services\RBACService;
                 ".checkout-total"
             ).textContent = `Rs. ${this.cartTotal.toFixed(2)}`;
 
-            const form = document.getElementById("checkoutForm");
-
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                this.checkout();
-            };
-
             const modal = document.getElementById("checkoutDialog");
-            modal.querySelector(".close-btn").onclick = () => this.closeCheckout();
+            modal.querySelector(".close-btn").onclick = () =>
+                this.closeCheckoutDialog();
             modal.querySelector(".form-actions button[type='button']").onclick = () =>
-                this.closeCheckout();
+                this.closeCheckoutDialog();
             modal.showModal();
         }
 
-        closeCheckout() {
+        closeCheckoutDialog() {
             document.getElementById("checkoutForm").reset();
             document.getElementById("checkoutDialog").close();
         }
 
-        async checkout() {
-            const form = document.getElementById("checkoutForm");
+        async checkout(e) {
+            e.preventDefault();
+            const form = e.target;
             const items = Array.from(
                 this.cart.values().map((product) => {
                     return {
@@ -528,17 +524,99 @@ use App\Services\RBACService;
 
             if (result.success) {
                 this.clearCart();
-                this.closeCheckout();
+                this.closeCheckoutDialog();
                 openPopupWithMessage(result.message, "success");
             } else {
-                this.closeCheckout();
+                this.closeCheckoutDialog();
                 openPopupWithMessage(result.message, "error");
             }
         }
+
+        openNewCustomerDialog() {
+            const modal = document.getElementById("newCustomerDialog");
+            modal.showModal();
+        }
+
+        closeNewCustomerDialog() {
+            document.getElementById("newCustomerForm").reset();
+            document.getElementById("newCustomerDialog").close();
+        }
+
+        openCustomerSearchDialog() {
+            const modal = document.getElementById("customerSearchDialog");
+            modal.showModal();
+        }
+
+        closeCustomerSearchDialog() {
+            document.getElementById("customerSearchDialog").close();
+            document.getElementById("customerSearchForm").reset();
+        }
+
+        renderCustomerData() {
+            document
+                .querySelector(".cart-summary .summary-item.customer-info")
+                ?.remove();
+            document
+                .querySelector(".checkout-summary .summary-item.customer-info")
+                ?.remove();
+            document.getElementById("clear-customer-button")?.remove();
+
+            if (this.customer === null) return;
+
+            const summaryItem = document.createElement("div");
+            summaryItem.classList.add("summary-item", "customer-info");
+            summaryItem.innerHTML = `
+                <span>Customer</span>
+                <span>${this.customer.name}</span>
+            `;
+
+            const cartSummary = document.querySelector(".cart-summary");
+            const checkoutSummary = document.querySelector(".checkout-summary");
+            cartSummary.insertBefore(summaryItem, cartSummary.firstChild);
+            checkoutSummary.insertBefore(
+                summaryItem.cloneNode(true),
+                checkoutSummary.firstChild
+            );
+
+            const clearCustomerButton = document.createElement("button");
+            clearCustomerButton.id = "clear-customer-button";
+            clearCustomerButton.classList.add("dropdown-item");
+            clearCustomerButton.innerHTML = `
+                <span class="icon">person_remove</span>
+                Clear Customer
+            `;
+            clearCustomerButton.onclick = () => this.clearCustomer();
+            document.getElementById("cart-menu").appendChild(clearCustomerButton);
+        }
+
+        async searchCustomer(e) {
+            e.preventDefault();
+            const form = e.target;
+            const phone = form.elements["phone"].value;
+
+            const response = await fetch(`/api/pos/customer/search?q=${phone}`);
+            const result = await response.json();
+
+            if (result.success) {
+                this.customer = result.data;
+                this.updateCart();
+            } else {
+                openPopupWithMessage(result.message, "error");
+            }
+
+            this.closeCustomerSearchDialog();
+        }
+
+        clearCustomer() {
+            this.customer = null;
+            this.updateCart();
+        }
     }
 
+    let pos;
+
     document.addEventListener("DOMContentLoaded", () => {
-        const pos = new POS();
+        pos = new POS();
         pos.init();
     });
 </script>

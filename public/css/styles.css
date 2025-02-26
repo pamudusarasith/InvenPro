@@ -1547,7 +1547,7 @@ dialog::backdrop {
   padding: 1rem;
 }
 
-.summary-item {
+.cart-summary .summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1555,11 +1555,11 @@ dialog::backdrop {
   border-bottom: 1px solid var(--border-light);
 }
 
-.summary-item:first-child {
+.cart-summary .summary-item:first-child {
   padding-top: 0;
 }
 
-.summary-item:last-child {
+.cart-summary .summary-item:last-child {
   border-bottom: none;
   font-weight: 600;
   font-size: 1.25rem;
@@ -1584,14 +1584,14 @@ dialog::backdrop {
   border-radius: 16px;
 }
 
-.summary-row {
+.checkout-summary .summary-item {
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
   color: var(--text-secondary);
 }
 
-.summary-row.total {
+.checkout-summary .summary-item.total {
   color: var(--text-primary);
   font-weight: 600;
   font-size: 1.25rem;
