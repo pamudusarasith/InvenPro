@@ -2,174 +2,177 @@
 
 namespace App\Services;
 
+use App\Services\Validation\Rules\{
+  CompareWithField,
+  CompareWithValue,
+  Email,
+  InArray,
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsNumeric,
+  IsString,
+  Matches,
+  NotRule,
+  OrRule,
+  Required
+};
+use App\Services\Validation\Validator;
+
 class ValidationService
 {
   /**
    * Error string to store validation error message
    */
-  private string $error = '';
+  private array $errors = [];
 
   public function validateLogin(array $data): bool
   {
-    $this->error = '';
+    $validator = new Validator($data);
+    $validator->rule('email', new Required('Email is required'))
+      ->rule('email', new Email())
+      ->rule('password', new Required('Password is required'));
 
-    $this->validateEmail($data);
-    if (!array_key_exists('password', $data) || empty($data['password'])) {
-      $this->error = 'Password is required';
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateCreateUser(array $data): bool
   {
-    $this->error = '';
+    $validator = new Validator($data);
+    $validator->rule('email', new Required('Email is required'))
+      ->rule('email', new Email())
+      ->rule('role_id', new Required('Role ID is required'))
+      ->rule('role_id', new IsNumeric('Invalid Role ID'))
+      ->rule('branch_id', new Required('Branch ID is required'))
+      ->rule('branch_id', new IsNumeric('Invalid Branch ID'));
 
-    $this->validateEmail($data);
-    if (!array_key_exists('role_id', $data) || empty($data['role_id'])) {
-      $this->error = 'Role is required';
-    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
-      $this->error = 'Branch is required';
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateUpdateUser(array $data): bool
   {
-    $this->error = '';
-
-    $this->validateEmail($data);
-    if (!array_key_exists('role_id', $data) || empty($data['role_id'])) {
-      $this->error = 'Role is required';
-    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
-      $this->error = 'Branch is required';
-    } elseif (!array_key_exists('status', $data) || empty($data['status'])) {
-      $this->error = 'Status is required';
+    $validator = new Validator($data);
+    $validator->rule('email', new Required('Email is required'))
+      ->rule('email', new Email())
+      ->rule('role_id', new Required('Role ID is required'))
+      ->rule('role_id', new IsNumeric('Invalid Role ID'))
+      ->rule('branch_id', new Required('Branch ID is required'))
+      ->rule('branch_id', new IsNumeric('Invalid Branch ID'))
+      ->rule('status', new Required('Status is required'))
+      ->rule('status', new InArray(['active', 'locked'], 'Status must be either active or locked'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateCreateSupplier(array $data): bool
   {
-    $this->error = '';
-
-    $this->validateEmail($data);
-    if (!array_key_exists('supplier_name', $data) || empty($data['supplier_name'])) {
-      $this->error = 'Supplier name is required';
-    } elseif (!array_key_exists('contact_person', $data) || empty($data['contact_person'])) {
-      $this->error = 'Contact person is required';
-    } elseif (!array_key_exists('phone', $data) || empty($data['phone'])) {
-      $this->error = 'Phone is required';
-    } elseif (!array_key_exists('branch_id', $data) || empty($data['branch_id'])) {
-      $this->error = 'Branch is required';
-    } elseif (!array_key_exists('address', $data) || empty($data['address'])) {
-      $this->error = 'Address is required';
+    $validator = new Validator($data);
+    $validator->rule('email', new Required('Email is required'))
+      ->rule('email', new Email())
+      ->rule('supplier_name', new Required('Supplier Name is required'))
+      ->rule('contact_person', new Required('Contact Person is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('branch_id', new Required('Branch ID is required'))
+      ->rule('branch_id', new IsNumeric('Invalid Branch ID'))
+      ->rule('address', new Required('Address is required'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateCheckout(array $data): bool
   {
-    $this->error = '';
-
-    if (!array_key_exists('items', $data) || empty($data['items'])) {
-      $this->error = 'Items are required';
-    } elseif (!array_key_exists('payment_method', $data) || empty($data['payment_method'])) {
-      $this->error = 'Payment method is required';
+    $validator = new Validator($data);
+    $validator->rule('items', new Required('Items are required'))
+      ->rule('items', new IsArray(1, null, 'Items must be an array'))
+      ->rule('items.*.product_id', new Required('Product ID is required'))
+      ->rule('items.*.product_id', new IsNumeric('Invalid Product ID'))
+      ->rule('items.*.quantity', new Required('Quantity is required'))
+      ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
+      ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('items.*.price', new Required('Price is required'))
+      ->rule('items.*.price', new IsNumeric('Price must be numeric'))
+      ->rule('items.*.price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
+      ->rule('payment_method', new Required('Payment method is required'))
+      ->rule('payment_method', new InArray(['cash', 'card'], 'Invalid payment method'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    foreach ($data['items'] as $item) {
-      if (!array_key_exists('product_id', $item) || empty($item['product_id'])) {
-        $this->error = 'Product ID is required';
-        break;
-      } elseif (!array_key_exists('quantity', $item) || empty($item['quantity'])) {
-        $this->error = 'Quantity is required';
-        break;
-      } elseif (!array_key_exists('price', $item) || empty($item['price'])) {
-        $this->error = 'Price is required';
-        break;
-      } elseif ($item['quantity'] <= 0) {
-        $this->error = 'Quantity must be greater than 0';
-        break;
-      } elseif ($item['price'] <= 0) {
-        $this->error = 'Price must be greater than 0';
-        break;
-      }
-    }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateCreateCustomer(array $data): bool
   {
-    $this->error = '';
-
-    $this->validateEmail($data);
-    if (!array_key_exists('first_name', $data) || empty($data['first_name'])) {
-      $this->error = 'First name is required';
-    } elseif (!array_key_exists('last_name', $data) || empty($data['last_name'])) {
-      $this->error = 'Last name is required';
-    } elseif (!array_key_exists('phone', $data) || empty($data['phone'])) {
-      $this->error = 'Phone is required';
-    } elseif (!array_key_exists('address', $data) || empty($data['address'])) {
-      $this->error = 'Address is required';
+    $validator = new Validator($data);
+    $validator->rule('email', new Required('Email is required'))
+      ->rule('email', new Email())
+      ->rule('first_name', new Required('First Name is required'))
+      ->rule('last_name', new Required('Last Name is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('address', new Required('Address is required'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateCreateProduct(array $data): bool
   {
-    $this->error = '';
-
-    if (!array_key_exists('product_name', $data) || empty($data['product_name'])) {
-      $this->error = 'Product name is required';
-    } elseif (!array_key_exists('product_code', $data) || empty($data['product_code'])) {
-      $this->error = 'Product code is required';
-    } elseif (!array_key_exists('unit_id', $data) || empty($data['unit_id'])) {
-      $this->error = 'Unit is required';
-    } elseif (!array_key_exists('categories', $data) || empty($data['categories'])) {
-      $this->error = 'Category is required';
-    } elseif (!array_key_exists('reorder_level', $data) || empty($data['reorder_level'])) {
-      $this->error = 'Reorder level is required';
-    } elseif (!array_key_exists('reorder_quantity', $data) || empty($data['reorder_quantity'])) {
-      $this->error = 'Reorder quantity is required';
+    $validator = new Validator($data);
+    $validator->rule('product_name', new Required('Product Name is required'))
+      ->rule('product_code', new Required('Product Code is required'))
+      ->rule('unit_id', new Required('Unit ID is required'))
+      ->rule('unit_id', new IsNumeric('Invalid Unit ID'))
+      ->rule('categories', new Required('Categories are required'))
+      ->rule('categories', new IsArray(1, null, 'Categories must be an array'))
+      ->rule('categories.*', new IsNumeric('Invalid Category ID'))
+      ->rule('reorder_level', new Required('Reorder Level is required'))
+      ->rule('reorder_level', new IsNumeric('Reorder Level must be numeric'))
+      ->rule('reorder_quantity', new Required('Reorder Quantity is required'))
+      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
+    return true;
   }
 
   public function validateUpdateProduct(array $data): bool
   {
-    $this->error = '';
-
-    if (!array_key_exists('product_name', $data) || empty($data['product_name'])) {
-      $this->error = 'Product name is required';
-    } elseif (!array_key_exists('product_code', $data) || empty($data['product_code'])) {
-      $this->error = 'Product code is required';
-    } elseif (!array_key_exists('unit_id', $data) || empty($data['unit_id'])) {
-      $this->error = 'Unit is required';
-    } elseif (!array_key_exists('categories', $data) || empty($data['categories'])) {
-      $this->error = 'Category is required';
-    } elseif (!array_key_exists('reorder_level', $data) || empty($data['reorder_level'])) {
-      $this->error = 'Reorder level is required';
-    } elseif (!array_key_exists('reorder_quantity', $data) || empty($data['reorder_quantity'])) {
-      $this->error = 'Reorder quantity is required';
+    $validator = new Validator($data);
+    $validator->rule('product_name', new Required('Product Name is required'))
+      ->rule('product_code', new Required('Product Code is required'))
+      ->rule('unit_id', new Required('Unit ID is required'))
+      ->rule('unit_id', new IsNumeric('Invalid Unit ID'))
+      ->rule('categories', new Required('Categories are required'))
+      ->rule('categories', new IsArray(1, null, 'Categories must be an array'))
+      ->rule('categories.*', new IsNumeric('Invalid Category ID'))
+      ->rule('reorder_level', new Required('Reorder Level is required'))
+      ->rule('reorder_level', new IsNumeric('Reorder Level must be numeric'))
+      ->rule('reorder_quantity', new Required('Reorder Quantity is required'))
+      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
     }
-
-    return $this->error === '';
-  }
-
-  public function validateEmail(array $data): void
-  {
-    if (!array_key_exists('email', $data) || empty($data['email'])) {
-      $this->error = 'Email is required';
-    } elseif (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-      $this->error = 'Invalid email format';
-    }
+    return true;
   }
 
   /**
@@ -179,6 +182,6 @@ class ValidationService
    */
   public function getError(): string
   {
-    return $this->error;
+    return array_values($this->errors)[0][0] ?? '';
   }
 }

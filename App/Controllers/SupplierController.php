@@ -2,11 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Core\{Controller, View};
 use App\Models\{BranchModel, SupplierModel};
-use App\Services\ValidationService;
 
-class SupplierController
+class SupplierController extends Controller
 {
   public function index(): void
   {
@@ -54,9 +53,8 @@ class SupplierController
 
   public function createSupplier(): void
   {
-    $validator = new ValidationService();
-    if (!$validator->validateCreateSupplier($_POST)) {
-      $this->index($validator->getError(), 'error');
+    if (!$this->validator->validateCreateSupplier($_POST)) {
+      $this->index($this->validator->getError(), 'error');
       return;
     }
     $supplierModel = new SupplierModel();
@@ -69,9 +67,8 @@ class SupplierController
 
   public function updateSupplier(array $params): void
   {
-    $validator = new ValidationService();
-    if (!$validator->validateCreateSupplier($_POST)) {
-      $this->details($params, $validator->getError(), 'error');
+    if (!$this->validator->validateCreateSupplier($_POST)) {
+      $this->details($params, $this->validator->getError(), 'error');
       return;
     }
     $supplierModel = new SupplierModel();
