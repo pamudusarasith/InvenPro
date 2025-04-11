@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\{Controller, View};
 use App\Models\{BranchModel, SupplierModel};
+use App\Services\ValidationService;
 
 class SupplierController extends Controller
 {
@@ -51,10 +52,26 @@ class SupplierController extends Controller
     ]);
   }
 
+  public function search(): void
+  {
+    $query = $_GET['q'] ?? '';
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+
+    $supplierModel = new SupplierModel();
+    $suppliers = $supplierModel->searchSuppliers($query, $page, $itemsPerPage);
+
+    self::sendJSON([
+      'success' => true,
+      'data' => $suppliers,
+    ]);
+  }
+
   public function createSupplier(): void
   {
-    if (!$this->validator->validateCreateSupplier($_POST)) {
-      $this->index($this->validator->getError(), 'error');
+    $validator = new ValidationService();
+    if (!$validator->validateCreateSupplier($_POST)) {
+      $this->index($validator->getError(), 'error');
       return;
     }
     $supplierModel = new SupplierModel();
@@ -67,8 +84,9 @@ class SupplierController extends Controller
 
   public function updateSupplier(array $params): void
   {
-    if (!$this->validator->validateCreateSupplier($_POST)) {
-      $this->details($params, $this->validator->getError(), 'error');
+    $validator = new ValidationService();
+    if (!$validator->validateCreateSupplier($_POST)) {
+      $this->details($params, $validator->getError(), 'error');
       return;
     }
     $supplierModel = new SupplierModel();
@@ -87,5 +105,20 @@ class SupplierController extends Controller
     $_SESSION['message'] = 'Supplier deleted successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/suppliers');
+  }
+
+  public function searchProducts(array $params): void
+  {
+    $query = $_GET['q'] ?? '';
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+
+    $supplierModel = new SupplierModel();
+    $products = $supplierModel->searchProducts($params['id'], $query, $page, $itemsPerPage);
+
+    self::sendJSON([
+      'success' => true,
+      'data' => $products,
+    ]);
   }
 }

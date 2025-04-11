@@ -25,6 +25,9 @@ return [
     '/api/pos/search' => 'App\Controllers\POSController::searchProducts',
     '/api/category/search' => 'App\Controllers\CategoryController::search',
     '/api/pos/customer/search' => 'App\Controllers\CustomerController::search',
+    '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
+    '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
+    '/api/products/search' => 'App\Controllers\ProductsController::search',
   ],
 
   'POST' => [
@@ -39,5 +42,6 @@ return [
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
+    '/orders/new' => 'App\Controllers\OrderController::createOrder',
   ],
 ];
