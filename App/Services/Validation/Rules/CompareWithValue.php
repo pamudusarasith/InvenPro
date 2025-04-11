@@ -33,7 +33,7 @@ class CompareWithValue extends Rule
 
   public function apply($value, string $field, array $data): bool
   {
-    if ($value === null) {
+    if (in_array($value, [null, '', []])) {
       return true; // Skip validation if null (use Required rule for this check)
     }
 

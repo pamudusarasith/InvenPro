@@ -175,6 +175,32 @@ class ValidationService
     return true;
   }
 
+  public function validateCreateOrder(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('reference', new Required('Reference is required'))
+      ->rule('supplier_id', new Required('Supplier ID is required'))
+      ->rule('supplier_id', new IsNumeric('Invalid Supplier ID'))
+      ->rule('order_date', new Required('Order Date is required'))
+      ->rule('order_date', new IsDate('Y-m-d', 'Invalid Order Date'))
+      ->rule('order_date', new CompareWithValue('>=', date('Y-m-d'), 'date', 'Order Date must be today or in the future'))
+      ->rule('expected_date', new IsDate('Y-m-d', 'Invalid Expected Date'))
+      ->rule('expected_date', new CompareWithField('>=', 'order_date', 'date', 'Expected Date must be today or in the future'))
+      ->rule('order_items', new Required('Items are required'))
+      ->rule('order_items', new IsArray(1, null, 'Items must be an array'))
+      ->rule('order_items.*.id', new Required('Product ID is required'))
+      ->rule('order_items.*.id', new IsNumeric('Invalid Product ID'))
+      ->rule('order_items.*.quantity', new Required('Quantity is required'))
+      ->rule('order_items.*.quantity', new IsNumeric('Quantity must be numeric'))
+      ->rule('order_items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('notes', new IsString(0, 255, 'Notes must be a string between 0 and 255 characters'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Get validation error
    *

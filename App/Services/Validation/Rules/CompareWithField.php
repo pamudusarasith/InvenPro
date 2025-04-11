@@ -34,8 +34,8 @@ class CompareWithField extends Rule
 
   public function apply($value, string $field, array $data): bool
   {
-    if ($value === null) {
-      return true; // Skip validation if null (use Required rule for this check)
+    if (in_array($value, [null, '', []]) || in_array($this->compareField, [null, '', []])) {
+      return true;
     }
 
     // Get the value of the field to compare with
