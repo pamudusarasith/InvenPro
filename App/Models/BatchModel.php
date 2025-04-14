@@ -34,8 +34,6 @@ class BatchModel extends Model
                 batch_code = ?,
                 manufactured_date = ?,
                 expiry_date = ?,
-                unit_price = ?,
-                current_quantity = ?
             WHERE id = ?
         ';
 
@@ -43,8 +41,6 @@ class BatchModel extends Model
             $data['batch_code'],
             $data['manufactured_date'],
             $data['expiry_date'],
-            $data['unit_price'],
-            $data['quantity'],
             $data['id']
         ]);
     }

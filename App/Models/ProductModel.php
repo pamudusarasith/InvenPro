@@ -263,4 +263,32 @@ class ProductModel extends Model
     ';
     self::$db->query($sql, [$id]);
   }
+
+  public function getSuppliersByProductId(int $productId): array
+  {
+    $sql = '
+      SELECT
+        s.supplier_name,
+        s.contact_person,
+        sp.is_preferred_supplier
+      FROM supplier_product sp
+      INNER JOIN supplier s ON sp.supplier_id = s.id AND sp.branch_id = s.branch_id
+      WHERE sp.product_id = ? AND sp.branch_id = ?
+    ';
+    $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll();
+  }
 }
+
+//         SELECT
+//     *
+// FROM
+//     supplier_product sp
+// INNER JOIN supplier s ON
+//     sp.supplier_id = s.id AND sp.branch_id = s.branch_id
+// LEFT JOIN purchase_order_item poi ON
+//     sp.product_id = poi.product_id
+// LEFT JOIN purchase_order po ON
+//     poi.po_id = po.id AND po.branch_id = s.branch_id
+// WHERE
+//     sp.product_id = 1
