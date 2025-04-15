@@ -22,6 +22,12 @@ class BatchController extends Controller
 
     public function updateBatch(array $params)
     {
+        if (!$this->validator->validateUpdateBatch($_POST)) {
+            $_SESSION['message'] = $this->validator->getError();
+            $_SESSION['message_type'] = 'error';
+            View::redirect('/products/' . $_POST['product_id']);
+        }
+
         $batchModel = new BatchModel();
         $_POST['id'] = $params['id'];
         $batchModel->updateBatch($_POST);

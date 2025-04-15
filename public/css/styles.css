@@ -708,18 +708,21 @@ body {
   background: var(--success-50);
   color: var(--success-600);
   border: 1px solid var(--success-200);
+  margin-right: 1rem;
 }
 
 .badge.warning {
   background: var(--warning-50);
   color: var(--warning-600);
   border: 1px solid var(--warning-200);
+  margin-right: 1rem;
 }
 
 .badge.danger {
   background: var(--danger-50);
   color: var(--danger-600);
   border: 1px solid var(--danger-200);
+  margin-right: 1rem;
 }
 
 /* Form styles */
@@ -1247,6 +1250,10 @@ dialog::backdrop {
   padding: 1.5rem;
 }
 
+.category-stats {
+  margin-left: auto;
+}
+
 .category.open .category-content {
   display: block;
 }
@@ -1343,6 +1350,7 @@ dialog::backdrop {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .stat-card {
