@@ -32,20 +32,72 @@ unset($_SESSION['message'], $_SESSION['message_type']);
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
-        <input type="text" id="searchInput" placeholder="Search suppliers...">
+        <input type="text" id="searchInput" placeholder="Search suppliers..." oninput="filterSuppliers()">
       </div>
+
+      <script>
+        function filterSuppliers() {
+          const searchInput = document.getElementById('searchInput').value.toLowerCase();
+          const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+          tableRows.forEach(row => {
+        const supplierName = row.children[0].textContent.toLowerCase();
+        const email = row.children[2].textContent.toLowerCase();
+
+        if (supplierName.includes(searchInput) || email.includes(searchInput)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+          });
+        }
+      </script>
       <div class="filters">
-        <select id="filterBranch">
+        <select id="filterBranch" onchange="filterByBranch()">
           <option value="">All Branches</option>
           <?php foreach ($branches as $branch): ?>
-            <option value="<?= $branch['id'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
+            <option value="<?= $branch['branch_name'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
           <?php endforeach; ?>
         </select>
-        <select id="filterStatus">
+
+        <script>
+          function filterByBranch() {
+            const selectedBranch = document.getElementById('filterBranch').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+            tableRows.forEach(row => {
+              const branchName = row.children[4].textContent.toLowerCase();
+
+              if (!selectedBranch || branchName === selectedBranch) {
+          row.style.display = '';
+              } else {
+          row.style.display = 'none';
+              }
+            });
+          }
+        </script>
+        <select id="filterStatus" onchange="filterByStatus()">
           <option value="">All Status</option>
-          <option value="active" selected>Active</option>
+          <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
+
+        <script>
+          function filterByStatus() {
+            const selectedStatus = document.getElementById('filterStatus').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+            tableRows.forEach(row => {
+              const status = row.children[5].textContent.toLowerCase();
+
+              if (!selectedStatus || status.includes(selectedStatus)) {
+          row.style.display = '';
+              } else {
+          row.style.display = 'none';
+              }
+            });
+          }
+        </script>
       </div>
     </div>
 
