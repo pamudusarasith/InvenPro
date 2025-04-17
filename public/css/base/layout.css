@@ -1,0 +1,43 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Ubuntu, serif;
+  scrollbar-width: thin;
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+}
+
+.body {
+  display: grid;
+  grid-template-areas:
+    "navbar navbar"
+    "sidebar main";
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.body.pos {
+  grid-template-areas:
+    "navbar"
+    "main";
+  grid-template-columns: 1fr;
+}
+
+.main {
+  grid-area: main;
+  padding: 2rem;
+  background: var(--surface-light);
+  height: 100%;
+  overflow: auto;
+}
+
+.body.pos .main {
+  padding: 1rem;
+}
