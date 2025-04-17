@@ -3,10 +3,6 @@
 use App\Services\RBACService;
 
 $branches = $branches ?? [];
-
-$message = $_SESSION['message'] ?? null;
-$messageType = $_SESSION['message_type'] ?? 'error';
-unset($_SESSION['message'], $_SESSION['message_type']);
 ?>
 
 <div class="body">
@@ -41,14 +37,14 @@ unset($_SESSION['message'], $_SESSION['message_type']);
           const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
 
           tableRows.forEach(row => {
-        const supplierName = row.children[0].textContent.toLowerCase();
-        const email = row.children[2].textContent.toLowerCase();
+            const supplierName = row.children[0].textContent.toLowerCase();
+            const email = row.children[2].textContent.toLowerCase();
 
-        if (supplierName.includes(searchInput) || email.includes(searchInput)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
+            if (supplierName.includes(searchInput) || email.includes(searchInput)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
           });
         }
       </script>
@@ -69,9 +65,9 @@ unset($_SESSION['message'], $_SESSION['message_type']);
               const branchName = row.children[4].textContent.toLowerCase();
 
               if (!selectedBranch || branchName === selectedBranch) {
-          row.style.display = '';
+                row.style.display = '';
               } else {
-          row.style.display = 'none';
+                row.style.display = 'none';
               }
             });
           }
@@ -91,9 +87,9 @@ unset($_SESSION['message'], $_SESSION['message_type']);
               const status = row.children[5].textContent.toLowerCase();
 
               if (!selectedStatus || status.includes(selectedStatus)) {
-          row.style.display = '';
+                row.style.display = '';
               } else {
-          row.style.display = 'none';
+                row.style.display = 'none';
               }
             });
           }
@@ -255,15 +251,6 @@ unset($_SESSION['message'], $_SESSION['message_type']);
   </dialog>
 <?php endif; ?>
 
-<!-- Message Popup -->
-<div id="messagePopup" class="popup <?= $messageType ?>">
-  <span class="icon"><?= $messageType === 'success' ? 'check_circle' : 'error' ?></span>
-  <span class="popup-message"><?= htmlspecialchars($message ?? '') ?></span>
-  <button class="popup-close" onclick="closePopup()">
-    <span class="icon">close</span>
-  </button>
-</div>
-
 <script>
   function changePage(pageNo) {
     const url = new URL(location.href);
@@ -278,19 +265,8 @@ unset($_SESSION['message'], $_SESSION['message_type']);
     location.href = url.toString();
   }
 
-  <?php if ($message): ?>
-    window.addEventListener('load', () => {
-      const popup = document.getElementById('messagePopup');
-      popup.classList.add('show');
-    });
-  <?php endif; ?>
-
-  function closePopup() {
-    const popup = document.getElementById('messagePopup');
-    popup.classList.remove('show');
-  }
-
   <?php if (RBACService::hasPermission('add_supplier')): ?>
+
     function openAddSupplierDialog() {
       const dialog = document.getElementById('addSupplierModal');
       dialog.showModal();

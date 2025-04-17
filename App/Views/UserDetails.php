@@ -5,10 +5,6 @@ use App\Services\RBACService;
 $roles = $roles ?? [];
 $branches = $branches ?? [];
 $activities = $activities ?? [];
-
-$message = $_SESSION['message'] ?? null;
-$messageType = $_SESSION['message_type'] ?? 'error';
-unset($_SESSION['message'], $_SESSION['message_type']);
 ?>
 
 <div class="body">
@@ -242,23 +238,6 @@ unset($_SESSION['message'], $_SESSION['message_type']);
     </div>
 </div>
 
-<?php
-$popupIcon = 'error';
-if ($messageType === 'success') {
-    $popupIcon = 'check_circle';
-} elseif ($messageType === 'warning') {
-    $popupIcon = 'warning';
-}
-?>
-
-<div id="messagePopup" class="popup <?= $messageType ?>">
-    <span class="icon"><?= $popupIcon ?></span>
-    <span class="popup-message"><?= htmlspecialchars($message ?? '') ?></span>
-    <button class="popup-close" onclick="closePopup()">
-        <span class="icon">close</span>
-    </button>
-</div>
-
 <script>
     function switchTab(tabId) {
         // Remove active class from all tabs and contents
@@ -312,16 +291,4 @@ if ($messageType === 'success') {
         const form = document.getElementById('details-form');
         form.submit();
     }
-
-    <?php if ($message): ?>
-        window.addEventListener('load', () => {
-            const popup = document.getElementById('messagePopup');
-            popup.classList.add('show');
-        });
-
-        function closePopup() {
-            const popup = document.getElementById('messagePopup');
-            popup.classList.remove('show');
-        }
-    <?php endif; ?>
 </script>

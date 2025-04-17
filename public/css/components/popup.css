@@ -1,0 +1,71 @@
+.popup {
+  position: fixed;
+  right: -400px;
+  top: 5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: var(--surface-white);
+  box-shadow: var(--shadow-lg);
+  max-width: 360px;
+  z-index: 9999;
+  transition: right 0.3s ease-in-out;
+}
+
+.popup.show {
+  right: 1.5rem;
+}
+
+.popup.success {
+  background: var(--success-50);
+  border-left: 4px solid var(--success-500);
+}
+
+.popup.error {
+  background: var(--danger-50);
+  border-left: 4px solid var(--danger-500);
+}
+
+.popup.warning {
+  background: var(--warning-50);
+  border-left: 4px solid var(--warning-500);
+}
+
+.popup .icon {
+  font-size: 1.5rem;
+}
+
+.popup.success .icon {
+  color: var(--success-600);
+}
+
+.popup.error .icon {
+  color: var(--danger-600);
+}
+
+.popup.warning .icon {
+  color: var(--warning-600);
+}
+
+.popup-message {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.popup-close {
+  padding: 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.popup-close:hover {
+  background: var(--overlay-dark);
+  color: var(--text-primary);
+}

@@ -1,0 +1,132 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--primary-600);
+  color: var(--surface-white);
+}
+
+.btn-primary:hover {
+  background: var(--primary-700);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--surface-mild);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-medium);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: var(--danger-600);
+  color: var(--surface-white);
+}
+
+.btn-danger:hover {
+  background: var(--danger-700);
+  transform: translateY(-1px);
+}
+
+.action-btn {
+  padding: 0.5rem;
+  margin-left: 0.25rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--surface-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: var(--surface-light);
+  color: var(--primary-600);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.action-btn.edit {
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.action-btn.delete {
+  background: var(--danger-50);
+  color: var(--danger-600);
+}
+
+.action-btn.edit:hover {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  transform: translateY(-2px);
+}
+
+.action-btn.delete:hover {
+  background: var(--danger-100);
+  color: var(--danger-700);
+  transform: translateY(-2px);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.75rem;
+  background: var(--primary-50);
+  color: var(--primary-600);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-btn .icon {
+  font-size: 1.25rem;
+}
+
+.icon-btn:hover {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.icon-btn.secondary {
+  background: var(--surface-mild);
+  color: var(--text-secondary);
+}
+
+.icon-btn.secondary:hover {
+  background: var(--surface-medium);
+  color: var(--text-primary);
+}
+
+.icon-btn.danger {
+  background: var(--danger-50);
+  color: var(--danger-600);
+}
+
+.icon-btn.danger:hover {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
