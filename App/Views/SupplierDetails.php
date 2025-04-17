@@ -2,10 +2,6 @@
 
 use App\Services\RBACService;
 
-$message = $_SESSION['message'] ?? null;
-$messageType = $_SESSION['message_type'] ?? 'error';
-unset($_SESSION['message'], $_SESSION['message_type']);
-
 $branches = $branches ?? [];
 ?>
 
@@ -282,24 +278,6 @@ $branches = $branches ?? [];
   </dialog>
 <?php endif; ?>
 
-<!-- Include message popup from existing code -->
-<?php
-$popupIcon = 'error';
-if ($messageType === 'success') {
-  $popupIcon = 'check_circle';
-} elseif ($messageType === 'warning') {
-  $popupIcon = 'warning';
-}
-?>
-
-<div id="messagePopup" class="popup <?= $messageType ?>">
-  <span class="icon"><?= $popupIcon ?></span>
-  <span class="popup-message"><?= htmlspecialchars($message ?? '') ?></span>
-  <button class="popup-close" onclick="closePopup()">
-    <span class="icon">close</span>
-  </button>
-</div>
-
 <script>
   // Reuse existing tab switching functionality
   function switchTab(tabId) {
@@ -311,19 +289,19 @@ if ($messageType === 'success') {
   }
 
   function enableEditing() {
-        // Add edit mode class to header
-        document.querySelector('.details-header').classList.add('edit-mode');
+    // Add edit mode class to header
+    document.querySelector('.details-header').classList.add('edit-mode');
 
-        // Enable all form inputs
-        document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
-            input.disabled = false;
-        });
+    // Enable all form inputs
+    document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
+      input.disabled = false;
+    });
 
-        // Scroll to form
-        document.querySelector('.tab-content.active').scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
+    // Scroll to form
+    document.querySelector('.tab-content.active').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
 
   function cancelEdit() {
     if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
@@ -381,15 +359,5 @@ if ($messageType === 'success') {
 
   function editProduct(productId) {
     // Implement product editing logic
-  }
-
-  <?php if ($message): ?>
-    window.addEventListener('load', () => {
-      document.getElementById('messagePopup').classList.add('show');
-    });
-  <?php endif; ?>
-
-  function closePopup() {
-    document.getElementById('messagePopup').classList.remove('show');
   }
 </script>

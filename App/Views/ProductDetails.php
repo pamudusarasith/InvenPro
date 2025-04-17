@@ -3,7 +3,7 @@
 use App\Services\RBACService;
 
 ?>
-<link rel="stylesheet" href="/css/productdetails.css">
+
 <div class="body">
   <?php App\Core\View::render("Navbar") ?>
   <?php App\Core\View::render("Sidebar") ?>
