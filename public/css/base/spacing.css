@@ -1,0 +1,234 @@
+/* Vertical spacing */
+.v-space-xs {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.v-space-sm {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.v-space-md {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.v-space-lg {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.v-space-xl {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Horizontal spacing */
+.h-space-xs {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+.h-space-sm {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+.h-space-md {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+.h-space-lg {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+.h-space-xl {
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+/* One-sided spacing utilities */
+.mt-xs {
+  margin-top: 0.25rem;
+}
+.mt-sm {
+  margin-top: 0.5rem;
+}
+.mt-md {
+  margin-top: 1rem;
+}
+.mt-lg {
+  margin-top: 1.5rem;
+}
+.mt-xl {
+  margin-top: 2rem;
+}
+
+.mb-xs {
+  margin-bottom: 0.25rem;
+}
+.mb-sm {
+  margin-bottom: 0.5rem;
+}
+.mb-md {
+  margin-bottom: 1rem;
+}
+.mb-lg {
+  margin-bottom: 1.5rem;
+}
+.mb-xl {
+  margin-bottom: 2rem;
+}
+
+.ml-xs {
+  margin-left: 0.25rem;
+}
+.ml-sm {
+  margin-left: 0.5rem;
+}
+.ml-md {
+  margin-left: 1rem;
+}
+.ml-lg {
+  margin-left: 1.5rem;
+}
+.ml-xl {
+  margin-left: 2rem;
+}
+
+.mr-xs {
+  margin-right: 0.25rem;
+}
+.mr-sm {
+  margin-right: 0.5rem;
+}
+.mr-md {
+  margin-right: 1rem;
+}
+.mr-lg {
+  margin-right: 1.5rem;
+}
+.mr-xl {
+  margin-right: 2rem;
+}
+
+/* Vertical padding */
+.v-pad-xs {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.v-pad-sm {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.v-pad-md {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.v-pad-lg {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+.v-pad-xl {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+/* Horizontal padding */
+.h-pad-xs {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+.h-pad-sm {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.h-pad-md {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.h-pad-lg {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.h-pad-xl {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+/* One-sided padding utilities */
+.pt-xs {
+  padding-top: 0.25rem;
+}
+.pt-sm {
+  padding-top: 0.5rem;
+}
+.pt-md {
+  padding-top: 1rem;
+}
+.pt-lg {
+  padding-top: 1.5rem;
+}
+.pt-xl {
+  padding-top: 2rem;
+}
+
+.pb-xs {
+  padding-bottom: 0.25rem;
+}
+.pb-sm {
+  padding-bottom: 0.5rem;
+}
+.pb-md {
+  padding-bottom: 1rem;
+}
+.pb-lg {
+  padding-bottom: 1.5rem;
+}
+.pb-xl {
+  padding-bottom: 2rem;
+}
+
+.pl-xs {
+  padding-left: 0.25rem;
+}
+.pl-sm {
+  padding-left: 0.5rem;
+}
+.pl-md {
+  padding-left: 1rem;
+}
+.pl-lg {
+  padding-left: 1.5rem;
+}
+.pl-xl {
+  padding-left: 2rem;
+}
+
+.pr-xs {
+  padding-right: 0.25rem;
+}
+.pr-sm {
+  padding-right: 0.5rem;
+}
+.pr-md {
+  padding-right: 1rem;
+}
+.pr-lg {
+  padding-right: 1.5rem;
+}
+.pr-xl {
+  padding-right: 2rem;
+}
+
+/* All-sides padding */
+.pad-xs {
+  padding: 0.25rem;
+}
+.pad-sm {
+  padding: 0.5rem;
+}
+.pad-md {
+  padding: 1rem;
+}
+.pad-lg {
+  padding: 1.5rem;
+}
+.pad-xl {
+  padding: 2rem;
+}

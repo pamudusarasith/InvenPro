@@ -2,15 +2,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
 
 /* Import the modular CSS files */
-@import "base/variables.css";
-@import "base/typography.css";
 @import "base/layout.css";
+@import "base/spacing.css";
+@import "base/typography.css";
+@import "base/variables.css";
 
 @import "components/badges.css";
 @import "components/buttons.css";
 @import "components/cards.css";
 @import "components/common.css";
 @import "components/dropdown.css";
+@import "components/flex.css";
 @import "components/forms.css";
 @import "components/modals.css";
 @import "components/navbar.css";
