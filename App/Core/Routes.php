@@ -28,6 +28,7 @@ return [
     '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
     '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
     '/api/products/search' => 'App\Controllers\ProductsController::search',
+    '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
   ],
 
   'POST' => [

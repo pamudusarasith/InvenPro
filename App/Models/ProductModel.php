@@ -279,16 +279,3 @@ class ProductModel extends Model
     return $stmt->fetchAll();
   }
 }
-
-//         SELECT
-//     *
-// FROM
-//     supplier_product sp
-// INNER JOIN supplier s ON
-//     sp.supplier_id = s.id AND sp.branch_id = s.branch_id
-// LEFT JOIN purchase_order_item poi ON
-//     sp.product_id = poi.product_id
-// LEFT JOIN purchase_order po ON
-//     poi.po_id = po.id AND po.branch_id = s.branch_id
-// WHERE
-//     sp.product_id = 1

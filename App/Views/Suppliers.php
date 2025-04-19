@@ -239,6 +239,7 @@ unset($_SESSION['message'], $_SESSION['message_type']);
   }
 
   <?php if (RBACService::hasPermission('add_supplier')): ?>
+
     function openAddSupplierDialog() {
       const dialog = document.getElementById('addSupplierModal');
       dialog.showModal();

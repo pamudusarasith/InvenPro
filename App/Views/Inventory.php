@@ -24,7 +24,7 @@ use App\Services\RBACService; ?>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">inventory</span>
+                    <span class="icon">check_circle</span>
                     <span class="stat-label">In Stock Products</span>
                 </div>
                 <?php
@@ -41,7 +41,7 @@ use App\Services\RBACService; ?>
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">shopping_cart</span>
+                    <span class="icon">warning</span>
                     <span class="stat-label">Low Stock Products</span>
                 </div>
                 <?php
@@ -58,7 +58,7 @@ use App\Services\RBACService; ?>
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">payments</span>
+                    <span class="icon">error</span>
                     <span class="stat-label">Out Of Stock Products</span>
                 </div>
                 <?php
