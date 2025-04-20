@@ -20,7 +20,7 @@
   background: var(--success-50);
 }
 
-.status-cancelled {
+.status-canceled {
   color: var(--danger-700);
   background: var(--danger-50);
 }

@@ -12,10 +12,9 @@
             ['url' => '/inventory', 'icon' => 'inventory_2', 'label' => 'Inventory', 'permission' => 'manage_inventory'],
             ['url' => '/customers', 'icon' => 'people_alt', 'label' => 'Customers', 'permission' => 'manage_customers'],
             ['url' => '/suppliers', 'icon' => 'local_shipping', 'label' => 'Suppliers', 'permission' => 'manage_suppliers'],
-            ['url' => '/orders', 'icon' => 'orders', 'label' => 'Orders', 'permission' => 'manage_orders'],
+            ['url' => '/orders', 'icon' => 'orders', 'label' => 'Purchase Orders', 'permission' => 'manage_orders'],
             ['url' => '/discounts', 'icon' => 'percent', 'label' => 'Discounts', 'permission' => 'manage_discounts'],
             ['url' => '/reports', 'icon' => 'bar_chart', 'label' => 'Reports', 'permission' => 'manage_reports'],
-            ['url' => '/employees', 'icon' => 'badge', 'label' => 'Employees', 'permission' => 'manage_employees'],
         ];
 
         foreach ($menuItems as $item):
