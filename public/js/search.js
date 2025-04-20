@@ -44,7 +44,7 @@ class SearchHandler {
     this.inputElement.addEventListener("focusout", () => {
       setTimeout(() => {
         this.resultsContainer.innerHTML = "";
-      }, 200);
+      }, 1000);
     });
 
     // Handle scrolling for pagination
