@@ -35,4 +35,14 @@ class BatchController extends Controller
         $_SESSION['message_type'] = 'success';
         View::redirect('/products/' . $_POST['product_id']);
     }
+
+    public function deleteBatch(array $params)
+    {
+        $batchModel = new BatchModel();
+        $batchModel->deleteBatch($params['id']);
+
+        $_SESSION['message'] = 'Batch deleted successfully';
+        $_SESSION['message_type'] = 'success';
+        View::redirect($_SERVER['HTTP_REFERER']);
+    }
 }

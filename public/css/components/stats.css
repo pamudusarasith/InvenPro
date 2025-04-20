@@ -26,13 +26,7 @@
   margin-bottom: 0.75rem;
   color: var(--text-secondary);
 }
-
-.stat-header .icon {
-  font-size: 1.25rem;
-  color: var(--primary-600);
-}
-
-.stat-label {
+s .stat-label {
   font-size: 0.875rem;
   font-weight: 500;
 }

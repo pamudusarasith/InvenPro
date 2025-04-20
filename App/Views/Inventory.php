@@ -24,7 +24,7 @@ use App\Services\RBACService; ?>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">check_circle</span>
+                    <span class="icon text-success">check_circle</span>
                     <span class="stat-label">In Stock Products</span>
                 </div>
                 <?php
@@ -41,7 +41,7 @@ use App\Services\RBACService; ?>
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">warning</span>
+                    <span class="icon text-warning">warning</span>
                     <span class="stat-label">Low Stock Products</span>
                 </div>
                 <?php
@@ -58,7 +58,7 @@ use App\Services\RBACService; ?>
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="icon">error</span>
+                    <span class="icon text-danger">error</span>
                     <span class="stat-label">Out Of Stock Products</span>
                 </div>
                 <?php
@@ -105,7 +105,7 @@ use App\Services\RBACService; ?>
                     <button class="category-header">
                         <h2><?php echo $category['category_name']; ?></h2>
                         <div class="category-stats">
-                            <span class="badge success">
+                            <span class="badge success mr-sm">
                                 In Stock:
                                 <?php
                                 $inStockCount = 0;
@@ -117,7 +117,7 @@ use App\Services\RBACService; ?>
                                 echo $inStockCount;
                                 ?>
                             </span>
-                            <span class="badge warning">
+                            <span class="badge warning mr-sm">
                                 Low Stock:
                                 <?php
                                 $lowStockCount = 0;
@@ -129,7 +129,7 @@ use App\Services\RBACService; ?>
                                 echo $lowStockCount;
                                 ?>
                             </span>
-                            <span class="badge danger">
+                            <span class="badge danger mr-sm">
                                 Out of Stock:
                                 <?php
                                 $outOfStockCount = 0;
