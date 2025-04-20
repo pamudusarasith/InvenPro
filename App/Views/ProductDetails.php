@@ -206,7 +206,7 @@ use App\Services\RBACService;
                         </button>
                       <?php endif; ?>
                       <?php if (RBACService::hasPermission('delete_batch')): ?>
-                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="openEditBatchDetailsDialog(event)">
+                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="deleteBatch(<?= $batch['id'] ?>)">
                           <span class=" icon">delete</span>
                         </button>
                       <?php endif; ?>
@@ -491,5 +491,12 @@ use App\Services\RBACService;
   function closeEditBatchDetailsDialog() {
     document.getElementById('batchDetailsForm').reset();
     document.getElementById('batchDetailsDialog').close();
+  }
+
+  function deleteBatch(batchId) {
+    if (!confirm('Are you sure you want to delete this batch?')) {
+      return;
+    }
+    window.location.href = `/batch/${batchId}/delete`;
   }
 </script>

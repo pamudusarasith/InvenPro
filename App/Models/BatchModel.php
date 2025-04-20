@@ -44,4 +44,14 @@ class BatchModel extends Model
             $data['id']
         ]);
     }
+
+    public function deleteBatch(int $id)
+    {
+        $sql = '
+            UPDATE product_batch
+            SET deleted_at = NOW()
+            WHERE id = ?
+        ';
+        self::$db->query($sql, [$id]);
+    }
 }

@@ -33,6 +33,9 @@ return [
     '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
     '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
     '/api/products/search' => 'App\Controllers\ProductsController::search',
+    '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
+    '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
+    '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
   ],
 
   'POST' => [
@@ -48,6 +51,8 @@ return [
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
     '/orders/new' => 'App\Controllers\OrderController::createOrder',
+    '/categories/new' => 'App\Controllers\CategoryController::createCategory',
+    '/categories/{id}/update' => 'App\Controllers\CategoryController::updateCategory',
     '/orders/{id}/update' => 'App\Controllers\OrderController::updateOrder',
     '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
   ],
