@@ -128,9 +128,12 @@ class SupplierModel extends Model
     $sql = '
       SELECT
         p.id,
-        p.product_name
+        p.product_name,
+        u.unit_symbol,
+        u.is_int
       FROM supplier_product sp
       INNER JOIN product p ON sp.product_id = p.id
+      INNER JOIN unit u ON p.unit_id = u.id
       WHERE p.deleted_at IS NULL
         AND sp.supplier_id = ?
         AND sp.branch_id = ?
