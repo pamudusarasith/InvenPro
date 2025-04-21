@@ -20,6 +20,39 @@
   font-size: 0.875rem;
 }
 
+.search-bar-with-btn {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  background: var(--surface-light);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  position: relative;
+}
+
+.search-bar-with-btn input {
+  border: none;
+  outline: none;
+  width: 100%;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.search-bar-with-btn button {
+  padding: 0.75rem 1rem;
+  background: var(--primary-500);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+}
+
 .search-results {
   display: flex;
   flex-direction: column;
