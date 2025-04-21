@@ -1,0 +1,138 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.form-grid .span-2 {
+  grid-column: span 2;
+}
+
+.form-grid .form-field {
+  margin-bottom: 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-field input:not(.search-bar input),
+.form-field select,
+.form-field textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  background: var(--surface-white);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.form-field select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--surface-white);
+  color: var(--text-primary);
+}
+
+.form-field select:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.form-field input:not(.search-bar input):focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--primary-300);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.form-field input:not(.search-bar input):hover,
+.form-field select:hover,
+.form-field textarea:hover {
+  border-color: var(--primary-300);
+}
+
+.form-field input:not(.search-bar input)::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled {
+  background: var(--surface-light);
+  cursor: not-allowed;
+}
+
+.form-field.error input,
+.form-field.error select,
+.form-field.error textarea {
+  border-color: var(--danger-300);
+}
+
+.form-field.error .error-message {
+  color: var(--danger-500);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.form-info {
+  background: var(--surface-medium);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.info-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.info-text .icon {
+  font-size: 1.25rem;
+}
+
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface-white);
+  padding: 1.5rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  z-index: 1;
+}
