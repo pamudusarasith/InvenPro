@@ -50,6 +50,8 @@ return [
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
+    '/roles/store' => 'App\Controllers\RoleController::store', // Added route
+    '/roles/{id}/update' => 'App\Controllers\RoleController::update',
     '/orders/new' => 'App\Controllers\OrderController::createOrder',
     '/categories/new' => 'App\Controllers\CategoryController::createCategory',
     '/categories/{id}/update' => 'App\Controllers\CategoryController::updateCategory',
