@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? "Invenpro" ?></title>
 
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/main.css">
 
     <?php if (isset($stylesheets)) {
         foreach ($stylesheets as $filename): ?>

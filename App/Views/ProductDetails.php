@@ -3,7 +3,7 @@
 use App\Services\RBACService;
 
 ?>
-<link rel="stylesheet" href="/css/productdetails.css">
+
 <div class="body">
   <?php App\Core\View::render("Navbar") ?>
   <?php App\Core\View::render("Sidebar") ?>
@@ -55,10 +55,6 @@ use App\Services\RBACService;
                   <span class="icon">edit</span>
                   Edit Product
                 </button>
-                <button class="dropdown-item" onclick="openAddBatchDetailsDialog()">
-                  <span class="icon">add_box</span>
-                  Add Batch
-                </button>
                 <button class="dropdown-item danger" onclick="deleteProduct(<?= $product['id'] ?>)">
                   <span class="icon">delete</span>
                   Delete Product
@@ -75,7 +71,12 @@ use App\Services\RBACService;
             <span class="icon">inventory_2</span>
             <span class="stat-label">Total Stock</span>
           </div>
-          <div class="stat-value"><?= number_format($stats['total_stock'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
+          <?php
+          $totalStock = array_sum(array_map(function ($batch) {
+            return strtotime($batch['expiry_date']) > time() || !$batch['expiry_date'] ? $batch['current_quantity'] : 0;
+          }, $product['batches']));
+          ?>
+          <div class="stat-value"><?= number_format($totalStock, 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
@@ -87,18 +88,26 @@ use App\Services\RBACService;
         <div class="stat-card">
           <div class="stat-header">
             <span class="icon">payments</span>
-            <span class="stat-label">Average Price</span>
+            <span class="stat-label">Out of Stock Batches</span>
           </div>
-          <div class="stat-value">$<?= number_format($stats['avg_price'], 2) ?></div>
+          <?php
+          $outOfStockCount = count(array_filter($product['batches'], function ($batch) {
+            return $batch['current_quantity'] <= 0;
+          }));
+          ?>
+          <div class="stat-value"><?= $outOfStockCount ?></div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
             <span class="icon">shopping_cart</span>
-            <span class="stat-label">Last Purchase</span>
+            <span class="stat-label">Expired Batches</span>
           </div>
-          <div class="stat-value">
-            <?= $stats['last_purchase'] ? date('M d, Y', strtotime($stats['last_purchase'])) : 'Never' ?>
-          </div>
+          <?php
+          $expiredBatchesCount = count(array_filter($product['batches'], function ($batch) {
+            return $batch['expiry_date'] && strtotime($batch['expiry_date']) < time();
+          }));
+          ?>
+          <div class="stat-value"><?= $expiredBatchesCount ?></div>
         </div>
       </div>
     </div>
@@ -197,7 +206,7 @@ use App\Services\RBACService;
                         </button>
                       <?php endif; ?>
                       <?php if (RBACService::hasPermission('delete_batch')): ?>
-                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="openEditBatchDetailsDialog(event)">
+                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="deleteBatch(<?= $batch['id'] ?>)">
                           <span class=" icon">delete</span>
                         </button>
                       <?php endif; ?>
@@ -218,8 +227,8 @@ use App\Services\RBACService;
                       <span class="info-value current-stock"><?= number_format($batch['current_quantity'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></span>
                     </div>
                     <div class="batch-info">
-                      <span class="info-label">Unit Price</span>
-                      <span class="info-value unit-value">Rs. <?= number_format($batch['unit_price'], 2) ?></span>
+                      <span class="info-label">Unit Cost</span>
+                      <span class="info-value unit-value">Rs. <?= number_format($batch['unit_cost'], 2) ?></span>
                     </div>
                     <div class="batch-info">
                       <span class="info-label">Manufacturing Date</span>
@@ -251,31 +260,36 @@ use App\Services\RBACService;
               <thead>
                 <tr>
                   <th>Supplier Name</th>
-                  <th>Supplier Code</th>
+                  <th>Contact Person</th>
                   <th>Preferred</th>
                   <th>Last Order</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($suppliers as $supplier): ?>
-                  <tr>
-                    <td><?= htmlspecialchars($supplier['supplier_name']) ?></td>
-                    <td><?= htmlspecialchars($supplier['supplier_product_code']) ?></td>
-                    <td>
-                      <span class="badge <?= $supplier['is_preferred_supplier'] ? 'success' : '' ?>">
-                        <?= $supplier['is_preferred_supplier'] ? 'Yes' : 'No' ?>
-                      </span>
-                    </td>
-                    <td><?= $supplier['last_order'] ? date('M d, Y', strtotime($supplier['last_order'])) : '-' ?></td>
-                    <td>
-                      <button type="button" class="icon-btn"
-                        onclick="window.location.href='/suppliers/<?= $supplier['id'] ?>'">
-                        <span class="icon">visibility</span>
-                      </button>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
+                <?php
+                if (empty($suppliers)) {
+                  echo '<tr><td colspan="6" style="text-align: center;">No suppliers found</td></tr>';
+                } else {
+                  foreach ($suppliers as $suppliers): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($suppliers['supplier_name']) ?></td>
+                      <td><?= htmlspecialchars($suppliers['contact_person']) ?></td>
+                      <td>
+                        <span class="badge <?= $suppliers['is_preferred_supplier'] ? 'success' : '' ?>">
+                          <?= $suppliers['is_preferred_supplier'] ? 'Yes' : 'No' ?>
+                        </span>
+                      </td>
+                      <td><?= $suppliers['last_order'] ? date('M d, Y', strtotime($suppliers['last_order'])) : '-' ?></td>
+                      <td>
+                        <button type="button" class="icon-btn"
+                          onclick="window.location.href='/suppliers/<?= $suppliers['id'] ?>'">
+                          <span class="icon">visibility</span>
+                        </button>
+                      </td>
+                    </tr>
+                <?php endforeach;
+                } ?>
               </tbody>
             </table>
           </div>
@@ -294,7 +308,7 @@ use App\Services\RBACService;
   <div class="modal-content">
     <div class="modal-header">
       <h2></h2>
-      <button type="button" class="close-btn" onclick="closeBatchDetailsDialog()">
+      <button type="button" class="close-btn" onclick="closeEditBatchDetailsDialog()">
         <span class="icon">close</span>
       </button>
     </div>
@@ -310,14 +324,6 @@ use App\Services\RBACService;
           <input type="text" name="batch_code">
         </div>
         <div class="form-field">
-          <label for="quantity">Quantity</label>
-          <input type="number" name="quantity">
-        </div>
-        <div class="form-field">
-          <label for="unitprice">Unit Price</label>
-          <input type="number" name="unit_price">
-        </div>
-        <div class="form-field">
           <label for="manufactured_date">Manufacturing Date</label>
           <input type="date" name="manufactured_date">
         </div>
@@ -327,7 +333,7 @@ use App\Services\RBACService;
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeBatchDetailsDialog()">
+        <button type="button" class="btn btn-secondary" onclick="closeEditBatchDetailsDialog()">
           Cancel
         </button>
         <button type="submit" class="btn btn-primary">
@@ -469,8 +475,6 @@ use App\Services\RBACService;
     document.querySelector('#batchDetailsDialog .modal-header h2').innerHTML = 'Edit Batch Details';
     const batchCard = e.target.closest('.batch-card');
     const batchCode = batchCard.querySelector('.batch-title').textContent;
-    const currentStock = batchCard.querySelector('.current-stock').textContent.split(" ")[0];
-    const unitPrice = batchCard.querySelector('.unit-value').textContent.slice(4).replace(/,/g, '');
     const mfgDate = new Date(batchCard.querySelector('.mfg').textContent).toISOString().split('T')[0];
     const expDate = new Date(batchCard.querySelector('.exp').textContent).toISOString().split('T')[0];
 
@@ -478,24 +482,21 @@ use App\Services\RBACService;
     form.action = `/batch/${batchCard.dataset.batchId}/update`;
     form.querySelector('input[name="po_number"]').parentElement.style.display = 'none';
     form.querySelector('input[name="batch_code"]').value = batchCode;
-    form.querySelector('input[name="quantity"]').value = currentStock;
-    form.querySelector('input[name="unit_price"]').value = unitPrice;
     form.querySelector('input[name="manufactured_date"]').value = mfgDate;
     form.querySelector('input[name="expiry_date"]').value = expDate;
     document.getElementById('batchDetailsDialog').showModal();
   }
 
-  function openAddBatchDetailsDialog() {
-    const form = document.getElementById('batchDetailsForm');
-    form.action = '/batch/new';
-    form.querySelector('input[name="po_number"]').parentElement.style.display = 'flex';
-    document.querySelector('#batchDetailsDialog .modal-header h2').innerHTML = 'Add New Batch';
-    document.getElementById('batchDetailsDialog').showModal();
 
-  }
-
-  function closeBatchDetailsDialog() {
+  function closeEditBatchDetailsDialog() {
     document.getElementById('batchDetailsForm').reset();
     document.getElementById('batchDetailsDialog').close();
+  }
+
+  function deleteBatch(batchId) {
+    if (!confirm('Are you sure you want to delete this batch?')) {
+      return;
+    }
+    window.location.href = `/batch/${batchId}/delete`;
   }
 </script>

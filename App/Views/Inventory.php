@@ -21,6 +21,60 @@ use App\Services\RBACService; ?>
             <?php endif; ?>
         </div>
 
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="icon text-success">check_circle</span>
+                    <span class="stat-label">In Stock Products</span>
+                </div>
+                <?php
+                $totalInStock = 0;
+                foreach ($categories as $category) {
+                    foreach ($category['products'] as $product) {
+                        if ($product['status'] === 'In Stock') {
+                            $totalInStock++;
+                        }
+                    }
+                }
+                ?>
+                <div class="stat-value"><?= $totalInStock ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="icon text-warning">warning</span>
+                    <span class="stat-label">Low Stock Products</span>
+                </div>
+                <?php
+                $totalLowStock = 0;
+                foreach ($categories as $category) {
+                    foreach ($category['products'] as $product) {
+                        if ($product['status'] === 'Low Stock') {
+                            $totalLowStock++;
+                        }
+                    }
+                }
+                ?>
+                <div class="stat-value"><?= $totalLowStock ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="icon text-danger">error</span>
+                    <span class="stat-label">Out Of Stock Products</span>
+                </div>
+                <?php
+                $totalOutOfStock = 0;
+                foreach ($categories as $category) {
+                    foreach ($category['products'] as $product) {
+                        if ($product['status'] === 'Out of Stock') {
+                            $totalOutOfStock++;
+                        }
+                    }
+                }
+                ?>
+                <div class="stat-value"><?= $totalOutOfStock ?></div>
+            </div>
+        </div>
+
         <!-- Controls Section -->
         <div class="card glass controls">
             <div class="search-bar">
@@ -50,6 +104,44 @@ use App\Services\RBACService; ?>
                 <div class="card glass category <?= $category['id'] === (int) $_GET['c'] ? 'open' : '' ?>">
                     <button class="category-header">
                         <h2><?php echo $category['category_name']; ?></h2>
+                        <div class="category-stats">
+                            <span class="badge success mr-sm">
+                                In Stock:
+                                <?php
+                                $inStockCount = 0;
+                                foreach ($category['products'] as $product) {
+                                    if ($product['status'] === 'In Stock') {
+                                        $inStockCount++;
+                                    }
+                                }
+                                echo $inStockCount;
+                                ?>
+                            </span>
+                            <span class="badge warning mr-sm">
+                                Low Stock:
+                                <?php
+                                $lowStockCount = 0;
+                                foreach ($category['products'] as $product) {
+                                    if ($product['status'] === 'Low Stock') {
+                                        $lowStockCount++;
+                                    }
+                                }
+                                echo $lowStockCount;
+                                ?>
+                            </span>
+                            <span class="badge danger mr-sm">
+                                Out of Stock:
+                                <?php
+                                $outOfStockCount = 0;
+                                foreach ($category['products'] as $product) {
+                                    if ($product['status'] === 'Out of Stock') {
+                                        $outOfStockCount++;
+                                    }
+                                }
+                                echo $outOfStockCount;
+                                ?>
+                            </span>
+                        </div>
                         <span class="icon toggle-icon">expand_more</span>
                     </button>
                     <div class="category-content">

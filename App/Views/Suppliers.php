@@ -3,10 +3,6 @@
 use App\Services\RBACService;
 
 $branches = $branches ?? [];
-
-$message = $_SESSION['message'] ?? null;
-$messageType = $_SESSION['message_type'] ?? 'error';
-unset($_SESSION['message'], $_SESSION['message_type']);
 ?>
 
 <div class="body">
@@ -32,20 +28,72 @@ unset($_SESSION['message'], $_SESSION['message_type']);
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
-        <input type="text" id="searchInput" placeholder="Search suppliers...">
+        <input type="text" id="searchInput" placeholder="Search suppliers..." oninput="filterSuppliers()">
       </div>
+
+      <script>
+        function filterSuppliers() {
+          const searchInput = document.getElementById('searchInput').value.toLowerCase();
+          const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+          tableRows.forEach(row => {
+            const supplierName = row.children[0].textContent.toLowerCase();
+            const email = row.children[2].textContent.toLowerCase();
+
+            if (supplierName.includes(searchInput) || email.includes(searchInput)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        }
+      </script>
       <div class="filters">
-        <select id="filterBranch">
+        <select id="filterBranch" onchange="filterByBranch()">
           <option value="">All Branches</option>
           <?php foreach ($branches as $branch): ?>
-            <option value="<?= $branch['id'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
+            <option value="<?= $branch['branch_name'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
           <?php endforeach; ?>
         </select>
-        <select id="filterStatus">
+
+        <script>
+          function filterByBranch() {
+            const selectedBranch = document.getElementById('filterBranch').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+            tableRows.forEach(row => {
+              const branchName = row.children[4].textContent.toLowerCase();
+
+              if (!selectedBranch || branchName === selectedBranch) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+          }
+        </script>
+        <select id="filterStatus" onchange="filterByStatus()">
           <option value="">All Status</option>
-          <option value="active" selected>Active</option>
+          <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
+
+        <script>
+          function filterByStatus() {
+            const selectedStatus = document.getElementById('filterStatus').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
+
+            tableRows.forEach(row => {
+              const status = row.children[5].textContent.toLowerCase();
+
+              if (!selectedStatus || status.includes(selectedStatus)) {
+                row.style.display = '';
+              } else {
+                row.style.display = 'none';
+              }
+            });
+          }
+        </script>
       </div>
     </div>
 
@@ -203,15 +251,6 @@ unset($_SESSION['message'], $_SESSION['message_type']);
   </dialog>
 <?php endif; ?>
 
-<!-- Message Popup -->
-<div id="messagePopup" class="popup <?= $messageType ?>">
-  <span class="icon"><?= $messageType === 'success' ? 'check_circle' : 'error' ?></span>
-  <span class="popup-message"><?= htmlspecialchars($message ?? '') ?></span>
-  <button class="popup-close" onclick="closePopup()">
-    <span class="icon">close</span>
-  </button>
-</div>
-
 <script>
   function changePage(pageNo) {
     const url = new URL(location.href);
@@ -226,19 +265,8 @@ unset($_SESSION['message'], $_SESSION['message_type']);
     location.href = url.toString();
   }
 
-  <?php if ($message): ?>
-    window.addEventListener('load', () => {
-      const popup = document.getElementById('messagePopup');
-      popup.classList.add('show');
-    });
-  <?php endif; ?>
-
-  function closePopup() {
-    const popup = document.getElementById('messagePopup');
-    popup.classList.remove('show');
-  }
-
   <?php if (RBACService::hasPermission('add_supplier')): ?>
+
     function openAddSupplierDialog() {
       const dialog = document.getElementById('addSupplierModal');
       dialog.showModal();

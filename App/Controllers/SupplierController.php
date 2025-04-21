@@ -2,11 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Core\{Controller, View};
 use App\Models\{BranchModel, SupplierModel};
 use App\Services\ValidationService;
 
-class SupplierController
+class SupplierController extends Controller
 {
   public function index(): void
   {
@@ -52,6 +52,21 @@ class SupplierController
     ]);
   }
 
+  public function search(): void
+  {
+    $query = $_GET['q'] ?? '';
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+
+    $supplierModel = new SupplierModel();
+    $suppliers = $supplierModel->searchSuppliers($query, $page, $itemsPerPage);
+
+    self::sendJSON([
+      'success' => true,
+      'data' => $suppliers,
+    ]);
+  }
+
   public function createSupplier(): void
   {
     $validator = new ValidationService();
@@ -90,5 +105,20 @@ class SupplierController
     $_SESSION['message'] = 'Supplier deleted successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/suppliers');
+  }
+
+  public function searchProducts(array $params): void
+  {
+    $query = $_GET['q'] ?? '';
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+
+    $supplierModel = new SupplierModel();
+    $products = $supplierModel->searchProducts($params['id'], $query, $page, $itemsPerPage);
+
+    self::sendJSON([
+      'success' => true,
+      'data' => $products,
+    ]);
   }
 }

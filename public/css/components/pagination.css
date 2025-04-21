@@ -1,0 +1,111 @@
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  backdrop-filter: blur(8px);
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.items-select {
+  padding: 0.375rem 1.5rem 0.375rem 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--glass-white);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.items-select:focus {
+  outline: none;
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+
+.items-select:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-400);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.pagination {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 0.5rem;
+}
+
+.page-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.25rem;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  background: var(--surface-mild);
+  color: var(--text-secondary);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--primary-50);
+  color: var(--primary-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-number {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.page-number:hover {
+  background: var(--primary-50);
+  color: var(--primary-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.page-number.active {
+  background: var(--gradient-primary);
+  color: var(--text-inverse);
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+.page-dots {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+}

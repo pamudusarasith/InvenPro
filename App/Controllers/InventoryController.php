@@ -40,4 +40,20 @@ class InventoryController extends Controller
       'units' => $units
     ]);
   }
+
+  public function searchProducts(): void
+  {
+    $productModel = new ProductModel();
+    $query = $_GET['q'];
+    if (empty($query)) {
+      self::sendJSON(["success" => false, "message" => "Query cannot be empty"]);
+    }
+
+    $products = $productModel->searchPOSProducts($query);
+
+    self::sendJSON([
+      "success" => true,
+      "data" => $products,
+    ]);
+  }
 }

@@ -71,6 +71,7 @@ class POSController extends Controller
         "success" => false,
         "message" => $this->validator->getError(),
       ]);
+      exit;
     }
 
     $data['user_id'] = $_SESSION['user']['id'];
