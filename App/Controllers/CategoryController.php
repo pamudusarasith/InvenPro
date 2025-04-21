@@ -10,12 +10,13 @@ class CategoryController extends Controller
 {
   public function index(): void
   {
+    $query = $_GET['q'] ?? "";
     $page = $_GET['p'] ?? 1;
     $itemsPerPage = $_GET['ipp'] ?? 10;
 
     $categoryModel = new CategoryModel();
-    $categories = $categoryModel->getCategories($page, $itemsPerPage);
-    $totalRecords = $categoryModel->getCategoriesCount();
+    $categories = $categoryModel->getCategories($query, $page, $itemsPerPage);
+    $totalRecords = $categoryModel->getCategoriesCount($query);
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
     View::renderTemplate('Categories', [
