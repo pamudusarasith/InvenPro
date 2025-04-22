@@ -239,6 +239,57 @@ class UserModel extends Model
       $_SESSION['message'] = 'User deleted successfully';
       $_SESSION['message_type'] = 'success';
   }
+
+  public function recordLastLogin(int $id): void
+  {
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
+    self::$db->query($sql, [$ip, $id]);
+
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'LOGIN',
+        changes: json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
+        metadata: json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
+  }
+
+  public function getFailedLoginAttempts(string $email): int
+  {
+    $sql = 'SELECT failed_login_attempts FROM user WHERE email = ?';
+    $stmt = self::$db->query($sql, [$email]);
+    return (int) $stmt->fetchColumn();
+  }
+
+  public function recordFailedLoginAttempt(string $email): void
+  {
+    $timestamp = date('Y-m-d H:i:s');
+    
+    $attempts = $this->getFailedLoginAttempts($email);
+    if ($attempts >= 3) {
+      return; // User is already locked out
+    }
+
+    $sql = 'UPDATE user SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = ? WHERE email = ?';
+    self::$db->query($sql, [$timestamp, $email]);
+  }
+
+  public function resetFailedLoginAttempts(string $email): void
+  {
+    $sql = 'UPDATE user SET failed_login_attempts = 0 WHERE email = ?';
+    self::$db->query($sql, [$email]);
+  }
+
+  public function lockUser(int $id): void
+  {
+    $sql = 'UPDATE user SET is_locked = 1 WHERE id = ?';
+    self::$db->query($sql, [$id]);
+  }
+
 }
 
   

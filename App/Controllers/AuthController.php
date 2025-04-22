@@ -34,23 +34,53 @@ class AuthController extends Controller
   public function login(): void
   {
     if (!$this->validator->validateLogin($_POST)) {
-      View::render('LoginPage', [
-        'error' => $this->validator->getError()
-      ]);
-      exit;
+        View::render('LoginPage', [
+            'error' => $this->validator->getError()
+        ]);
+        return;
     }
 
     $userModel = new UserModel();
-    $user = $userModel->findByEmail($_POST['email']);
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $user = $userModel->findByEmail($email);
 
-    if (!$user || !password_verify($_POST['password'], $user['password'])) {
-      View::render('LoginPage', [
-        'error' => 'Invalid email or password'
-      ]);
-      exit;
+    if (!$user || !password_verify($password, $user['password'])) {
+        $userModel->recordFailedLoginAttempt($email);
+        $attempts = $userModel->getFailedLoginAttempts($email);
+
+        if ($attempts >= 3) {
+            $userModel->lockUser($user['id'] ?? 0);
+            
+            $_SESSION['message'] = 'Account locked due to too many failed login attempts. Please contact support.';
+            $_SESSION['message_type'] = 'error';
+
+            View::redirect('/');
+            return;
+        } else {
+
+            $_SESSION['message'] = 'Invalid email or password. Please try again.';
+            $_SESSION['message_type'] = 'error';
+
+            View::redirect('/');
+            return;
+        }
+        return;
     }
 
+    if ($user['is_locked']) {
+        $_SESSION['message'] = 'Your account is locked. Please contact support.';
+        $_SESSION['message_type'] = 'error';
+
+        View::redirect('/');
+        return;
+    }
+
+    // Login successful
+    $userModel->resetFailedLoginAttempts($email);
+
     $_SESSION['user'] = $user;
+    $userModel->recordLastLogin($user['id']);
 
     View::redirect('/');
   }

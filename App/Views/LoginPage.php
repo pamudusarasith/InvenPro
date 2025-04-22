@@ -3,7 +3,6 @@
 
 <head>
   <title>Login - InvenPro</title>
-  <link rel="stylesheet" href="/css/styles.css">
   <style>
     body {
       margin: 0;
@@ -105,6 +104,9 @@
 </head>
 
 <body>
+<?php
+  var_dump($_SESSION)
+  ?>
   <div class="login-container">
     <img src="/images/logo-light.png" alt="InvenPro Logo" class="logo">
     <form action="/" method="POST">
@@ -113,16 +115,6 @@
       <input type="submit" value="Login">
     </form>
   </div>
-
-  <?php if (isset($error)): ?>
-    <div class="error-popup <?= $error ? 'show' : ''; ?>">
-      <div class="message-container">
-        <span class="icon">error</span>
-        <p><?= $error; ?></p>
-      </div>
-    </div>
-    <div class="overlay <?= $error ? 'show' : ''; ?>"></div>
-  <?php endif; ?>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
