@@ -175,15 +175,23 @@ class ValidationService
     return true;
   }
 
-  public function validateUpdateBatch(array $data): bool
+  public function validateCreateCategory(array $data): bool
   {
     $validator = new Validator($data);
-    $validator->rule('product_id', new Required('product id Code is required'))
-      ->rule('product_id', new IsNumeric('Invalid Product ID'))
-      ->rule('batch_code', new Required('Batch Code is required'))
-      ->rule('manufactured_date', new IsDate('Invalid Manufactured Date'))
-      ->rule('expiry_date', new IsDate('Invalid Expiry Date'));
-    $validator->rule('manufactured_date', new CompareWithField('<', 'expiry_date', 'Manufactured date must be earlier than expiry date'));
+    $validator->rule('category_name', new Required('Category Name is required'))
+      ->rule('description', new IsString(0, 255, 'Description must be between 0 and 255 characters'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateUpdateCategory(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('category_name', new Required('Category Name is required'))
+      ->rule('description', new IsString(0, 255, 'Description must be between 0 and 255 characters'));
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;

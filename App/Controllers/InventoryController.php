@@ -9,14 +9,32 @@ class InventoryController extends Controller
 {
   public function index()
   {
+    $status = $_GET['status'] ?? "";
+    $query = $_GET['q'] ?? "";
     $categoryId = $_GET['c'] ?? null;
     $page = $_GET['p'] ?? 1;
     $itemsPerPage = $_GET['ipp'] ?? 10;
 
+    $productModel = new ProductModel();
+    $units = $productModel->getMeasuringUnits();
+
+    if (!empty($query) || !empty($status)) {
+      $products = $productModel->searchInventoryProducts($query, $status, $page, $itemsPerPage);
+      $totalRecords = $productModel->getInventoryProductsCount($query);
+      View::renderTemplate('Inventory', [
+        'title' => 'Inventory',
+        'units' => $units,
+        'products' => $products,
+        'page' => $page,
+        'itemsPerPage' => $itemsPerPage,
+        'totalPages' => ceil($totalRecords / $itemsPerPage),
+      ]);
+      return;
+    }
+
     $categoryModel = new CategoryModel();
     $categories = $categoryModel->getPrimaryCategories();
 
-    $productModel = new ProductModel();
     foreach ($categories as &$category) {
       $recordsCount = $productModel->getCountByCategoryId($category['id']);
       if ($categoryId && $category['id'] == $categoryId) {
@@ -25,14 +43,12 @@ class InventoryController extends Controller
         $category['totalPages'] = ceil($recordsCount / $itemsPerPage);
         $category['itemsPerPage'] = $itemsPerPage;
       } else {
-        $category['products'] = $productModel->getProductsByCategoryId($category['id']);
+        $category['products'] = $productModel->getProductsByCategoryId($category['id'], 1, 10);
         $category['page'] = 1;
         $category['totalPages'] = ceil($recordsCount / 10);
         $category['itemsPerPage'] = 10;
       }
     }
-
-    $units = $productModel->getMeasuringUnits();
 
     View::renderTemplate('Inventory', [
       'title' => 'Inventory',
