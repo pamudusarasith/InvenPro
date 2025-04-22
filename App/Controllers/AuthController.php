@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Core\{Controller, View};
 use App\Models\UserModel;
-use App\Services\ValidationService;
 
 class AuthController extends Controller
 {

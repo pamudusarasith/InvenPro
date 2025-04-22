@@ -2,11 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Core\View;
+use App\Core\{Controller, View};
 use App\Models\{UserModel, RoleModel, BranchModel};
-use App\Services\ValidationService;
 
-class UserController
+class UserController extends Controller
 {
   public function index(): void
   {
@@ -61,9 +60,8 @@ class UserController
 
   public function createUser(): void
   {
-    $validator = new ValidationService();
-    if (!$validator->validateCreateUser($_POST)) {
-      $this->index($validator->getError(), 'error');
+    if (!$this->validator->validateCreateUser($_POST)) {
+      $this->index($this->validator->getError(), 'error');
       exit;
     }
 
@@ -81,9 +79,8 @@ class UserController
 
   public function updateUser(array $params): void
   {
-    $validator = new ValidationService();
-    if (!$validator->validateUpdateUser($_POST)) {
-      $this->details($params, $validator->getError(), 'error');
+    if (!$this->validator->validateUpdateUser($_POST)) {
+      $this->details($params, $this->validator->getError(), 'error');
       exit;
     }
 

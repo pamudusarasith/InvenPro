@@ -34,8 +34,6 @@ class BatchModel extends Model
                 batch_code = ?,
                 manufactured_date = ?,
                 expiry_date = ?,
-                unit_price = ?,
-                current_quantity = ?
             WHERE id = ?
         ';
 
@@ -43,9 +41,17 @@ class BatchModel extends Model
             $data['batch_code'],
             $data['manufactured_date'],
             $data['expiry_date'],
-            $data['unit_price'],
-            $data['quantity'],
             $data['id']
         ]);
+    }
+
+    public function deleteBatch(int $id)
+    {
+        $sql = '
+            UPDATE product_batch
+            SET deleted_at = NOW()
+            WHERE id = ?
+        ';
+        self::$db->query($sql, [$id]);
     }
 }

@@ -78,6 +78,20 @@ function closePopup() {
   popup?.classList.remove("show");
 }
 
+function switchTab(tabId) {
+  document
+    .querySelectorAll(".tab-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+  document
+    .querySelectorAll(".tab-content")
+    .forEach((content) => content.classList.remove("active"));
+
+  document
+    .querySelector(`.tab-btn[onclick*="${tabId}"]`)
+    .classList.add("active");
+  document.getElementById(tabId).classList.add("active");
+}
+
 // Initialize dropdowns when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("messagePopup");

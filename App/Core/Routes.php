@@ -18,6 +18,11 @@ return [
     '/suppliers/{id}' => 'App\Controllers\SupplierController::details',
     '/suppliers/{id}/delete' => 'App\Controllers\SupplierController::deleteSupplier',
     '/orders' => 'App\Controllers\OrderController::index',
+    '/orders/{id}' => 'App\Controllers\OrderController::details',
+    '/orders/{id}/delete' => 'App\Controllers\OrderController::deleteOrder',
+    '/orders/{id}/approve' => 'App\Controllers\OrderController::approveOrder',
+    '/orders/{id}/complete' => 'App\Controllers\OrderController::completeOrder',
+    '/orders/{id}/cancel' => 'App\Controllers\OrderController::cancelOrder',
     '/discounts' => 'App\Controllers\DiscountController::index',
     '/reports' => 'App\Controllers\ReportController::index',
     '/employees' => 'App\Controllers\EmployeeController::index',
@@ -25,6 +30,12 @@ return [
     '/api/pos/search' => 'App\Controllers\POSController::searchProducts',
     '/api/category/search' => 'App\Controllers\CategoryController::search',
     '/api/pos/customer/search' => 'App\Controllers\CustomerController::search',
+    '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
+    '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
+    '/api/products/search' => 'App\Controllers\ProductsController::search',
+    '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
+    '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
+    '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
   ],
 
   'POST' => [
@@ -41,5 +52,10 @@ return [
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
     '/roles/store' => 'App\Controllers\RoleController::store', // Added route
     '/roles/{id}/update' => 'App\Controllers\RoleController::update',
+    '/orders/new' => 'App\Controllers\OrderController::createOrder',
+    '/categories/new' => 'App\Controllers\CategoryController::createCategory',
+    '/categories/{id}/update' => 'App\Controllers\CategoryController::updateCategory',
+    '/orders/{id}/update' => 'App\Controllers\OrderController::updateOrder',
+    '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
   ],
 ];

@@ -156,7 +156,7 @@ CREATE TABLE supplier_product (
 
 CREATE TABLE purchase_order (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    po_number VARCHAR(50) NOT NULL UNIQUE,
+    reference VARCHAR(50) NOT NULL UNIQUE,
     branch_id INT NOT NULL,
     supplier_id INT NOT NULL,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

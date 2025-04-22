@@ -92,4 +92,62 @@ class SupplierModel extends Model
     $sql = 'UPDATE supplier SET deleted_at = NOW() WHERE id = ?';
     self::$db->query($sql, [$id]);
   }
+
+  public function searchSuppliers(string $query, int $page, int $itemsPerPage): array
+  {
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+      SELECT
+        s.id,
+        s.supplier_name,
+        s.contact_person,
+        s.email,
+        s.phone
+      FROM supplier s
+      WHERE s.deleted_at IS NULL
+        AND s.branch_id = ?
+        AND (s.supplier_name LIKE ? OR s.contact_person LIKE ? OR s.email LIKE ? OR s.phone LIKE ?)
+      ORDER BY s.id
+      LIMIT ? OFFSET ?
+    ';
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      "%$query%",
+      "%$query%",
+      "%$query%",
+      $itemsPerPage,
+      $offset,
+    ]);
+    return $stmt->fetchAll();
+  }
+
+  public function searchProducts(int $id, string $query, int $page, int $itemsPerPage): array
+  {
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+      SELECT
+        p.id,
+        p.product_name,
+        u.unit_symbol,
+        u.is_int
+      FROM supplier_product sp
+      INNER JOIN product p ON sp.product_id = p.id
+      INNER JOIN unit u ON p.unit_id = u.id
+      WHERE p.deleted_at IS NULL
+        AND sp.supplier_id = ?
+        AND sp.branch_id = ?
+        AND p.product_name LIKE ?
+      ORDER BY p.id
+      LIMIT ? OFFSET ?
+    ';
+    $stmt = self::$db->query($sql, [
+      $id,
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      $itemsPerPage,
+      $offset,
+    ]);
+    return $stmt->fetchAll();
+  }
 }

@@ -13,10 +13,12 @@ class ProductsController extends Controller
     $productModel = new ProductModel();
     $product = $productModel->getProductById($params['id']);
     $units = $productModel->getMeasuringUnits();
+    $suppliers = $productModel->getSuppliersByProductId($params['id']);
     View::renderTemplate('ProductDetails', [
       'title' => 'Product Details',
       'product' => $product,
-      'units' => $units
+      'units' => $units,
+      'suppliers' => $suppliers
     ]);
   }
 
@@ -60,5 +62,15 @@ class ProductsController extends Controller
     $_SESSION['message'] = 'Product deleted successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/inventory');
+  }
+
+  public function productSuppliersDetails(array $params)
+  {
+    $productModel = new ProductModel();
+    $productsupplier = $productModel->getSuppliersByProductId($params['product_id']);
+    View::renderTemplate('ProductSuppliersDetails', [
+      'title' => 'Product Suppliers',
+      'productsupplier' => $productsupplier
+    ]);
   }
 }
