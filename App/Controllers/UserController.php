@@ -9,18 +9,23 @@ class UserController extends Controller
 {
   public function index(): void
   {
-    $page = $_GET['p'] ?? 1;
-    $itemsPerPage = $_GET['ipp'] ?? 10;
-    $userModal = new UserModel();
-    $users = $userModal->getUsers($page, $itemsPerPage);
-    $totalRecords = $userModal->getUsersCount();
+    $page = max(1, (int) ($_GET['p'] ?? 1));
+    $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
+    $search = $_GET['search'] ?? '';
+    $roleId = $_GET['role'] ?? '';
+    $branchId = $_GET['branch'] ?? '';
+    $status = $_GET['status'] ?? '';
+
+    $userModel = new UserModel();
+    $users = $userModel->getUsers($page, $itemsPerPage, $search, $roleId, $branchId, $status);
+    $totalRecords = $userModel->getUsersCount($search, $roleId, $branchId, $status);
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
-    $roleModal = new RoleModel();
-    $roles = $roleModal->getAllRoles();
+    $roleModel = new RoleModel();
+    $roles = $roleModel->getAllRoles();
 
-    $branchModal = new BranchModel();
-    $branches = $branchModal->getBranches();
+    $branchModel = new BranchModel();
+    $branches = $branchModel->getBranches();
 
     View::renderTemplate('Users', [
       'title' => 'Users',
@@ -28,8 +33,13 @@ class UserController extends Controller
       'page' => $page,
       'itemsPerPage' => $itemsPerPage,
       'totalPages' => $totalPages,
+      'totalRecords' => $totalRecords,
       'roles' => $roles,
       'branches' => $branches,
+      'search' => $search,
+      'roleId' => $roleId,
+      'branchId' => $branchId,
+      'status' => $status
     ]);
   }
 

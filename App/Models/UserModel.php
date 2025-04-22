@@ -23,14 +23,37 @@ class UserModel extends Model
     return $stmt->fetch();
   }
 
-  public function getUsersCount(): int
+  public function getUsersCount(string $search = '', string $roleId = '', string $branchId = '', string $status = ''): int
   {
-    $sql = 'SELECT COUNT(*) FROM user WHERE deleted_at IS NULL';
-    $stmt = self::$db->query($sql);
+    $sql = 'SELECT COUNT(*) FROM user u WHERE u.deleted_at IS NULL';
+    $params = [];
+
+    if ($search) {
+      $sql .= ' AND (u.display_name LIKE ? OR u.email LIKE ?)';
+      $params[] = "%$search%";
+      $params[] = "%$search%";
+    }
+
+    if ($roleId) {
+      $sql .= ' AND u.role_id = ?';
+      $params[] = $roleId;
+    }
+
+    if ($branchId) {
+      $sql .= ' AND u.branch_id = ?';
+      $params[] = $branchId;
+    }
+
+    if ($status) {
+      $sql .= ' AND u.is_locked = ?';
+      $params[] = $status === 'locked' ? 1 : 0;
+    }
+
+    $stmt = self::$db->query($sql, $params);
     return (int) $stmt->fetchColumn();
   }
 
-  public function getUsers(int $page, int $itemsPerPage)
+  public function getUsers(int $page, int $itemsPerPage, string $search = '', string $roleId = '', string $branchId = '', string $status = '')
   {
     $offset = ($page - 1) * $itemsPerPage;
     $sql = '
@@ -46,10 +69,35 @@ class UserModel extends Model
       LEFT JOIN role r ON u.role_id = r.id
       LEFT JOIN branch b ON u.branch_id = b.id
       WHERE u.deleted_at IS NULL
-      ORDER BY u.id
-      LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, [$itemsPerPage, $offset]);
+    $params = [];
+
+    if ($search) {
+      $sql .= ' AND (u.display_name LIKE ? OR u.email LIKE ?)';
+      $params[] = "%$search%";
+      $params[] = "%$search%";
+    }
+
+    if ($roleId) {
+      $sql .= ' AND u.role_id = ?';
+      $params[] = $roleId;
+    }
+
+    if ($branchId) {
+      $sql .= ' AND u.branch_id = ?';
+      $params[] = $branchId;
+    }
+
+    if ($status) {
+      $sql .= ' AND u.is_locked = ?';
+      $params[] = $status === 'locked' ? 1 : 0;
+    }
+
+    $sql .= ' ORDER BY u.id LIMIT ? OFFSET ?';
+    $params[] = $itemsPerPage;
+    $params[] = $offset;
+
+    $stmt = self::$db->query($sql, $params);
     $result = $stmt->fetchAll();
 
     foreach ($result as &$user) {
@@ -92,10 +140,12 @@ class UserModel extends Model
   public function createUser(array $data): void
   {
     $sql = '
-      INSERT INTO user (email, password, role_id, branch_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO user (first_name, last_name, email, password, role_id, branch_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     ';
     self::$db->query($sql, [
+      $data['first_name'],
+      $data['last_name'],
       $data['email'],
       password_hash($data['password'], PASSWORD_BCRYPT),
       $data['role_id'],
@@ -133,3 +183,5 @@ class UserModel extends Model
     self::$db->query($sql, [$id]);
   }
 }
+
+  
