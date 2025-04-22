@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Core\Model;
 
+use App\Models\AuditLogModel;
+
 class RoleModel extends Model
 {
 
@@ -261,8 +263,26 @@ class RoleModel extends Model
             $data['description'],
             $data['created_at'] ?? date('Y-m-d H:i:s')
         ]);
-        return self::$db->lastInsertId();
+
+        $id = self::$db->lastInsertId();
+
+        $auditLogModel = new AuditLogModel();
+        $auditLogModel->logAction(
+        tableName: 'role',
+        recordId: $id,
+        actionType: 'CREATE',
+        changes: json_encode(['id' => $id , $data]),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($data['branch_id']) ? $data['branch_id'] : null  
+        );
+
+        $_SESSION['message'] = 'Role created successfully';
+        $_SESSION['message_type'] = 'success';
+        
+        return $id;
     }
+
 
     /**
      * Update an existing role
@@ -279,6 +299,7 @@ class RoleModel extends Model
             $data['created_at'] ?? date('Y-m-d H:i:s'),
             $roleId
         ]);
+
     }
 
     /**

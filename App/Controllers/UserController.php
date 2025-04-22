@@ -57,6 +57,8 @@ class UserController extends Controller
     $roleModal = new RoleModel();
     $roles = $roleModal->getAllRoles();
 
+    error_log(print_r($user, true)); // Debugging line
+
     $branchModal = new BranchModel();
     $branches = $branchModal->getBranches();
 

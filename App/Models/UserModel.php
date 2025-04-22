@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Models\AuditLogModel;
 
 class UserModel extends Model
 {
@@ -119,6 +120,7 @@ class UserModel extends Model
         u.email,
         u.force_profile_setup,
         r.role_name,
+        b.id AS branch_id,
         b.branch_name,
         u.is_locked,
         u.failed_login_attempts,
@@ -151,6 +153,23 @@ class UserModel extends Model
       $data['role_id'],
       $data['branch_id']
     ]);
+
+    $id = self::$db->lastInsertId();
+
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'CREATE',
+        changes: json_encode($data),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+    );
+
+    $_SESSION['message'] = 'User created successfully';
+    $_SESSION['message_type'] = 'success';
+    
   }
 
   public function updateUser(int $id, array $data): void
@@ -175,12 +194,50 @@ class UserModel extends Model
       $data['is_locked'],
       $id
     ]);
+
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'UPDATE',
+        changes: json_encode(['id' => $id, $data]),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+    );
+
+    $_SESSION['message'] = 'User updated successfully';
+    $_SESSION['message_type'] = 'success';
+
   }
 
   public function deleteUser(int $id): void
   {
-    $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
-    self::$db->query($sql, [$id]);
+      // Fetch user details to get branch_id
+      $user = $this->getUserById($id);
+      if (!$user) {
+          throw new \Exception('User not found');
+      }
+
+      // Soft delete the user
+      $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
+      self::$db->query($sql, [$id]);
+
+      // Log the action
+      $auditLogModel = new AuditLogModel();
+      $auditLogModel->logAction(
+          tableName: 'user',
+          recordId: $id,
+          actionType: 'DELETE',
+          changes: json_encode($user),
+          metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+          changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+          branchId: isset($user['branch_id']) ? $user['branch_id'] : null
+      );
+
+      $_SESSION['message'] = 'User deleted successfully';
+      $_SESSION['message_type'] = 'success';
   }
 }
 

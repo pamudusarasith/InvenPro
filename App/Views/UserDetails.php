@@ -2,7 +2,6 @@
 
 use App\Services\RBACService;
 $roles = $roles ?? [];
-var_dump($_SESSION); // Debug session contents
 $branches = $branches ?? [];
 $activities = $activities ?? [];
 ?>
@@ -69,8 +68,7 @@ $activities = $activities ?? [];
                                         Edit Profile
                                     </button>
                                 <?php endif; ?>
-                                
-                                <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['id']) && $_SESSION['id'] != $user['id']): ?>
+                                <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
                                     <button class="dropdown-item danger" onclick="deleteUser(<?= $user['id'] ?>)">
                                         <span class="icon">delete</span>
                                         Delete User
