@@ -38,7 +38,7 @@ class RoleController extends Controller
             $roleId = $role['id'];
             $data['rolePermissionCategories'][$roleId] = $this->roleModel->getRolePermissionCategories($roleId);
             $data['rolePermissionsDetails'][$roleId] = $this->roleModel->getPermissionsByRole($roleId);
-            $data['rolePermissions'][$roleId] = $this->roleModel->getRolePermissionNames($roleId); // Add this
+            $data['rolePermissions'][$roleId] = $this->roleModel->getRolePermissionIds($roleId); // Add this
         }
 
         //error_log("Role Permission Categories: " . print_r($data['rolePermissionCategories'], true));

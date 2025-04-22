@@ -167,11 +167,11 @@ class RoleModel extends Model
      */
     public function getRolePermissionIds(int $roleId): array
     {
-        $sql = 'SELECT p.id
-                FROM permission p
-                JOIN role_permission rp ON p.id = rp.permission_id
+        $sql = 'SELECT pr.id
+                FROM permission pr
+                JOIN role_permission rp ON pr.id = rp.permission_id
                 WHERE rp.role_id = ?
-                ORDER BY p.id';
+                ORDER BY pr.id';
         $stmt = self::$db->query($sql, [$roleId]);
         $permissions = $stmt->fetchAll();
 
