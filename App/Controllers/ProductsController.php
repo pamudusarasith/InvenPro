@@ -73,4 +73,19 @@ class ProductsController extends Controller
       'productsupplier' => $productsupplier
     ]);
   }
+
+  public function assignProducts(): void
+  {
+    $productModel = new ProductModel();
+    $query = $_GET['q'] ?? '';
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+
+    $products = $productModel->assignProduct($query, $page, $itemsPerPage);
+
+    self::sendJSON([
+      "success" => true,
+      "data" => $products,
+    ]);
+  }
 }
