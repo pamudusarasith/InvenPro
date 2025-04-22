@@ -73,8 +73,9 @@ class RoleModel extends Model
         return $result;
     }
 
+
     /**
-     * Get permissions for a role, grouped by category
+     * Get permission names for a role, grouped by category
      * @param int $roleId
      * @return array
      */
@@ -87,36 +88,42 @@ class RoleModel extends Model
                 WHERE rp.role_id = ?
                 ORDER BY pc.category_name, p.permission_name';
         $stmt = self::$db->query($sql, [$roleId]);
-        $permissions = $stmt->fetchAll();
-
+        $rows = $stmt->fetchAll();
+    
         $result = [];
-        foreach ($permissions as $perm) {
-            $categoryKey = strtolower(str_replace(' ', '_', $perm['category_name']));
-            if (!isset($result[$categoryKey])) {
-                $result[$categoryKey] = [];
+    
+        foreach ($rows as $row) {
+            $categoryKey = strtolower(str_replace(' ', '_', $row['category_name']));
+            if (!isset($result[$roleId])) {
+                $result[$roleId] = [];
             }
-            $result[$categoryKey][] = $perm['description'];
+            if (!isset($result[$roleId][$categoryKey])) {
+                $result[$roleId][$categoryKey] = [];
+            }
+            $result[$roleId][$categoryKey][] = $row['description'];
         }
-
+    
         return $result;
     }
 
+    
+
     /**
-     * Get permission names for a role (for $rolePermissions structure)
-     * @param int $roleId
+     * Get all permission categories by
      * @return array
      */
-    public function getRolePermissionNames(int $roleId): array
+    public function getRolePermissionCategories(int $roleId): array
     {
-        $sql = 'SELECT p.permission_name
+        $sql = 'SELECT pc.category_name
                 FROM permission p
                 JOIN role_permission rp ON p.id = rp.permission_id
+                JOIN permission_category pc ON p.category_id = pc.id
                 WHERE rp.role_id = ?
-                ORDER BY p.permission_name';
+                GROUP BY pc.category_name
+                ORDER BY pc.category_name';
         $stmt = self::$db->query($sql, [$roleId]);
-        $permissions = $stmt->fetchAll();
-
-        return array_column($permissions, 'permission_name');
+        $categories = $stmt->fetchAll();
+        return array_column($categories, 'category_name');
     }
 
     /**
@@ -152,6 +159,57 @@ class RoleModel extends Model
 
         return $result;
     }
+
+    /**
+     * Get permission names for a role (for $rolePermissions structure)
+     * @param int $roleId
+     * @return array
+     */
+    public function getRolePermissionIds(int $roleId): array
+    {
+        $sql = 'SELECT pr.id
+                FROM permission pr
+                JOIN role_permission rp ON pr.id = rp.permission_id
+                WHERE rp.role_id = ?
+                ORDER BY pr.id';
+        $stmt = self::$db->query($sql, [$roleId]);
+        $permissions = $stmt->fetchAll();
+
+        return array_column($permissions, 'id');
+    }
+
+    /**
+     * Get permission names for a role, grouped by category
+     * @param int $roleId
+     * @return array
+     */
+    public function getRolePermissionNamesGrouped(int $roleId): array
+    {
+        $sql = 'SELECT pc.category_name, p.permission_name
+                FROM permission p
+                JOIN role_permission rp ON p.id = rp.permission_id
+                JOIN permission_category pc ON p.category_id = pc.id
+                WHERE rp.role_id = ?
+                ORDER BY pc.category_name, p.permission_name';
+        $stmt = self::$db->query($sql, [$roleId]);
+        $rows = $stmt->fetchAll();
+    
+        $result = [];
+    
+        foreach ($rows as $row) {
+            $categoryKey = strtolower(str_replace(' ', '_', $row['category_name']));
+            if (!isset($result[$roleId])) {
+                $result[$roleId] = [];
+            }
+            if (!isset($result[$roleId][$categoryKey])) {
+                $result[$roleId][$categoryKey] = [];
+            }
+            $result[$roleId][$categoryKey][] = $row['permission_name'];
+        }
+    
+        return $result;
+    }
+    
 
     /**
      * Get permission categories
