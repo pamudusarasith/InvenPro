@@ -41,4 +41,14 @@ class AuditLogModel extends Model
             $branchId
         ]);
     }
+
+    public function getAuditLogsById(int $id): array
+    {
+        $sql = '
+        SELECT 
+            created_at, action_type, table_name, metadata
+        FROM audit_log WHERE changed_by = ?';
+        return self::$db->query($sql, [$id])->fetchAll();
+    }
 }
+
