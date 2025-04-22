@@ -23,7 +23,7 @@ return [
     '/orders/{id}/approve' => 'App\Controllers\OrderController::approveOrder',
     '/orders/{id}/complete' => 'App\Controllers\OrderController::completeOrder',
     '/orders/{id}/cancel' => 'App\Controllers\OrderController::cancelOrder',
-    '/discounts' => 'App\Controllers\DiscountController::index',
+    '/discounts' => 'App\Controllers\DiscountsController::index',
     '/reports' => 'App\Controllers\ReportController::index',
     '/employees' => 'App\Controllers\EmployeeController::index',
     '/pos' => 'App\Controllers\POSController::index',
@@ -57,5 +57,7 @@ return [
     '/categories/{id}/update' => 'App\Controllers\CategoryController::updateCategory',
     '/orders/{id}/update' => 'App\Controllers\OrderController::updateOrder',
     '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
+    '/discounts/new' => 'App\Controllers\DiscountsController::createDiscount',
+    '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
   ],
 ];

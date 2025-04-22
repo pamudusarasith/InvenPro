@@ -1,0 +1,477 @@
+/* Discount Grid */
+.discount-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.discount-card {
+  background-color: var(--surface-white);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.discount-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.discount-card.inactive {
+  opacity: 0.75;
+  background-color: var(--surface-mild);
+}
+
+.discount-card.inactive::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--text-tertiary);
+}
+
+.discount-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.discount-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.discount-description {
+  padding: 0 1.25rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.discount-dates {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: var(--surface-light);
+  border-top: 1px solid var(--border-light);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.discount-dates .icon {
+  color: var(--text-tertiary);
+  font-size: 1.125rem;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border-light);
+  background-color: var(--surface-white);
+}
+
+/* Section titles in forms */
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface-light);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-light);
+}
+
+.section-title h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.section-title .btn {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.section-title .btn:hover {
+  color: var(--text-primary);
+}
+
+/* Conditions Container */
+.conditions-container,
+.coupons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+/* Condition cards */
+.condition-card {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.condition-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.condition-type {
+  flex-grow: 1;
+  margin-right: 0.75rem;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: auto;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switch input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+  position: absolute;
+}
+
+.toggle-switch label {
+  cursor: pointer;
+  width: 48px;
+  height: 24px;
+  background-color: var(--text-tertiary);
+  display: block;
+  border-radius: 100px;
+  position: relative;
+  transition: 0.3s;
+  margin: 0;
+}
+
+.toggle-switch label:after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 90px;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + label {
+  background-color: var(--success-600);
+}
+
+.toggle-switch input:checked + label:after {
+  left: calc(100% - 3px);
+  transform: translateX(-100%);
+}
+
+.toggle-label {
+  margin-left: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Coupon fields */
+.coupon-code-field {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.coupon-code-field input {
+  flex-grow: 1;
+}
+
+.coupon-item {
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.coupon-field {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.coupon-field .form-field {
+  margin-bottom: 0;
+  flex-grow: 1;
+}
+
+.coupon-status {
+  max-width: 120px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Discount Details Dialog Styles */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.detail-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-description {
+  padding: 1.25rem;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.detail-info {
+  padding: 1.25rem;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-row .label {
+  width: 8rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.detail-row .value {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+/* Coupon section in details */
+.coupon-section,
+.conditions-section {
+  padding: 1.25rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.coupon-section h4,
+.conditions-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.coupon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.coupon-item-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--surface-light);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-light);
+}
+
+.coupon-code-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: monospace;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.empty-state {
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+  padding: 1rem;
+}
+
+/* Conditions list in details */
+.conditions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.conditions-list li {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background-color: var(--surface-mild);
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+}
+
+.condition-icon {
+  font-family: "Material Symbols Rounded";
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  color: var(--text-tertiary);
+}
+
+/* Selected Product Styles */
+.selected-product {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.selected-product:hover {
+  background-color: var(--surface-mild);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.selected-product-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.selected-product .icon-btn {
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.selected-product:hover .icon-btn {
+  opacity: 1;
+}
+
+.selected-product.hidden {
+  display: none;
+}
+
+/* Show different states for product selection */
+.product-selected .search-bar {
+  display: none;
+}
+
+.product-not-selected .selected-product {
+  display: none;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .discount-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .checkbox-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .discount-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .coupon-field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .coupon-status {
+    max-width: none;
+    justify-content: flex-start;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
+  
+  .detail-row .label {
+    width: auto;
+    margin-bottom: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-actions {
+    flex-wrap: wrap;
+  }
+  
+  .card-actions .btn {
+    flex: 1 0 100%;
+    margin-bottom: 0.5rem;
+  }
+}
