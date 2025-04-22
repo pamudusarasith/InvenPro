@@ -20,24 +20,30 @@ class RoleController extends Controller
      */
     public function index()
     {
+        $roles = $this->roleModel->getAllRoles();
         $data = [
             'title' => 'Roles',
-            'roles' => $this->roleModel->getAllRoles(),
+            'roles' => $roles,
             'permissionCategories' => $this->roleModel->getPermissionCategories(),
             'permissionsByCategory' => $this->roleModel->getAllPermissionsGrouped(),
-            'rolePermissions' => [],
             'rolePermissionsDetails' => [],
+            'rolePermissionCategories' => [],
+            'rolePermissions' => [], // Add this
             'roleUserCounts' => $this->roleModel->getUserCountByRole(),
             'csrf_token' => $this->generateCsrfToken()
         ];
 
-        // Populate rolePermissions and rolePermissionsDetails for each role
-        foreach ($data['roles'] as $role) {
+        // Populate rolePermissions, rolePermissionsDetails, and rolePermissionCategories
+        foreach ($roles as $role) {
             $roleId = $role['id'];
-            $data['rolePermissions'][$roleId] = $this->roleModel->getRolePermissionNames($roleId);
-            $data['rolePermissionsDetails'][$roleId] = $this->roleModel->getRolePermissionsDetails($roleId);
+            $data['rolePermissionCategories'][$roleId] = $this->roleModel->getRolePermissionCategories($roleId);
+            $data['rolePermissionsDetails'][$roleId] = $this->roleModel->getPermissionsByRole($roleId);
+            $data['rolePermissions'][$roleId] = $this->roleModel->getRolePermissionNames($roleId); // Add this
         }
 
+        //error_log("Role Permission Categories: " . print_r($data['rolePermissionCategories'], true));
+        error_log("Role Permissions Details: " . print_r($data['rolePermissionsDetails'], true));
+        error_log("Role Permissions: " . print_r($data['rolePermissions'], true));
 
         View::renderTemplate('Roles', $data);
     }
