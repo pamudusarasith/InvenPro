@@ -44,7 +44,11 @@ class ValidationService
   public function validateCreateUser(array $data): bool
   {
     $validator = new Validator($data);
-    $validator->rule('email', new Required('Email is required'))
+    $validator->rule('first_name', new Required('First Name is required'))
+      ->rule('first_name', new IsString(0, 50, 'First Name must be a string between 0 and 50 characters'))
+      ->rule('last_name', new Required('Last Name is required'))
+      ->rule('last_name', new IsString(0, 50, 'Last Name must be a string between 0 and 50 characters'))
+      ->rule('email', new Required('Email is required'))
       ->rule('email', new Email())
       ->rule('role_id', new Required('Role ID is required'))
       ->rule('role_id', new IsNumeric('Invalid Role ID'))
@@ -61,7 +65,10 @@ class ValidationService
   public function validateUpdateUser(array $data): bool
   {
     $validator = new Validator($data);
-    $validator->rule('email', new Required('Email is required'))
+    $validator->rule('first_name', new Required('First Name is required'))
+      ->rule('first_name', new IsString(0, 50, 'First Name must be a string between 0 and 50 characters'))
+      ->rule('last_name', new Required('Last Name is required'))
+      ->rule('last_name', new IsString(0, 50, 'Last Name must be a string between 0 and 50 characters'))->rule('email', new Required('Email is required'))
       ->rule('email', new Email())
       ->rule('role_id', new Required('Role ID is required'))
       ->rule('role_id', new IsNumeric('Invalid Role ID'))
