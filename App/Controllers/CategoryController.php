@@ -47,6 +47,13 @@ class CategoryController extends Controller
 
   public function createCategory()
   {
+    if (!$this->validator->validateCreateCategory($_POST)) {
+      $_SESSION['message'] = $this->validator->getError();
+      $_SESSION['message_type'] = 'erroe';
+      View::redirect('/categories');
+    }
+
+
     $categoryModel = new CategoryModel();
     $categoryModel->createCategory($_POST);
     $_SESSION['message'] = 'category added successfully';
@@ -56,6 +63,12 @@ class CategoryController extends Controller
 
   public function updateCategory(array $params)
   {
+    if (!$this->validator->validateUpdateCategory($_POST)) {
+      $_SESSION['message'] = $this->validator->getError();
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/categories');
+    }
+
     $categoryModel = new CategoryModel();
     $_POST['id'] = $params['id'];
     $categoryModel->updateCategory($_POST);

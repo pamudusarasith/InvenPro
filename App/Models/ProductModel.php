@@ -105,6 +105,7 @@ class ProductModel extends Model
     return array_values($products);
   }
 
+
   public function searchPOSProducts(string $query): array
   {
     $sql = '
@@ -135,8 +136,76 @@ class ProductModel extends Model
     return $products;
   }
 
-  public function getProductsByCategoryId(int $categoryId): array
+
+
+  public function searchInventoryProducts(string $query, string $status, int $page, int $itemsPerPage): array
   {
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+    SELECT
+        p.id,
+        p.product_code,
+        p.product_name,
+        SUM(pb.current_quantity) AS quantity,
+        IF(COUNT(DISTINCT pb.unit_price) > 1, "Multiple", pb.unit_price) AS price,
+        (CASE
+          WHEN SUM(pb.current_quantity) > bp.reorder_level THEN "In Stock"
+          WHEN SUM(pb.current_quantity) > 0 THEN "Low Stock"
+          ELSE "Out of Stock"
+        END) AS status
+    FROM product p
+    INNER JOIN branch_product bp ON p.id = bp.product_id
+    LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+    WHERE p.deleted_at IS NULL
+      AND pb.deleted_at IS NULL
+      AND bp.branch_id = ?
+      AND (
+          p.product_name LIKE ? OR
+          p.product_code LIKE ?   
+        )      
+    GROUP BY p.id
+    HAVING status LIKE ?
+    LIMIT ? OFFSET ?
+    ';
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      "%$query%",
+      "%$status%",
+      $itemsPerPage,
+      $offset
+    ]);
+    return $stmt->fetchAll();
+  }
+
+  public function getInventoryProductsCount(string $query): int
+  {
+    $sql = '
+    SELECT
+      COUNT(DISTINCT p.id) AS count
+    FROM product p
+    INNER JOIN branch_product bp ON p.id = bp.product_id
+    LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+    WHERE p.deleted_at IS NULL
+      AND pb.deleted_at IS NULL
+      AND bp.branch_id = ?
+      AND (
+        p.product_name LIKE ? OR
+        p.product_code LIKE ?
+      )
+    ';
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      "%$query%"
+    ]);
+    return $stmt->fetch()['count'];
+  }
+
+
+  public function getProductsByCategoryId(int $categoryId, int $page, int $itemsPerPage): array
+  {
+    $offset = ($page - 1) * $itemsPerPage;
     $sql = '
       SELECT
         p.id,
@@ -155,12 +224,19 @@ class ProductModel extends Model
       INNER JOIN branch_product bp ON p.id = bp.product_id
       LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
       WHERE p.deleted_at IS NULL
+        AND pb.deleted_at IS NULL
         AND bp.branch_id = ?
         AND (pc.category_id = ? OR c.parent_id = ?)
       GROUP BY p.id
-      LIMIT 10
+      LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $categoryId, $categoryId]);
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      $categoryId,
+      $categoryId,
+      $itemsPerPage,
+      $offset
+    ]);
     return $stmt->fetchAll();
   }
 
