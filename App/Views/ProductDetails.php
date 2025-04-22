@@ -68,7 +68,7 @@ use App\Services\RBACService;
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-header">
-            <span class="icon">inventory_2</span>
+            <span class="icon text-success">inventory_2</span>
             <span class="stat-label">Total Stock</span>
           </div>
           <?php
@@ -78,16 +78,17 @@ use App\Services\RBACService;
           ?>
           <div class="stat-value"><?= number_format($totalStock, 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
         </div>
+
         <div class="stat-card">
           <div class="stat-header">
-            <span class="icon">trending_up</span>
+            <span class="icon text-info">trending_up</span>
             <span class="stat-label">Sales This Month</span>
           </div>
           <div class="stat-value"><?= number_format($stats['monthly_sales'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <span class="icon">payments</span>
+            <span class="icon text-warning">error_outline</span>
             <span class="stat-label">Out of Stock Batches</span>
           </div>
           <?php
@@ -99,7 +100,7 @@ use App\Services\RBACService;
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <span class="icon">shopping_cart</span>
+            <span class="icon text-danger">event_busy</span>
             <span class="stat-label">Expired Batches</span>
           </div>
           <?php
@@ -199,18 +200,6 @@ use App\Services\RBACService;
                 <div class="batch-card card glass" data-batch-id="<?= $batch['id'] ?>">
                   <div class="batch-header">
                     <span class="batch-title"><?= htmlspecialchars($batch['batch_code']) ?></span>
-                    <div>
-                      <?php if (RBACService::hasPermission('edit_batch')): ?>
-                        <button type="button" class="icon-btn" title="Edit Batch" onclick="openEditBatchDetailsDialog(event)">
-                          <span class=" icon">edit</span>
-                        </button>
-                      <?php endif; ?>
-                      <?php if (RBACService::hasPermission('delete_batch')): ?>
-                        <button type="button" class="icon-btn danger" title="Delete Batch" onclick="deleteBatch(<?= $batch['id'] ?>)">
-                          <span class=" icon">delete</span>
-                        </button>
-                      <?php endif; ?>
-                    </div>
                   </div>
                   <div class="batch-status">
                     <?php if ($batch['current_quantity'] <= 0): ?>
@@ -469,34 +458,5 @@ use App\Services\RBACService;
     }
 
     renderCategorySearchResults(data.data);
-  }
-
-  function openEditBatchDetailsDialog(e) {
-    document.querySelector('#batchDetailsDialog .modal-header h2').innerHTML = 'Edit Batch Details';
-    const batchCard = e.target.closest('.batch-card');
-    const batchCode = batchCard.querySelector('.batch-title').textContent;
-    const mfgDate = new Date(batchCard.querySelector('.mfg').textContent).toISOString().split('T')[0];
-    const expDate = new Date(batchCard.querySelector('.exp').textContent).toISOString().split('T')[0];
-
-    const form = document.getElementById('batchDetailsForm');
-    form.action = `/batch/${batchCard.dataset.batchId}/update`;
-    form.querySelector('input[name="po_number"]').parentElement.style.display = 'none';
-    form.querySelector('input[name="batch_code"]').value = batchCode;
-    form.querySelector('input[name="manufactured_date"]').value = mfgDate;
-    form.querySelector('input[name="expiry_date"]').value = expDate;
-    document.getElementById('batchDetailsDialog').showModal();
-  }
-
-
-  function closeEditBatchDetailsDialog() {
-    document.getElementById('batchDetailsForm').reset();
-    document.getElementById('batchDetailsDialog').close();
-  }
-
-  function deleteBatch(batchId) {
-    if (!confirm('Are you sure you want to delete this batch?')) {
-      return;
-    }
-    window.location.href = `/batch/${batchId}/delete`;
   }
 </script>

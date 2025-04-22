@@ -1,0 +1,341 @@
+/* Role cards styles */
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.role-card {
+  border-radius: 0.5rem;
+  background: var(--surface-white);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.role-card-header {
+  padding: 1rem;
+  background: var(--primary-600);
+  color: var(--text-inverse);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.role-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.role-card-body {
+  padding: 1rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.role-card-body p {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.role-permission-count {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.role-permission-count .icon {
+  margin-right: 0.5rem;
+  color: var(--primary-500);
+  font-size: 1.1rem;
+}
+
+.role-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 1rem;
+  margin-top: auto;
+}
+
+/* Role chips styling */
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.role-chip {
+  background-color: var(--primary-100);
+  color: var(--primary-700);
+  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Dialog and Modal Styles */
+#roleDialog,
+#roleDetailsDialog {
+  width: 60%;
+  max-width: 800px;
+}
+
+#roleDialog .modal-content,
+#roleDetailsDialog .modal-content {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+#roleDialog .modal-body,
+#roleDetailsDialog .modal-body {
+  padding: 1.5rem;
+}
+
+.form-actions,
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+  background-color: var(--surface-mild);
+}
+
+.details-section {
+  padding: 0 0.5rem;
+}
+
+.details-section h3 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: var(--primary-600);
+  font-weight: 500;
+}
+
+/* Permissions section styles */
+.permissions-section {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+  padding-top: 1.5rem;
+}
+
+.permissions-section h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--primary-600);
+}
+
+.permissions-section .subtitle {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+/* Tabs for permission categories */
+.permission-tabs {
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.permission-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.permission-tabs::-webkit-scrollbar-track {
+  background: var(--surface-mild);
+}
+
+.permission-tabs::-webkit-scrollbar-thumb {
+  background-color: var(--border-medium);
+  border-radius: 4px;
+}
+
+.permission-tab {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.permission-tab:hover {
+  color: var(--primary-600);
+}
+
+.permission-tab.active {
+  color: var(--primary-600);
+  font-weight: 500;
+}
+
+.permission-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--primary-600);
+}
+
+.permission-content {
+  padding: 1rem 0;
+}
+
+.permission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.permission-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.select-all {
+  font-size: 0.85rem;
+  color: var(--primary-600);
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-all:hover {
+  text-decoration: underline;
+}
+
+/* Permission list styles */
+.permission-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--surface-mild);
+  transition: background-color 0.2s;
+}
+
+.permission-item:hover {
+  background-color: var(--surface-medium);
+}
+
+.permission-item label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.permission-item input[type="checkbox"] {
+  margin-right: 0.75rem;
+  cursor: pointer;
+}
+
+/* Permission category styles (in details view) */
+.permission-category {
+  margin-bottom: 1.5rem;
+}
+
+.permission-category h5 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  color: var(--primary-600);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.5rem;
+}
+
+.permission-details-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+.permission-details-list li {
+  padding: 0.4rem 0.75rem;
+  background-color: var(--surface-mild);
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.permission-details-list li.no-permissions {
+  grid-column: 1 / -1;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Details grid in role details dialog */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.details-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.details-label {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin-bottom: 0.25rem;
+}
+
+.details-value {
+  font-size: 0.95rem;
+}
+
+.details-divider {
+  height: 1px;
+  background-color: var(--border-light);
+  margin: 1.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .role-cards,
+  .permission-list,
+  .permission-details-list,
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #roleDialog,
+  #roleDetailsDialog {
+    width: 95%;
+  }
+}

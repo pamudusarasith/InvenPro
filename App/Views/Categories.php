@@ -25,9 +25,11 @@ use App\Services\RBACService;
 
         <!-- Controls Section -->
         <div class="card glass controls">
-            <div class="search-bar">
-                <span class="icon">search</span>
-                <input type="text" id="searchInput" placeholder="Search categories...">
+            <div class="search-bar-with-btn">
+                <input type="text" id="searchInput" placeholder="Search categories..." value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+                <button class="icon-btn" onclick="searchCategories()">
+                    <span class="icon">search</span>
+                </button>
             </div>
         </div>
 
@@ -262,8 +264,18 @@ use App\Services\RBACService;
         `;
     }
 
+    function searchCategories() {
+        const searchInput = document.getElementById('searchInput').value;
+        const url = new URL(location.href);
+        url.searchParams.set('q', searchInput);
+        url.searchParams.delete('p');
+        location.href = url.toString();
+    }
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
-        const categorySearch = new SearchHandler({
+        const parentcategorySearch = new SearchHandler({
             apiEndpoint: '/api/category/search',
             inputElement: document.querySelector('#parent_category input'),
             resultsContainer: document.querySelector('#parent_category .search-results'),
@@ -281,5 +293,12 @@ use App\Services\RBACService;
                 document.querySelector('#parent_category .search-results').innerHTML = '';
             },
         })
+
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchCategories();
+            }
+        });
     });
 </script>

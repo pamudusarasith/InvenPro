@@ -32,7 +32,7 @@ return [
     '/api/pos/customer/search' => 'App\Controllers\CustomerController::search',
     '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
     '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
-    '/api/products/search' => 'App\Controllers\ProductsController::search',
+    '/api/products/search' => 'App\Controllers\ProductsController::assignProducts',
     '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
@@ -50,6 +50,8 @@ return [
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
+    '/roles/store' => 'App\Controllers\RoleController::store', // Added route
+    '/roles/{id}/update' => 'App\Controllers\RoleController::update',
     '/orders/new' => 'App\Controllers\OrderController::createOrder',
     '/categories/new' => 'App\Controllers\CategoryController::createCategory',
     '/categories/{id}/update' => 'App\Controllers\CategoryController::updateCategory',
