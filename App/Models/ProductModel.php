@@ -83,8 +83,9 @@ class ProductModel extends Model
     return $stmt->fetchAll();
   }
 
-  public function searchProduct(string $query): array
+  public function searchProduct(string $query, int $page, int $itemsPerPage): array
   {
+    $offset = ($page - 1) * $itemsPerPage;
     $sql = '
       SELECT
         p.*,
@@ -95,8 +96,9 @@ class ProductModel extends Model
       WHERE p.deleted_at IS NULL AND (
         p.product_name LIKE ? OR
         p.product_code LIKE ?)
+      LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, ["%$query%", "%$query%"]);
+    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
     $products = $stmt->fetchAll();
 
     foreach ($products as $i => $product) {
@@ -107,6 +109,27 @@ class ProductModel extends Model
     }
 
     return array_values($products);
+  }
+
+  public function assignProduct(string $query, int $page, int $itemsPerPage): array
+  {
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+      SELECT
+        p.*,
+        u.unit_name,
+        u.unit_symbol
+      FROM product p
+      INNER JOIN unit u ON p.unit_id = u.id
+      WHERE p.deleted_at IS NULL AND (
+        p.product_name LIKE ? OR
+        p.product_code LIKE ?)
+      LIMIT ? OFFSET ?
+    ';
+    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
+    $products = $stmt->fetchAll();
+
+    return $products;
   }
 
   public function searchPOSProducts(string $query): array
