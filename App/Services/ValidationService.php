@@ -191,7 +191,8 @@ class ValidationService
   public function validateUpdateCategory(array $data): bool
   {
     $validator = new Validator($data);
-    $validator->rule('category_name', new Required('Category Name is required'))
+    $validator
+      ->rule('category_name', new Required('Category Name is required'))
       ->rule('description', new IsString(0, 255, 'Description must be between 0 and 255 characters'));
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
@@ -275,7 +276,7 @@ class ValidationService
     return true;
   }
 
-  public function validateCreateDiscount(array $data): bool
+  public function validateCreateOrUpdateDiscount(array $data): bool
   {
     $validator = new Validator($data);
     $validator->rule('name', new Required('Name is required'))
