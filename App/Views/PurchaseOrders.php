@@ -19,6 +19,22 @@ function generateOrderReference()
   return 'PO-' . date('Ymd') . '-' . substr(uniqid(), -5);
 }
 
+// Helper function to get badge class based on status
+function getStatusBadgeClass($status)
+{
+  switch ($status) {
+    case 'pending':
+      return 'warning';
+    case 'open':
+      return 'accent';
+    case 'received':
+      return 'success';
+    case 'canceled':
+      return 'danger';
+    default:
+      return 'secondary';
+  }
+}
 ?>
 
 <div class="body">
@@ -52,12 +68,10 @@ function generateOrderReference()
       <div class="filters">
         <select id="statusFilter" onchange="applyFilters()">
           <option value="all" <?= $currentStatus === 'all' ? 'selected' : '' ?>>All Statuses</option>
-          <option value="draft" <?= $currentStatus === 'draft' ? 'selected' : '' ?>>Draft</option>
           <option value="pending" <?= $currentStatus === 'pending' ? 'selected' : '' ?>>Pending</option>
-          <option value="approved" <?= $currentStatus === 'approved' ? 'selected' : '' ?>>Approved</option>
-          <option value="ordered" <?= $currentStatus === 'ordered' ? 'selected' : '' ?>>Ordered</option>
-          <option value="received" <?= $currentStatus === 'received' ? 'selected' : '' ?>>Received</option>
-          <option value="cancelled" <?= $currentStatus === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+          <option value="open" <?= $currentStatus === 'open' ? 'selected' : '' ?>>Open</option>
+          <option value="completed" <?= $currentStatus === 'completed' ? 'selected' : '' ?>>Completed</option>
+          <option value="canceled" <?= $currentStatus === 'canceled' ? 'selected' : '' ?>>Canceled</option>
         </select>
 
         <div class="date-filter">
@@ -95,7 +109,7 @@ function generateOrderReference()
                 <td><?= htmlspecialchars($order['supplier_name']) ?></td>
                 <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
                 <td>
-                  <span class="badge order-status status-<?= $order['status'] ?>">
+                  <span class="badge <?= getStatusBadgeClass($order['status']) ?>">
                     <?= ucfirst($order['status']) ?>
                   </span>
                 </td>
@@ -273,77 +287,54 @@ function generateOrderReference()
   </div>
 </dialog>
 
+<script src="/js/search.js"></script>
 <script>
   class OrderForm {
     constructor(formElement) {
       this.form = formElement;
-      this.supplierSearch = {
-        query: "",
-        results: [],
-        page: 0,
-      };
       this.supplier = null;
-      this.productSearch = {
-        query: "",
-        results: [],
-        page: 0,
-      };
       this.items = new Map();
+
+      // Initialize search handlers after DOM is loaded
+      this.initSearchHandlers();
     }
 
     init() {
-      this.form
-        .querySelector("#order-supplier input")
-        .addEventListener("input", (e) => this.searchSuppliers(e.target.value));
-      this.form
-        .querySelector("#order-supplier input")
-        .addEventListener("focusin", (e) => this.searchSuppliers(e.target.value));
-      this.form
-        .querySelector("#order-supplier input")
-        .addEventListener("focusout", () => {
-          setTimeout(() => {
-            this.form.querySelector("#order-supplier .search-results").innerHTML =
-              "";
-          }, 200);
-        });
-      this.form
-        .querySelector("#order-supplier .search-results")
-        .addEventListener("scrollend", (e) =>
-          this.searchSuppliers(
-            this.supplierSearch.query,
-            this.supplierSearch.page + 1
-          )
-        );
-
-      this.form
-        .querySelector("#order-items input")
-        .addEventListener("input", (e) => this.searchProducts(e.target.value));
-      this.form
-        .querySelector("#order-items input")
-        .addEventListener("focusin", (e) => this.searchProducts(e.target.value));
-      this.form
-        .querySelector("#order-items input")
-        .addEventListener("focusout", () => {
-          setTimeout(() => {
-            this.form.querySelector("#order-items .search-results").innerHTML =
-              "";
-          }, 200);
-        });
-      this.form
-        .querySelector("#order-items .search-results")
-        .addEventListener("scrollend", (e) =>
-          this.searchProducts(
-            this.productSearch.query,
-            this.productSearch.page + 1
-          )
-        );
-
       this.form.onsubmit = (e) => this.submit(e);
-
-      document.querySelector("#add-item-form .cancel-btn").onclick =
-        this.cancelAddItemForm;
-
+      document.querySelector("#add-item-form .cancel-btn").onclick = this.cancelAddItemForm;
       this.renderItems();
+    }
+
+    initSearchHandlers() {
+      // Supplier search handler
+      this.supplierSearch = new SearchHandler({
+        apiEndpoint: '/api/suppliers/search',
+        inputElement: this.form.querySelector("#order-supplier input"),
+        resultsContainer: this.form.querySelector("#order-supplier .search-results"),
+        itemsPerPage: 5,
+        renderResultItem: (supplier) => {
+          const element = document.createElement("div");
+          element.classList.add("search-result");
+          element.textContent = supplier.supplier_name;
+          return element;
+        },
+        onSelect: (supplier) => this.selectSupplier(supplier)
+      });
+
+      // Products search handler
+      this.productSearch = new SearchHandler({
+        apiEndpoint: '/api/suppliers/{supplier_id}/products/search',
+        inputElement: this.form.querySelector("#order-items input"),
+        resultsContainer: this.form.querySelector("#order-items .search-results"),
+        itemsPerPage: 5,
+        renderResultItem: (product) => {
+          const element = document.createElement("div");
+          element.classList.add("search-result");
+          element.textContent = product.product_name;
+          return element;
+        },
+        onSelect: (product) => this.showAddItemForm(product)
+      });
     }
 
     selectSupplier(supplier) {
@@ -352,67 +343,17 @@ function generateOrderReference()
       this.form
         .querySelector("#supplier_details")
         .closest(".form-field").style.display = "flex";
-      this.form.querySelector("#supplier_name").textContent =
-        supplier.supplier_name;
-      this.form.querySelector("#contact_person").textContent =
-        supplier.contact_person;
+      this.form.querySelector("#supplier_name").textContent = supplier.supplier_name;
+      this.form.querySelector("#contact_person").textContent = supplier.contact_person;
       this.form.querySelector("#supplier_email").textContent = supplier.email;
       this.form.querySelector("#supplier_phone").textContent = supplier.phone;
       this.form.querySelector("#supplier_id").value = supplier.id;
 
-      this.supplierSearch.results = [];
-      this.supplierSearch.query = "";
-      this.supplierSearch.page = 0;
-    }
-
-    renderSupplierSearchResults() {
-      const resultsContainer = this.form.querySelector(
-        "#order-supplier .search-results"
-      );
-      resultsContainer.innerHTML = "";
-
-      this.supplierSearch.results.forEach((supplier) => {
-        const supplierElement = document.createElement("div");
-        supplierElement.classList.add("search-result");
-        supplierElement.textContent = supplier.supplier_name;
-        supplierElement.addEventListener("click", () =>
-          this.selectSupplier(supplier)
-        );
-
-        resultsContainer.appendChild(supplierElement);
+      // Update product search with current supplier ID
+      this.productSearch.updateParams({
+        supplier_id: supplier.id
       });
-    }
-
-    async searchSuppliers(query, page = 1) {
-      const response = await fetch(
-        `/api/suppliers/search?q=${query}&p=${page}&ipp=5`
-      );
-      const data = await response.json();
-
-      if (!data.success) {
-        console.error("Failed to search suppliers:", data.error);
-        return;
-      }
-
-      if (data.data.length === 0) return;
-
-      if (document.querySelector("#order-supplier input").value !== query) return;
-
-      if (query !== this.supplierSearch.query && page === 1) {
-        this.supplierSearch.query = query;
-        this.supplierSearch.results = data.data;
-        this.supplierSearch.page = 1;
-      } else if (
-        query === this.supplierSearch.query &&
-        page > this.supplierSearch.page
-      ) {
-        this.supplierSearch.results = this.supplierSearch.results.concat(
-          data.data
-        );
-        this.supplierSearch.page = page;
-      }
-
-      this.renderSupplierSearchResults();
+      this.productSearch.apiEndpoint = `/api/suppliers/${supplier.id}/products/search`;
     }
 
     addItem(product) {
@@ -428,7 +369,6 @@ function generateOrderReference()
         quantity,
       });
 
-      console.log(this.items);
       form.querySelectorAll("input").forEach((elem) => (elem.value = ""));
       form.style.display = "none";
 
@@ -481,7 +421,7 @@ function generateOrderReference()
 
         const input = document.createElement("input");
         input.type = "hidden";
-        input.name = "order_items[]";
+        input.name = "items[]";
         input.value = JSON.stringify({
           id: product.id,
           quantity: product.quantity,
@@ -494,65 +434,9 @@ function generateOrderReference()
         tbody.appendChild(tr);
       });
 
-      document.getElementById("items_count").textContent =
-        this.items.size.toString();
-    }
-
-    renderProductSearchResults() {
-      const resultsContainer = this.form.querySelector(
-        "#order-items .search-results"
-      );
-      resultsContainer.innerHTML = "";
-
-      if (this.productSearch.results.length === 0) {
-        const elem = document.createElement("div");
-        elem.classList.add("search-result");
-        elem.textContent = "No results";
-        resultsContainer.appendChild(elem);
-        return;
+      if (document.getElementById("items_count")) {
+        document.getElementById("items_count").textContent = this.items.size.toString();
       }
-
-      this.productSearch.results.forEach((product) => {
-        const productElement = document.createElement("div");
-        productElement.classList.add("search-result");
-        productElement.textContent = product.product_name;
-        productElement.addEventListener("click", () =>
-          this.showAddItemForm(product)
-        );
-
-        resultsContainer.appendChild(productElement);
-      });
-    }
-
-    async searchProducts(query, page = 1) {
-      if (!this.supplier) return;
-      const response = await fetch(
-        `/api/suppliers/${this.supplier.id}/products/search?q=${query}&p=${page}&ipp=5`
-      );
-      const data = await response.json();
-
-      if (!data.success) {
-        console.error("Failed to search products:", data.error);
-        return;
-      }
-
-      if (data.data.length === 0) return;
-
-      if (document.querySelector("#order-items input").value !== query) return;
-
-      if (query !== this.productSearch.query && page === 1) {
-        this.productSearch.query = query;
-        this.productSearch.results = data.data;
-        this.productSearch.page = 1;
-      } else if (
-        query === this.productSearch.query &&
-        page > this.productSearch.page
-      ) {
-        this.productSearch.results = this.productSearch.results.concat(data.data);
-        this.productSearch.page = page;
-      }
-
-      this.renderProductSearchResults();
     }
 
     submit(e) {
@@ -566,7 +450,6 @@ function generateOrderReference()
     }
   }
 
-  // Modify the existing event listener to include the modal initialization
   document.addEventListener("DOMContentLoaded", function() {
     const createOrderForm = document.getElementById("createOrderForm");
     const orderForm = new OrderForm(createOrderForm);

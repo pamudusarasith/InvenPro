@@ -17,7 +17,7 @@ class UserController extends Controller
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
     $roleModal = new RoleModel();
-    $roles = $roleModal->getRoles();
+    $roles = $roleModal->getAllRoles();
 
     $branchModal = new BranchModel();
     $branches = $branchModal->getBranches();
@@ -45,7 +45,7 @@ class UserController extends Controller
     }
 
     $roleModal = new RoleModel();
-    $roles = $roleModal->getRoles();
+    $roles = $roleModal->getAllRoles();
 
     $branchModal = new BranchModel();
     $branches = $branchModal->getBranches();

@@ -2,6 +2,10 @@
 
 use App\Services\RBACService;
 
+$message = $_SESSION['message'] ?? null;
+$messageType = $_SESSION['message_type'] ?? 'error';
+unset($_SESSION['message'], $_SESSION['message_type']);
+
 $branches = $branches ?? [];
 ?>
 
@@ -174,7 +178,6 @@ $branches = $branches ?? [];
                 <tr>
                   <th>Product Code</th>
                   <th>Product Name</th>
-                  <th>Supplier Code</th>
                   <th>Preferred</th>
                   <th>Last Order</th>
                   <th>Actions</th>
@@ -185,7 +188,7 @@ $branches = $branches ?? [];
                   <tr>
                     <td><?= htmlspecialchars($product['product_code']) ?></td>
                     <td><?= htmlspecialchars($product['product_name']) ?></td>
-                    <td><?= htmlspecialchars($product['supplier_product_code']) ?></td>
+                  
                     <td>
                       <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
                         <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
@@ -228,46 +231,21 @@ $branches = $branches ?? [];
 
       <form id="assignProductsForm" method="POST" action="/suppliers/<?= $supplier['id'] ?>/products">
         <div class="form-grid">
-          <div class="search-bar span-2">
-            <span class="icon">search</span>
-            <input type="text" id="searchInput" placeholder="Search products...">
+          <div class="form-field span-2">
+            <div id="assign-product" class="search-bar">
+              <span class="icon">search</span>
+              <input type="text" placeholder="Search Products...">
+              <div class="search-results"></div>
+            </div>
           </div>
 
-          <div class="product-list span-2">
-            <?php foreach ($available_products as $product): ?>
-              <div class="product-assignment-item">
-                <div class="product-info">
-                  <label class="checkbox-wrapper">
-                    <input type="checkbox"
-                      name="products[]"
-                      value="<?= $product['id'] ?>"
-                      <?= isset($supplier_products[$product['id']]) ? 'checked' : '' ?>>
-                    <span class="product-name"><?= htmlspecialchars($product['product_name']) ?></span>
-                    <span class="product-code"><?= htmlspecialchars($product['product_code']) ?></span>
-                  </label>
-                </div>
-
-                <div class="product-details" data-product="<?= $product['id'] ?>">
-                  <div class="form-row">
-                    <input type="text"
-                      name="supplier_codes[<?= $product['id'] ?>]"
-                      placeholder="Supplier Code"
-                      value="<?= htmlspecialchars($supplier_products[$product['id']]['supplier_product_code'] ?? '') ?>"
-                      class="form-input compact">
-
-                    <label class="toggle-wrapper">
-                      <input type="checkbox"
-                        name="preferred[<?= $product['id'] ?>]"
-                        <?= isset($supplier_products[$product['id']]) &&
-                          $supplier_products[$product['id']]['is_preferred_supplier'] ? 'checked' : '' ?>>
-                      <span class="toggle-label">Preferred Supplier</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            <?php endforeach; ?>
-          </div>
+        <div class="form-field span-2" style="display: none;" id="product_details">
+          <p><strong>Product Code:</strong> <span id="product_code"></span></p>
+          <p><strong>Product Name:</strong> <span id="product_name"></span></p>
         </div>
+  </div>
+</form>
+
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAssignDialog()">Cancel</button>
@@ -278,7 +256,48 @@ $branches = $branches ?? [];
   </dialog>
 <?php endif; ?>
 
+<!-- Include message popup from existing code -->
+<?php
+$popupIcon = 'error';
+if ($messageType === 'success') {
+  $popupIcon = 'check_circle';
+} elseif ($messageType === 'warning') {
+  $popupIcon = 'warning';
+}
+?>
+
+<div id="messagePopup" class="popup <?= $messageType ?>">
+  <span class="icon"><?= $popupIcon ?></span>
+  <span class="popup-message"><?= htmlspecialchars($message ?? '') ?></span>
+  <button class="popup-close" onclick="closePopup()">
+    <span class="icon">close</span>
+  </button>
+</div>
+
+<script src="/js/search.js"></script>
 <script>
+
+function selectproduct(product) {
+  document.querySelector("#product_details").style.display = "flex";
+  document.querySelector("#product_code").textContent = product.product_code;
+  document.querySelector("#product_name").textContent = product.product_name;
+}
+
+new SearchHandler({
+  apiEndpoint: '/api/products/search',
+  inputElement: document.querySelector("#assign-product input"),
+  resultsContainer: document.querySelector("#assign-product .search-results"),
+  itemsPerPage: 5,
+  renderResultItem: (product) => {
+    const element = document.createElement("div");
+    element.classList.add("search-result");
+    element.textContent = product.product_name;
+    element.addEventListener("click", () => selectproduct(product)); // bind click handler
+    return element;
+  },
+});
+
+
   // Reuse existing tab switching functionality
   function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -289,19 +308,19 @@ $branches = $branches ?? [];
   }
 
   function enableEditing() {
-    // Add edit mode class to header
-    document.querySelector('.details-header').classList.add('edit-mode');
+        // Add edit mode class to header
+        document.querySelector('.details-header').classList.add('edit-mode');
 
-    // Enable all form inputs
-    document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
-      input.disabled = false;
-    });
+        // Enable all form inputs
+        document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
+            input.disabled = false;
+        });
 
-    // Scroll to form
-    document.querySelector('.tab-content.active').scrollIntoView({
-      behavior: 'smooth'
-    });
-  }
+        // Scroll to form
+        document.querySelector('.tab-content.active').scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
 
   function cancelEdit() {
     if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
@@ -359,5 +378,15 @@ $branches = $branches ?? [];
 
   function editProduct(productId) {
     // Implement product editing logic
+  }
+
+  <?php if ($message): ?>
+    window.addEventListener('load', () => {
+      document.getElementById('messagePopup').classList.add('show');
+    });
+  <?php endif; ?>
+
+  function closePopup() {
+    document.getElementById('messagePopup').classList.remove('show');
   }
 </script>

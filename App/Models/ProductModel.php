@@ -57,6 +57,7 @@ class ProductModel extends Model
         *
       FROM product_batch
       WHERE deleted_at IS NULL
+        AND is_active = 1
         AND branch_id = ?
         AND product_id = ?
         AND unit_price = ?
@@ -72,15 +73,19 @@ class ProductModel extends Model
       SELECT
         *
       FROM product_batch
-      WHERE deleted_at IS NULL AND product_id = ? AND branch_id = ?
+      WHERE deleted_at IS NULL
+        AND is_active = 1
+        AND product_id = ?
+        AND branch_id = ?
       ORDER BY expiry_date ASC
     ';
     $stmt = self::$db->query($sql, [$id, $_SESSION['user']['branch_id']]);
     return $stmt->fetchAll();
   }
 
-  public function searchProduct(string $query): array
+  public function searchProduct(string $query, int $page, int $itemsPerPage): array
   {
+    $offset = ($page - 1) * $itemsPerPage;
     $sql = '
       SELECT
         p.*,
@@ -91,8 +96,9 @@ class ProductModel extends Model
       WHERE p.deleted_at IS NULL AND (
         p.product_name LIKE ? OR
         p.product_code LIKE ?)
+      LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, ["%$query%", "%$query%"]);
+    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
     $products = $stmt->fetchAll();
 
     foreach ($products as $i => $product) {
@@ -105,6 +111,26 @@ class ProductModel extends Model
     return array_values($products);
   }
 
+  public function assignProduct(string $query, int $page, int $itemsPerPage): array
+  {
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+      SELECT
+        p.*,
+        u.unit_name,
+        u.unit_symbol
+      FROM product p
+      INNER JOIN unit u ON p.unit_id = u.id
+      WHERE p.deleted_at IS NULL AND (
+        p.product_name LIKE ? OR
+        p.product_code LIKE ?)
+      LIMIT ? OFFSET ?
+    ';
+    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
+    $products = $stmt->fetchAll();
+
+    return $products;
+  }
 
   public function searchPOSProducts(string $query): array
   {
@@ -118,6 +144,7 @@ class ProductModel extends Model
       INNER JOIN product_batch pb ON p.id = pb.product_id
       WHERE p.deleted_at IS NULL
         AND pb.deleted_at IS NULL
+        AND pb.is_active = 1
         AND pb.branch_id = ?
         AND (
           p.product_name LIKE ? OR
@@ -224,7 +251,6 @@ class ProductModel extends Model
       INNER JOIN branch_product bp ON p.id = bp.product_id
       LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
       WHERE p.deleted_at IS NULL
-        AND pb.deleted_at IS NULL
         AND bp.branch_id = ?
         AND (pc.category_id = ? OR c.parent_id = ?)
       GROUP BY p.id

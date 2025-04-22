@@ -210,14 +210,63 @@ class ValidationService
       ->rule('order_date', new CompareWithValue('>=', date('Y-m-d'), 'date', 'Order Date must be today or in the future'))
       ->rule('expected_date', new IsDate('Y-m-d', 'Invalid Expected Date'))
       ->rule('expected_date', new CompareWithField('>=', 'order_date', 'date', 'Expected Date must be today or in the future'))
-      ->rule('order_items', new Required('Items are required'))
-      ->rule('order_items', new IsArray(1, null, 'Items must be an array'))
-      ->rule('order_items.*.id', new Required('Product ID is required'))
-      ->rule('order_items.*.id', new IsNumeric('Invalid Product ID'))
-      ->rule('order_items.*.quantity', new Required('Quantity is required'))
-      ->rule('order_items.*.quantity', new IsNumeric('Quantity must be numeric'))
-      ->rule('order_items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('items', new Required('Items are required'))
+      ->rule('items', new IsArray(1, null, 'Items must be an array'))
+      ->rule('items.*.id', new Required('Product ID is required'))
+      ->rule('items.*.id', new IsNumeric('Invalid Product ID'))
+      ->rule('items.*.quantity', new Required('Quantity is required'))
+      ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
+      ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
       ->rule('notes', new IsString(0, 255, 'Notes must be a string between 0 and 255 characters'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateUpdateOrder(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('reference', new Required('Reference is required'))
+      ->rule('expected_date', new IsDate('Y-m-d', 'Invalid Expected Date'))
+      ->rule('expected_date', new CompareWithField('>=', 'order_date', 'date', 'Expected Date must be later than Order Date'))
+      ->rule('items', new Required('Items are required'))
+      ->rule('items', new IsArray(1, null, 'Items must be an array'))
+      ->rule('items.*.id', new Required('Product ID is required'))
+      ->rule('items.*.id', new IsNumeric('Invalid Product ID'))
+      ->rule('items.*.quantity', new Required('Quantity is required'))
+      ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
+      ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('notes', new IsString(0, 255, 'Notes must be a string between 0 and 255 characters'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateReceiveOrder(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('batches', new Required('Batches are required'))
+      ->rule('batches', new IsArray(0, null, 'Batches must be an array'))
+      ->rule('batches.*.product_id', new Required('Product ID is required'))
+      ->rule('batches.*.product_id', new IsNumeric('Invalid Product ID'))
+      ->rule('batches.*.batch_code', new Required('Batch Code is required'))
+      ->rule('batches.*.batch_code', new IsString(0, 50, 'Batch Code must be a string between 0 and 50 characters'))
+      ->rule('batches.*.received_qty', new Required('Quantity is required'))
+      ->rule('batches.*.received_qty', new IsNumeric('Quantity must be numeric'))
+      ->rule('batches.*.received_qty', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('batches.*.unit_cost', new Required('Unit Cost is required'))
+      ->rule('batches.*.unit_cost', new IsNumeric('Unit Cost must be numeric'))
+      ->rule('batches.*.unit_cost', new CompareWithValue('>', 0, 'numeric', 'Unit Cost must be greater than 0'))
+      ->rule('batches.*.unit_price', new Required('Unit Price is required'))
+      ->rule('batches.*.unit_price', new IsNumeric('Unit Price must be numeric'))
+      ->rule('batches.*.unit_price', new CompareWithValue('>', 0, 'numeric', 'Unit Price must be greater than 0'))
+      ->rule('batches.*.manufactured_date', new IsDate('Y-m-d', 'Invalid Manufactured Date'))
+      ->rule('batches.*.expiry_date', new IsDate('Y-m-d', 'Invalid Expiry Date'))
+      ->rule('batches.*.expiry_date', new CompareWithField('>', 'manufactured_date', 'date', 'Expiry Date must be later than Manufactured Date'));
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;

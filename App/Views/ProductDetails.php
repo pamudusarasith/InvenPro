@@ -216,8 +216,8 @@ use App\Services\RBACService;
                       <span class="info-value current-stock"><?= number_format($batch['current_quantity'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></span>
                     </div>
                     <div class="batch-info">
-                      <span class="info-label">Unit Price</span>
-                      <span class="info-value unit-value">Rs. <?= number_format($batch['unit_price'], 2) ?></span>
+                      <span class="info-label">Unit Cost</span>
+                      <span class="info-value unit-value">Rs. <?= number_format($batch['unit_cost'], 2) ?></span>
                     </div>
                     <div class="batch-info">
                       <span class="info-label">Manufacturing Date</span>
