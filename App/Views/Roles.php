@@ -305,14 +305,37 @@ use App\Services\RBACService;
       document.getElementById('roleName').value = role.role_name;
       document.getElementById('roleDescription').value = role.description;
 
+      // Reset all checkboxes and Select All buttons
       document.querySelectorAll('input[name="permissions[]"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('.select-all').forEach(btn => btn.textContent = 'Select All');
 
+      // Check permissions for the role
       if (rolePermissions[roleId]) {
-        rolePermissions[roleId].forEach(perm => {
-          const checkbox = document.querySelector(`input[value="${perm}"]`);
-          if (checkbox) checkbox.checked = true;
+        console.log('Permissions for role', roleId, rolePermissions[roleId]); // Debug
+        rolePermissions[roleId].forEach(permId => {
+          const checkbox = document.querySelector(`input[name="permissions[]"][value="${permId}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+          } else {
+            console.warn(`Checkbox not found for permission ID: ${permId}`); // Debug
+          }
         });
+
+        // Update Select All button text for each category
+        document.querySelectorAll('.permission-content').forEach(tabContent => {
+          const group = tabContent.id.replace('-tab', '');
+          const checkboxes = tabContent.querySelectorAll('input[name="permissions[]"]');
+          const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+          const selectAllBtn = document.querySelector(`.select-all[data-group="${group}"]`);
+          if (selectAllBtn) {
+            selectAllBtn.textContent = allChecked ? 'Deselect All' : 'Select All';
+          }
+        });
+      } else {
+        console.warn(`No permissions found for role ID: ${roleId}`); // Debug
       }
+    } else {
+      console.error(`Role not found for ID: ${roleId}`);
     }
 
     dialog.showModal();
