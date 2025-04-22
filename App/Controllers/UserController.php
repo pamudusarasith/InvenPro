@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
-use App\Models\{UserModel, RoleModel, BranchModel};
+use App\Models\{UserModel, RoleModel, BranchModel, AuditLogModel};
 
 class UserController extends Controller
 {
@@ -57,7 +57,11 @@ class UserController extends Controller
     $roleModal = new RoleModel();
     $roles = $roleModal->getAllRoles();
 
-    error_log(print_r($user, true)); // Debugging line
+    $auditLogModel = new AuditLogModel();
+    $activities = $auditLogModel->getAuditLogsById($user['id']);
+
+    //error_log(print_r($user, true)); // Debugging line
+    error_log(print_r($activities, true)); // Debugging line
 
     $branchModal = new BranchModel();
     $branches = $branchModal->getBranches();
@@ -67,6 +71,7 @@ class UserController extends Controller
       'user' => $user,
       'roles' => $roles,
       'branches' => $branches,
+      'activities' => $activities,
     ]);
   }
 
