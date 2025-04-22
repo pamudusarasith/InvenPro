@@ -111,22 +111,60 @@
   box-shadow: none;
 }
 
+.icon-btn.primary {
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+.icon-btn.primary:hover {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
 .icon-btn.secondary {
   background: var(--surface-mild);
   color: var(--text-secondary);
 }
-
 .icon-btn.secondary:hover {
   background: var(--surface-medium);
   color: var(--text-primary);
 }
-
+.icon-btn.success {
+  border-color: var(--success-100);
+  color: var(--success-600);
+}
+.icon-btn.success:hover {
+  background-color: var(--success-200);
+  color: var(--success-700);
+}
+.icon-btn.warning {
+  background: var(--warning-50);
+  color: var(--warning-600);
+}
+.icon-btn.warning:hover {
+  background: var(--warning-100);
+  color: var(--warning-700);
+}
 .icon-btn.danger {
   background: var(--danger-50);
   color: var(--danger-600);
 }
-
 .icon-btn.danger:hover {
   background: var(--danger-100);
   color: var(--danger-700);
 }
+.icon-btn.edit {
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+.icon-btn.edit:hover {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+.icon-btn.delete {
+  background: var(--danger-50);
+  color: var(--danger-600);
+}
+.icon-btn.delete:hover {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+

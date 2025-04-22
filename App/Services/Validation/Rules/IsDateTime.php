@@ -4,7 +4,7 @@ namespace App\Services\Validation\Rules;
 
 use App\Services\Validation\Rule;
 
-class IsDate extends Rule
+class IsDateTime extends Rule
 {
   private string $format;
 

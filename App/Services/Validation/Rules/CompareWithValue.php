@@ -10,18 +10,21 @@ class CompareWithValue extends Rule
   private $operator;
   private $compareValue;
   private $type;
+  private $format;
 
   /**
    * @param string $operator The comparison operator ('==', '>', '<', etc.)
    * @param mixed $compareValue The value to compare against
    * @param string|null $type The type to use for comparison ('auto', 'numeric', 'string', 'date', 'boolean', 'array')
    * @param string|null $message Custom error message
+   * @param string|null $format Format for date comparison (if applicable)
    */
-  public function __construct(string $operator, $compareValue, ?string $type = 'auto', ?string $message = null)
+  public function __construct(string $operator, $compareValue, ?string $type = 'auto', ?string $message = null, string $format = 'Y-m-d')
   {
     $this->operator = $operator;
     $this->compareValue = $compareValue;
     $this->type = $type;
+    $this->format = $format;
 
     // If no custom message is provided, create a helpful default message
     if (!$message) {
@@ -46,8 +49,8 @@ class CompareWithValue extends Rule
         return $this->compareString((string)$value, (string)$this->compareValue, $this->operator);
 
       case 'date':
-        $dateValue = $this->parseDate($value);
-        $dateCompareValue = $this->parseDate($this->compareValue);
+        $dateValue = $this->parseDate($value, $this->format);
+        $dateCompareValue = $this->parseDate($this->compareValue, $this->format);
 
         if ($dateValue === null || $dateCompareValue === null) {
           return false; // Invalid date values
