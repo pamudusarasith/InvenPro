@@ -18,6 +18,13 @@ function getStatusBadgeClass($status)
       return 'secondary';
   }
 }
+
+$canEditOrder = RBACService::hasPermission('edit_purchase_orders');
+$canApproveOrder = RBACService::hasPermission('approve_purchase_orders');
+$canCancelOrder = RBACService::hasPermission('cancel_purchase_orders');
+$canDeleteOrder = RBACService::hasPermission('delete_purchase_orders');
+$canReceiveItems = RBACService::hasPermission('receive_purchase_orders');
+$canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
 ?>
 
 <link rel="stylesheet" href="/css/pages/purchase-order-details.css">
@@ -54,58 +61,60 @@ function getStatusBadgeClass($status)
       </div>
 
       <div>
-        <div id="edit-actions" class="row gap-md" style="display: none;">
-          <button class="btn btn-secondary" onclick="cancelEdit()">
-            <span class="icon">close</span>
-            Cancel
-          </button>
-          <button class="btn btn-primary" onclick="saveChanges()">
-            <span class="icon">save</span>
-            Save
-          </button>
-        </div>
+        <?php if ($canEditOrder): ?>
+          <div id="edit-actions" class="row gap-md" style="display: none;">
+            <button class="btn btn-secondary" onclick="cancelEdit()">
+              <span class="icon">close</span>
+              Cancel
+            </button>
+            <button class="btn btn-primary" onclick="saveChanges()">
+              <span class="icon">save</span>
+              Save
+            </button>
+          </div>
+        <?php endif; ?>
 
         <div class="dropdown">
           <button class="dropdown-trigger icon-btn" title="More options">
             <span class="icon">more_vert</span>
           </button>
           <div class="dropdown-menu">
-            <?php if ($order['status'] === 'pending'): ?>
+            <?php if ($canEditOrder && $order['status'] === 'pending'): ?>
               <button class="dropdown-item" onclick="enableEdit(event)">
                 <span class="icon">edit</span>
                 Edit Order
               </button>
             <?php endif; ?>
 
-            <?php if ($order['status'] === 'pending'): ?>
+            <?php if ($canApproveOrder && $order['status'] === 'pending'): ?>
               <button class="dropdown-item" onclick="approveOrder()">
                 <span class="icon">done</span>
                 Approve Order
               </button>
             <?php endif; ?>
 
-            <?php if ($order['status'] === 'pending'): ?>
+            <?php if ($canCancelOrder && $order['status'] === 'pending'): ?>
               <button class="dropdown-item danger" onclick="cancelOrder()">
                 <span class="icon">cancel</span>
                 Cancel Order
               </button>
             <?php endif; ?>
 
-            <?php if ($order['status'] === 'open'): ?>
+            <?php if ($canReceiveItems && $order['status'] === 'open'): ?>
               <button class="dropdown-item" onclick="openReceiveItemsDialog()">
                 <span class="icon">add</span>
                 Add Received Items
               </button>
             <?php endif; ?>
 
-            <?php if ($order['status'] === 'open'): ?>
+            <?php if ($canCompleteOrder && $order['status'] === 'open'): ?>
               <button class="dropdown-item" onclick="completeOrder()">
                 <span class="icon">inventory</span>
                 Complete Order
               </button>
             <?php endif; ?>
 
-            <?php if (in_array($order['status'], ['pending', 'canceled'])): ?>
+            <?php if ($canDeleteOrder && in_array($order['status'], ['pending', 'canceled'])): ?>
               <button class="dropdown-item danger" onclick="deleteOrder()">
                 <span class="icon">delete</span>
                 Delete Order
@@ -148,9 +157,9 @@ function getStatusBadgeClass($status)
       <button class="tab-btn" onclick="switchTab('timeline')">Timeline</button>
     </div>
 
+    <input type="hidden" name="supplier_id" value="<?= $order['supplier_id'] ?>">
 
     <!-- Order Details Tab -->
-    <input type="hidden" name="supplier_id" value="<?= $order['supplier_id'] ?>">
     <div id="overview" class="tab-content active">
       <form id="details-form" method="POST" action="/orders/<?= $order['id'] ?>/update">
         <div class="card">
@@ -237,97 +246,171 @@ function getStatusBadgeClass($status)
         </div>
       </form>
     </div>
-  </div>
 
-  <!-- Timeline Tab -->
-  <div id="timeline" class="tab-content">
-    <div class="card">
-      <h3>Order Timeline</h3>
-      <div class="content">
-        <ul class="timeline">
-          <li class="timeline-item created">
-            <div class="timeline-date">Apr 10, 2025 - 09:30 AM</div>
-            <div class="timeline-content">Order Created</div>
-            <div class="timeline-meta">by John Manager</div>
-          </li>
-          <li class="timeline-item pending">
-            <div class="timeline-date">Apr 10, 2025 - 09:30 AM</div>
-            <div class="timeline-content">Order Submitted for Approval</div>
-            <div class="timeline-meta">by John Manager</div>
-          </li>
-          <li class="timeline-item approved">
-            <div class="timeline-date">Apr 11, 2025 - 11:15 AM</div>
-            <div class="timeline-content">Order Approved</div>
-            <div class="timeline-meta">by Jane Supervisor</div>
-          </li>
-          <li class="timeline-item received">
-            <div class="timeline-date">Apr 12, 2025 - 02:45 PM</div>
-            <div class="timeline-content">Order Sent to Supplier</div>
-            <div class="timeline-meta">by John Manager</div>
-          </li>
-        </ul>
+    <!-- Timeline Tab -->
+    <div id="timeline" class="tab-content">
+      <div class="card">
+        <h3>Order Timeline</h3>
+        <div class="content">
+          <ul class="timeline">
+            <li class="timeline-item created">
+              <div class="timeline-date">Apr 10, 2025 - 09:30 AM</div>
+              <div class="timeline-content">Order Created</div>
+              <div class="timeline-meta">by John Manager</div>
+            </li>
+            <li class="timeline-item pending">
+              <div class="timeline-date">Apr 10, 2025 - 09:30 AM</div>
+              <div class="timeline-content">Order Submitted for Approval</div>
+              <div class="timeline-meta">by John Manager</div>
+            </li>
+            <li class="timeline-item approved">
+              <div class="timeline-date">Apr 11, 2025 - 11:15 AM</div>
+              <div class="timeline-content">Order Approved</div>
+              <div class="timeline-meta">by Jane Supervisor</div>
+            </li>
+            <li class="timeline-item received">
+              <div class="timeline-date">Apr 12, 2025 - 02:45 PM</div>
+              <div class="timeline-content">Order Sent to Supplier</div>
+              <div class="timeline-meta">by John Manager</div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </div>
-</div>
 
-<dialog id="add-item-dialog" class="modal">
-  <div class="modal-content">
-    <div id="add-item-form" class="form-grid">
-      <div class="form-field span-2">
-        <label for="add-item-qty">Quantity</label>
-        <input id="add-item-qty" type="number">
-      </div>
-      <div class="form-field span-2 add-item-actions">
-        <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
-        <button type="button" class="btn btn-primary add-btn">Add</button>
+<?php if ($canEditOrder): ?>
+  <dialog id="add-item-dialog" class="modal">
+    <div class="modal-content">
+      <div id="add-item-form" class="form-grid">
+        <div class="form-field span-2">
+          <label for="add-item-qty">Quantity</label>
+          <input id="add-item-qty" type="number">
+        </div>
+        <div class="form-field span-2 add-item-actions">
+          <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-primary add-btn">Add</button>
+        </div>
       </div>
     </div>
-  </div>
-</dialog>
+  </dialog>
+<?php endif; ?>
 
-<dialog id="receive-items-dialog" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Receive Items: <?= htmlspecialchars($order['reference']) ?></h2>
-      <button class="close-btn" onclick="closeReceiveItemsDialog()">
-        <span class="icon">close</span>
-      </button>
-    </div>
-    <form id="receive-items-form" method="POST" action="/orders/<?= $order['id'] ?>/receive">
-      <div class="receive-items-container">
-        <?php foreach ($order['items'] as $item): ?>
-          <div class="card glass">
-            <div class="product-header" onclick="toggleProductCard(event)">
-              <div class="col gap-sm">
-                <h3><?= htmlspecialchars($item['product_name']) ?></h3>
-                <div class="row gap-md">
-                  <span class="badge accent">Ordered: <?= ($item['is_int'] ? intval($item['order_qty']) : number_format($item['order_qty'], 3)) . ' ' . $item['unit_symbol'] ?></span>
-                  <span class="badge" id="received-qty-badge-<?= $item['product_id'] ?>">Received: 0 <?= $item['unit_symbol'] ?></span>
+<?php if ($canReceiveItems): ?>
+  <dialog id="receive-items-dialog" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Receive Items: <?= htmlspecialchars($order['reference']) ?></h2>
+        <button class="close-btn" onclick="closeReceiveItemsDialog()">
+          <span class="icon">close</span>
+        </button>
+      </div>
+      <form id="receive-items-form" method="POST" action="/orders/<?= $order['id'] ?>/receive">
+        <div class="receive-items-container">
+          <?php foreach ($order['items'] as $item): ?>
+            <div class="card glass">
+              <div class="product-header" onclick="toggleProductCard(event)">
+                <div class="col gap-sm">
+                  <h3><?= htmlspecialchars($item['product_name']) ?></h3>
+                  <div class="row gap-md">
+                    <span class="badge accent">Ordered: <?= ($item['is_int'] ? intval($item['order_qty']) : number_format($item['order_qty'], 3)) . ' ' . $item['unit_symbol'] ?></span>
+                    <span class="badge" id="received-qty-badge-<?= $item['product_id'] ?>">Received: <?= (
+                                                                                                        $item['is_int']
+                                                                                                        ? intval($item['received_qty'])
+                                                                                                        : number_format($item['received_qty'], 3)
+                                                                                                      ) . ' ' . $item['unit_symbol'] ?></span>
+                  </div>
                 </div>
+                <span class="icon toggle-icon">expand_more</span>
               </div>
-              <span class="icon toggle-icon">expand_more</span>
-            </div>
 
-            <div class="product-content" data-product-id="<?= $item['product_id'] ?>" style="display: none;">
-              <!-- Batches container -->
-              <div class="batches-container">
-                <?php foreach ($item['batches'] as $idx => $batch): ?>
+              <div class="product-content" data-product-id="<?= $item['product_id'] ?>" style="display: none;">
+                <!-- Batches container -->
+                <div class="batches-container">
+                  <?php foreach ($item['batches'] as $idx => $batch): ?>
+                    <div class="batch-card mb-sm">
+                      <div class="batch-header">
+                        <h4>Batch #<span class="batch-number"><?= $idx ?></span></h4>
+                        <button type="button" class="icon-btn danger" title="Remove Batch" onclick="removeBatch(event)">
+                          <span class="icon">delete</span>
+                        </button>
+                      </div>
+                      <div class="form-grid">
+                        <input type="hidden" name="batches[BATCH_INDEX][product_id]" value="<?= $item['product_id'] ?>">
+                        <div class="form-field">
+                          <label>Batch Code *</label>
+                          <input type="text"
+                            name="batches[BATCH_INDEX][batch_code]"
+                            value="<?= $batch['batch_code'] ?>"
+                            placeholder="BAT-001"
+                            required>
+                        </div>
+                        <div class="form-field">
+                          <label>Quantity *</label>
+                          <input type="number"
+                            name="batches[BATCH_INDEX][received_qty]"
+                            value="<?= $item['is_int']
+                                      ? intval($batch['quantity'])
+                                      : number_format($batch['quantity'], 3) ?>"
+                            min="0"
+                            step="<?= $item['is_int'] ? '1' : '0.001' ?>"
+                            placeholder="0"
+                            required
+                            onchange="updateTotalReceivedQty(<?= $item['product_id'] ?>)">
+                        </div>
+                        <div class="form-field">
+                          <label>Unit Cost *</label>
+                          <input type="number"
+                            name="batches[BATCH_INDEX][unit_cost]"
+                            value="<?= $batch['unit_cost'] ?>"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required>
+                        </div>
+                        <div class="form-field">
+                          <label>Selling Price *</label>
+                          <input type="number"
+                            name="batches[BATCH_INDEX][unit_price]"
+                            value="<?= $batch['unit_price'] ?>"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required>
+                        </div>
+                        <div class="form-field">
+                          <label>Manufacturing Date</label>
+                          <input type="date"
+                            name="batches[BATCH_INDEX][manufactured_date]"
+                            value="<?= $batch['manufactured_date'] ?>">
+                        </div>
+                        <div class="form-field">
+                          <label>Expiry Date</label>
+                          <input type="date"
+                            name="batches[BATCH_INDEX][expiry_date]"
+                            value="<?= $batch['expiry_date'] ?>">
+                        </div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+
+                <!-- Template for a new batch (hidden) -->
+                <template>
                   <div class="batch-card mb-sm">
                     <div class="batch-header">
-                      <h4>Batch #<span class="batch-number"><?= $idx ?></span></h4>
+                      <h4>Batch #<span class="batch-number"></span></h4>
                       <button type="button" class="icon-btn danger" title="Remove Batch" onclick="removeBatch(event)">
                         <span class="icon">delete</span>
                       </button>
                     </div>
                     <div class="form-grid">
-                      <input type="hidden" name="batches[BATCH_INDEX][product_id]" value="<?= $item['product_id'] ?>">
+                      <input type="hidden" name="batches[BATCH_INDEX][product_id]" value="">
                       <div class="form-field">
                         <label>Batch Code *</label>
                         <input type="text"
                           name="batches[BATCH_INDEX][batch_code]"
-                          value="<?= $batch['batch_code'] ?>"
                           placeholder="BAT-001"
                           required>
                       </div>
@@ -335,9 +418,6 @@ function getStatusBadgeClass($status)
                         <label>Quantity *</label>
                         <input type="number"
                           name="batches[BATCH_INDEX][received_qty]"
-                          value="<?= $item['is_int']
-                                    ? intval($batch['quantity'])
-                                    : number_format($batch['quantity'], 3) ?>"
                           min="0"
                           step="<?= $item['is_int'] ? '1' : '0.001' ?>"
                           placeholder="0"
@@ -348,7 +428,6 @@ function getStatusBadgeClass($status)
                         <label>Unit Cost *</label>
                         <input type="number"
                           name="batches[BATCH_INDEX][unit_cost]"
-                          value="<?= $batch['unit_cost'] ?>"
                           min="0"
                           step="0.01"
                           placeholder="0.00"
@@ -358,7 +437,6 @@ function getStatusBadgeClass($status)
                         <label>Selling Price *</label>
                         <input type="number"
                           name="batches[BATCH_INDEX][unit_price]"
-                          value="<?= $batch['unit_price'] ?>"
                           min="0"
                           step="0.01"
                           placeholder="0.00"
@@ -367,263 +445,177 @@ function getStatusBadgeClass($status)
                       <div class="form-field">
                         <label>Manufacturing Date</label>
                         <input type="date"
-                          name="batches[BATCH_INDEX][manufactured_date]"
-                          value="<?= $batch['manufactured_date'] ?>">
+                          name="batches[BATCH_INDEX][manufactured_date]">
                       </div>
                       <div class="form-field">
                         <label>Expiry Date</label>
                         <input type="date"
-                          name="batches[BATCH_INDEX][expiry_date]"
-                          value="<?= $batch['expiry_date'] ?>">
+                          name="batches[BATCH_INDEX][expiry_date]">
                       </div>
                     </div>
                   </div>
-                <?php endforeach; ?>
-              </div>
+                </template>
 
-              <!-- Template for a new batch (hidden) -->
-              <template>
-                <div class="batch-card mb-sm">
-                  <div class="batch-header">
-                    <h4>Batch #<span class="batch-number"></span></h4>
-                    <button type="button" class="icon-btn danger" title="Remove Batch" onclick="removeBatch(event)">
-                      <span class="icon">delete</span>
-                    </button>
-                  </div>
-                  <div class="form-grid">
-                    <input type="hidden" name="batches[BATCH_INDEX][product_id]" value="">
-                    <div class="form-field">
-                      <label>Batch Code *</label>
-                      <input type="text"
-                        name="batches[BATCH_INDEX][batch_code]"
-                        placeholder="BAT-001"
-                        required>
-                    </div>
-                    <div class="form-field">
-                      <label>Quantity *</label>
-                      <input type="number"
-                        name="batches[BATCH_INDEX][received_qty]"
-                        min="0"
-                        step="<?= $item['is_int'] ? '1' : '0.001' ?>"
-                        placeholder="0"
-                        required
-                        onchange="updateTotalReceivedQty(<?= $item['product_id'] ?>)">
-                    </div>
-                    <div class="form-field">
-                      <label>Unit Cost *</label>
-                      <input type="number"
-                        name="batches[BATCH_INDEX][unit_cost]"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        required>
-                    </div>
-                    <div class="form-field">
-                      <label>Selling Price *</label>
-                      <input type="number"
-                        name="batches[BATCH_INDEX][unit_price]"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        required>
-                    </div>
-                    <div class="form-field">
-                      <label>Manufacturing Date</label>
-                      <input type="date"
-                        name="batches[BATCH_INDEX][manufactured_date]">
-                    </div>
-                    <div class="form-field">
-                      <label>Expiry Date</label>
-                      <input type="date"
-                        name="batches[BATCH_INDEX][expiry_date]">
-                    </div>
-                  </div>
+                <!-- Add new batch button -->
+                <div class="row justify-center v-pad-md">
+                  <button type="button" class="btn btn-primary" onclick="addNewBatch(event, <?= $item['product_id'] ?>, '<?= $item['is_int'] ? '1' : '0.001' ?>')">
+                    <span class="icon">add</span>
+                    Add Batch
+                  </button>
                 </div>
-              </template>
-
-              <!-- Add new batch button -->
-              <div class="row justify-center v-pad-md">
-                <button type="button" class="btn btn-primary" onclick="addNewBatch(event, <?= $item['product_id'] ?>, '<?= $item['is_int'] ? '1' : '0.001' ?>')">
-                  <span class="icon">add</span>
-                  Add Batch
-                </button>
               </div>
             </div>
-          </div>
-        <?php endforeach; ?>
-      </div>
+          <?php endforeach; ?>
+        </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeReceiveItemsDialog()">
-          Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" onclick="submitReceiveItems(event)">
-          <span class="icon">done</span>
-          Receive Items
-        </button>
-      </div>
-    </form>
-  </div>
-</dialog>
-
-<!-- Confirmation dialog -->
-<dialog id="confirmDialog" class="modal delete-confirm-modal">
-  <div class="modal-content">
-    <div class="text-center">
-      <span class="icon warning-icon">warning</span>
-      <h3 id="confirm-title">Confirm Action</h3>
-      <p id="confirm-message">Are you sure you want to proceed with this action?</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeReceiveItemsDialog()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" onclick="submitReceiveItems(event)">
+            <span class="icon">done</span>
+            Receive Items
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="dialog-actions">
-      <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
-      <button class="btn btn-danger" id="confirm-btn">Confirm</button>
-    </div>
-  </div>
-</dialog>
+  </dialog>
+<?php endif; ?>
 
 <script src="/js/search.js"></script>
 <script>
   class PurchaseOrderDetails {
     constructor() {
-      window.enableEdit = this.enableEdit.bind(this);
-      window.cancelEdit = this.cancelEdit.bind(this);
-      window.saveChanges = this.saveChanges.bind(this);
-      window.removeItem = this.removeItem.bind(this);
-      window.approveOrder = this.approveOrder;
-      window.cancelOrder = this.cancelOrder;
-      window.completeOrder = this.completeOrder;
-      window.deleteOrder = this.deleteOrder;
-      window.openReceiveItemsDialog = this.openReceiveItemsDialog;
-      window.closeReceiveItemsDialog = this.closeReceiveItemsDialog;
-      window.toggleProductCard = this.toggleProductCard;
-      window.addNewBatch = this.addNewBatch;
-      window.removeBatch = this.removeBatch;
-      window.updateTotalReceivedQty = this.updateTotalReceivedQty;
-      window.submitReceiveItems = this.submitReceiveItems;
+      <?php if ($canEditOrder): ?>
+        window.enableEdit = this.enableEdit.bind(this);
+        window.cancelEdit = this.cancelEdit.bind(this);
+        window.saveChanges = this.saveChanges.bind(this);
+        window.removeItem = this.removeItem.bind(this);
+      <?php endif; ?>
+      <?php if ($canApproveOrder): ?>
+        window.approveOrder = this.approveOrder.bind(this);
+      <?php endif; ?>
+      <?php if ($canCancelOrder): ?>
+        window.cancelOrder = this.cancelOrder.bind(this);
+      <?php endif; ?>
+      <?php if ($canCompleteOrder): ?>
+        window.completeOrder = this.completeOrder.bind(this);
+      <?php endif; ?>
+      <?php if ($canDeleteOrder): ?>
+        window.deleteOrder = this.deleteOrder.bind(this);
+      <?php endif; ?>
+      <?php if ($canReceiveItems): ?>
+        window.openReceiveItemsDialog = this.openReceiveItemsDialog.bind(this);
+        window.closeReceiveItemsDialog = this.closeReceiveItemsDialog.bind(this);
+        window.toggleProductCard = this.toggleProductCard.bind(this);
+        window.addNewBatch = this.addNewBatch.bind(this);
+        window.removeBatch = this.removeBatch.bind(this);
+        window.updateTotalReceivedQty = this.updateTotalReceivedQty.bind(this);
+        window.submitReceiveItems = this.submitReceiveItems.bind(this);
+      <?php endif; ?>
     }
 
     init() {
-      let supplierId = document.querySelector("input[name='supplier_id']").value;
-      this.productSearch = new SearchHandler({
-        apiEndpoint: `/api/suppliers/${supplierId}/products/search`,
-        inputElement: document.querySelector("#order-item-search input"),
-        resultsContainer: document.querySelector(
-          "#order-item-search .search-results"
-        ),
-        itemsPerPage: 5,
-        renderResultItem: (product) => {
-          const element = document.createElement("div");
-          element.classList.add("search-result");
-          element.textContent = product.product_name;
-          return element;
-        },
-        onSelect: (product) => this.showAddItemDialog(product),
-      });
-    }
-
-    enableEdit(e) {
-      e.target.closest(".dropdown").style.display = "none";
-      document.getElementById("edit-actions").style.display = "flex";
-      document
-        .querySelectorAll(".form-field :is(input, select, textarea)")
-        .forEach((input) => {
-          input.disabled = false;
+      <?php if ($canEditOrder): ?>
+        let supplierId = document.querySelector("input[name='supplier_id']").value;
+        this.productSearch = new SearchHandler({
+          apiEndpoint: `/api/suppliers/${supplierId}/products/search`,
+          inputElement: document.querySelector("#order-item-search input"),
+          resultsContainer: document.querySelector(
+            "#order-item-search .search-results"
+          ),
+          itemsPerPage: 5,
+          renderResultItem: (product) => {
+            const element = document.createElement("div");
+            element.classList.add("search-result");
+            element.textContent = product.product_name;
+            return element;
+          },
+          onSelect: (product) => this.showAddItemDialog(product),
         });
-      document
-        .querySelectorAll(".form-field[style*='display'")
-        .forEach((field) => {
-          field.style.display = "flex";
-        });
-
-      document.getElementById("order-item-search").style.display = "flex";
-      document.querySelector("#order-items th:last-child").style.display = "";
-      document
-        .querySelectorAll("#order-items tbody tr td[style*='display']")
-        .forEach((td) => {
-          td.style.display = "";
-        });
+      <?php endif; ?>
     }
 
-    approveOrder() {
-      if (confirm("Are you sure you want to approve this order?")) {
-        window.location = window.location.pathname + "/approve";
-      }
-    }
+    <?php if ($canEditOrder): ?>
+      enableEdit(e) {
+        e.target.closest(".dropdown").style.display = "none";
+        document.getElementById("edit-actions").style.display = "flex";
+        document
+          .querySelectorAll(".form-field :is(input, select, textarea)")
+          .forEach((input) => {
+            input.disabled = false;
+          });
+        document
+          .querySelectorAll(".form-field[style*='display'")
+          .forEach((field) => {
+            field.style.display = "flex";
+          });
 
-    cancelOrder() {
-      if (confirm("Are you sure you want to cancel this order?")) {
-        window.location = window.location.pathname + "/cancel";
+        document.getElementById("order-item-search").style.display = "flex";
+        document.querySelector("#order-items th:last-child").style.display = "";
+        document
+          .querySelectorAll("#order-items tbody tr td[style*='display']")
+          .forEach((td) => {
+            td.style.display = "";
+          });
       }
-    }
 
-    completeOrder() {
-      if (confirm("Are you sure you want to complete this order?")) {
-        window.location = window.location.pathname + "/complete";
+      cancelEdit() {
+        if (
+          confirm(
+            "Are you sure you want to cancel? Any unsaved changes will be lost."
+          )
+        ) {
+          window.location.reload();
+        }
       }
-    }
 
-    deleteOrder() {
-      if (confirm("Are you sure you want to delete this order?")) {
-        window.location = window.location.pathname + "/delete";
+      saveChanges() {
+        if (!confirm("Are you sure you want to save these changes?")) {
+          return;
+        }
+        const form = document.getElementById("details-form");
+        form.submit();
       }
-    }
 
-    cancelEdit() {
-      if (
-        confirm(
-          "Are you sure you want to cancel? Any unsaved changes will be lost."
-        )
-      ) {
-        window.location.reload();
+      removeItem(e) {
+        e.preventDefault();
+        e.target.closest("tr").remove();
       }
-    }
 
-    saveChanges() {
-      if (!confirm("Are you sure you want to save these changes?")) {
-        return;
+      showAddItemDialog(product) {
+        if (
+          document.querySelector(
+            `#order-items tbody tr input[data-id="${product.id}"]`
+          )
+        ) {
+          openPopupWithMessage("Item already added to the order", "error");
+          return;
+        }
+        const dialog = document.getElementById("add-item-dialog");
+        dialog.querySelector(".add-btn").onclick = () => {
+          this.addItemToOrder(product);
+          dialog.close();
+        };
+        dialog.querySelector(".cancel-btn").onclick = () => {
+          dialog.close();
+        };
+        dialog.showModal();
       }
-      const form = document.getElementById("details-form");
-      form.submit();
-    }
 
-    removeItem(e) {
-      e.preventDefault();
-      e.target.closest("tr").remove();
-    }
-
-    showAddItemDialog(product) {
-      if (
-        document.querySelector(
-          `#order-items tbody tr input[data-id="${product.id}"]`
-        )
-      ) {
-        openPopupWithMessage("Item already added to the order", "error");
-        return;
-      }
-      const dialog = document.getElementById("add-item-dialog");
-      dialog.querySelector(".add-btn").onclick = () => {
-        this.addItemToOrder(product);
-        dialog.close();
-      };
-      dialog.querySelector(".cancel-btn").onclick = () => {
-        dialog.close();
-      };
-      dialog.showModal();
-    }
-
-    addItemToOrder(product) {
-      let quantity = parseFloat(document.querySelector("#add-item-qty").value);
-      if (product.is_int) {
-        quantity = Math.floor(quantity);
-      } else {
-        quantity = quantity.toFixed(3);
-      }
-      if (quantity <= 0) {
-        openPopupWithMessage("Please enter a valid quantity", "error");
-        return;
-      }
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
+      addItemToOrder(product) {
+        let quantity = parseFloat(document.querySelector("#add-item-qty").value);
+        if (product.is_int) {
+          quantity = Math.floor(quantity);
+        } else {
+          quantity = quantity.toFixed(3);
+        }
+        if (quantity <= 0) {
+          openPopupWithMessage("Please enter a valid quantity", "error");
+          return;
+        }
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
             <td>${product.product_name}</td>
             <td>${quantity} ${product.unit_symbol}</td>
             <td>
@@ -633,148 +625,155 @@ function getStatusBadgeClass($status)
             </td>
             <input type="hidden" name="items[]" value='{"id": ${product.id}, "quantity": ${quantity} }' data-id="${product.id}">
         `;
-      document.querySelector("#order-items tbody").appendChild(tr);
-      document.querySelector("#order-item-search input").value = "";
-      this.productSearch.clear();
-    }
-
-    openReceiveItemsDialog() {
-      const dialog = document.getElementById("receive-items-dialog");
-      dialog.showModal();
-    }
-
-    closeReceiveItemsDialog() {
-      const dialog = document.getElementById("receive-items-dialog");
-      dialog.close();
-    }
-
-    // Toggle product card expansion
-    toggleProductCard(e) {
-      let target = e.target;
-      if (!e.target.classList.contains("product-header")) {
-        target = e.target.closest(".product-header");
+        document.querySelector("#order-items tbody").appendChild(tr);
+        document.querySelector("#order-item-search input").value = "";
+        this.productSearch.clear();
       }
-      target.classList.toggle("open");
-      const content = target.nextElementSibling;
+    <?php endif; ?>
 
-      if (content.style.display === "none") {
-        content.style.display = "block";
-      } else {
-        content.style.display = "none";
-      }
-    }
-
-    // Add a new batch for a product
-    addNewBatch(e) {
-      const productContent = e.target.closest(".product-content");
-      const container = productContent.querySelector(".batches-container");
-      const template = productContent.querySelector("template");
-      const batches = container.querySelectorAll(".batch-card");
-      const nextBatchNumber = batches.length + 1;
-
-      // Clone the template
-      const batchNode = template.content.cloneNode(true);
-
-      // Update batch number
-      batchNode.querySelector(".batch-number").textContent = nextBatchNumber;
-
-      batchNode.querySelector("input[name*='product_id']").value =
-        productContent.dataset.productId;
-
-      // Append the new batch
-      container.appendChild(batchNode);
-    }
-
-    // Remove a batch
-    removeBatch(e) {
-      const productContent = e.target.closest(".product-content");
-      const container = productContent.querySelector(".batches-container");
-      const batchElement = e.target.closest(".batch-card");
-      batchElement.remove();
-
-      // Renumber the batches
-      container.querySelectorAll(".batch-card").forEach((batch, index) => {
-        batch.querySelector(".batch-number").textContent = index + 1;
-      });
-
-      // Update the received quantity badge
-      this.updateTotalReceivedQty(productId);
-    }
-
-    // Update the total received quantity for a product
-    updateTotalReceivedQty(productId) {
-      const container = document.getElementById(`batches-container-${productId}`);
-      const quantityInputs = container.querySelectorAll(
-        'input[name*="received_qty"]'
-      );
-      let total = 0;
-
-      quantityInputs.forEach((input) => {
-        const value = parseFloat(input.value || 0);
-        if (!isNaN(value)) {
-          total += value;
+    <?php if ($canApproveOrder): ?>
+      approveOrder() {
+        if (confirm("Are you sure you want to approve this order?")) {
+          window.location = window.location.pathname + "/approve";
         }
-      });
-
-      // Update the badge
-      const badge = document.getElementById(`received-qty-badge-${productId}`);
-      const unitSymbol = badge.textContent.split(" ").pop();
-      badge.textContent = `Received: ${total} ${unitSymbol}`;
-
-      // Update class based on comparison with ordered quantity
-      const orderedText = document.querySelector(
-        `.product-meta .badge.accent[id*="${productId}"]`
-      ).textContent;
-      const orderedQty = parseFloat(orderedText.replace("Ordered: ", ""));
-
-      if (total === 0) {
-        badge.className = "badge";
-      } else if (total < orderedQty) {
-        badge.className = "badge warning";
-      } else if (total === orderedQty) {
-        badge.className = "badge success";
-      } else {
-        badge.className = "badge danger";
       }
-    }
+    <?php endif; ?>
 
-    submitReceiveItems(e) {
-      const form = document.getElementById("receive-items-form");
-      form.querySelectorAll(".batch-card").forEach((batch, index) => {
-        batch.querySelectorAll("input").forEach((input) => {
-          let name = input.name;
-          input.name = name.replace("BATCH_INDEX", index);
+    <?php if ($canCancelOrder): ?>
+      cancelOrder() {
+        if (confirm("Are you sure you want to cancel this order?")) {
+          window.location = window.location.pathname + "/cancel";
+        }
+      }
+    <?php endif; ?>
+
+    <?php if ($canCompleteOrder): ?>
+      completeOrder() {
+        if (confirm("Are you sure you want to complete this order?")) {
+          window.location = window.location.pathname + "/complete";
+        }
+      }
+    <?php endif; ?>
+
+    <?php if ($canDeleteOrder): ?>
+      deleteOrder() {
+        if (confirm("Are you sure you want to delete this order?")) {
+          window.location = window.location.pathname + "/delete";
+        }
+      }
+    <?php endif; ?>
+
+    <?php if ($canReceiveItems): ?>
+      openReceiveItemsDialog() {
+        const dialog = document.getElementById("receive-items-dialog");
+        dialog.showModal();
+      }
+
+      closeReceiveItemsDialog() {
+        const dialog = document.getElementById("receive-items-dialog");
+        dialog.close();
+      }
+
+      // Toggle product card expansion
+      toggleProductCard(e) {
+        let target = e.target;
+        if (!e.target.classList.contains("product-header")) {
+          target = e.target.closest(".product-header");
+        }
+        target.classList.toggle("open");
+        const content = target.nextElementSibling;
+
+        if (content.style.display === "none") {
+          content.style.display = "block";
+        } else {
+          content.style.display = "none";
+        }
+      }
+
+      // Add a new batch for a product
+      addNewBatch(e) {
+        const productContent = e.target.closest(".product-content");
+        const container = productContent.querySelector(".batches-container");
+        const template = productContent.querySelector("template");
+        const batches = container.querySelectorAll(".batch-card");
+        const nextBatchNumber = batches.length + 1;
+
+        // Clone the template
+        const batchNode = template.content.cloneNode(true);
+
+        // Update batch number
+        batchNode.querySelector(".batch-number").textContent = nextBatchNumber;
+
+        batchNode.querySelector("input[name*='product_id']").value =
+          productContent.dataset.productId;
+
+        // Append the new batch
+        container.appendChild(batchNode);
+      }
+
+      // Remove a batch
+      removeBatch(e) {
+        const productContent = e.target.closest(".product-content");
+        const container = productContent.querySelector(".batches-container");
+        const batchElement = e.target.closest(".batch-card");
+        batchElement.remove();
+
+        // Renumber the batches
+        container.querySelectorAll(".batch-card").forEach((batch, index) => {
+          batch.querySelector(".batch-number").textContent = index + 1;
         });
-      });
-    }
-  }
 
-  // Show confirmation dialog
-  function showConfirmDialog(title, message, confirmCallback) {
-    const dialog = document.getElementById("confirmDialog");
-    document.getElementById("confirm-title").textContent = title;
-    document.getElementById("confirm-message").textContent = message;
+        // Update the received quantity badge
+        this.updateTotalReceivedQty(productId);
+      }
 
-    const confirmBtn = document.getElementById("confirm-btn");
-    const cancelBtn = document.getElementById("cancel-btn");
+      // Update the total received quantity for a product
+      updateTotalReceivedQty(productId) {
+        const container = document.getElementById(`batches-container-${productId}`);
+        const quantityInputs = container.querySelectorAll(
+          'input[name*="received_qty"]'
+        );
+        let total = 0;
 
-    // Remove any existing event listeners
-    const confirmBtnClone = confirmBtn.cloneNode(true);
-    const cancelBtnClone = cancelBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(confirmBtnClone, confirmBtn);
-    cancelBtn.parentNode.replaceChild(cancelBtnClone, cancelBtn);
+        quantityInputs.forEach((input) => {
+          const value = parseFloat(input.value || 0);
+          if (!isNaN(value)) {
+            total += value;
+          }
+        });
 
-    // Add new event listeners
-    document.getElementById("confirm-btn").addEventListener("click", () => {
-      dialog.close();
-      confirmCallback();
-    });
+        // Update the badge
+        const badge = document.getElementById(`received-qty-badge-${productId}`);
+        const unitSymbol = badge.textContent.split(" ").pop();
+        badge.textContent = `Received: ${total} ${unitSymbol}`;
 
-    document.getElementById("cancel-btn").addEventListener("click", () => {
-      dialog.close();
-    });
+        // Update class based on comparison with ordered quantity
+        const orderedText = document.querySelector(
+          `.product-meta .badge.accent[id*="${productId}"]`
+        ).textContent;
+        const orderedQty = parseFloat(orderedText.replace("Ordered: ", ""));
 
-    dialog.showModal();
+        if (total === 0) {
+          badge.className = "badge";
+        } else if (total < orderedQty) {
+          badge.className = "badge warning";
+        } else if (total === orderedQty) {
+          badge.className = "badge success";
+        } else {
+          badge.className = "badge danger";
+        }
+      }
+
+      submitReceiveItems(e) {
+        const form = document.getElementById("receive-items-form");
+        form.querySelectorAll(".batch-card").forEach((batch, index) => {
+          batch.querySelectorAll("input").forEach((input) => {
+            let name = input.name;
+            input.name = name.replace("BATCH_INDEX", index);
+          });
+        });
+      }
+    <?php endif; ?>
   }
 
   document.addEventListener("DOMContentLoaded", () => {

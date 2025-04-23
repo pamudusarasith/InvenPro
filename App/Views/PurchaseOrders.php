@@ -38,6 +38,8 @@ function getStatusBadgeClass($status)
 $canCreateOrder = RBACService::hasPermission('create_purchase_order');
 ?>
 
+<link rel="stylesheet" href="/css/pages/purchase-orders.css">
+
 <div class="body">
   <?php App\Core\View::render("Navbar") ?>
   <?php App\Core\View::render("Sidebar") ?>
