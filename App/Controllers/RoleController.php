@@ -19,7 +19,6 @@ class RoleController extends Controller
     $this->userModel = new UserModel();
   }
 
-
   /**
    * Display the roles and permissions page.
    *
@@ -116,6 +115,71 @@ class RoleController extends Controller
         View::redirect('/roles');
     }
   }
+
+  /**
+ * Update an existing role
+ * @return void
+ */
+public function updateRole()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = [
+            'role_id' => $_POST['role_id'] ?? null,
+            'role_name' => $_POST['role_name'] ?? '',
+            'description' => $_POST['description'] ?? '',
+            'addedPermissions' => json_decode($_POST['added_permissions'] ?? '[]', true),
+            'removedPermissions' => json_decode($_POST['removed_permissions'] ?? '[]', true),
+        ];
+
+        //error_log("Data: " . print_r($data, true)); // Log the data for debugging
+
+        if (empty($data['role_id'])) {
+            $_SESSION['message'] = 'Role ID is required';
+            $_SESSION['message_type'] = 'error';
+        } else {
+            $result = $this->roleModel->updateRole($data);
+
+            if ($result === false) {
+                $_SESSION['message'] = 'Failed to update role';
+                $_SESSION['message_type'] = 'error';
+            } else {
+                $_SESSION['message'] = 'Role updated successfully';
+                $_SESSION['message_type'] = 'success';
+            }
+        }
+
+        View::redirect('/roles');
+    } else {
+        View::redirect('/roles');
+    }
+  }
+
+  /**
+   * Delete a role
+   * @return void
+   */
+  public function deleteRole()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $roleId = $_POST['role_id'] ?? null;
+
+        if (empty($roleId)) {
+            $_SESSION['message'] = 'Role ID is required';
+            $_SESSION['message_type'] = 'error';
+        } elseif ($this->roleModel->getUserCountByRole($roleId) > 0) {
+            $_SESSION['message'] = 'Cannot delete role with assigned users';
+            $_SESSION['message_type'] = 'error';
+        } else {
+            $result = $this->roleModel->deleteRole((int)$roleId);
+            $_SESSION['message'] = $result === false
+                ? 'Failed to delete role'
+                : 'Role deleted successfully';
+            $_SESSION['message_type'] = $result === false ? 'error' : 'success';
+        }
+
+        View::redirect('/roles');
+    } else {
+        View::redirect('/roles');
+    }
+  }
 }
-
-

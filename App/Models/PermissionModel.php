@@ -89,4 +89,16 @@ class PermissionModel extends Model
     $result = self::$db->query($sql, $permissionIds); // Use self::$db
     return (int) $result->fetchColumn() ?? 0;
   }
+
+  /**
+   * Get permission by role_ID
+   * @param int $id
+   * @return array|null
+   */
+  public function getPermissionsByRoleId(int $id): ?array
+  {
+    $sql = 'SELECT p.id, p.permission_name FROM role_permission rp JOIN permission p ON rp.permission_id = p.id WHERE rp.role_id = ?';
+    $stmt = self::$db->query($sql, [$id]);
+    return $stmt->fetchAll() ?: null;
+  }
 }
