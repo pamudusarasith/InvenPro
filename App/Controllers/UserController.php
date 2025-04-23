@@ -3,24 +3,29 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
-use App\Models\{UserModel, RoleModel, BranchModel};
+use App\Models\{UserModel, RoleModel, BranchModel, AuditLogModel};
 
 class UserController extends Controller
 {
   public function index(): void
   {
-    $page = $_GET['p'] ?? 1;
-    $itemsPerPage = $_GET['ipp'] ?? 10;
+    $page = max(1, (int) ($_GET['p'] ?? 1));
+    $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
+    $search = $_GET['search'] ?? '';
+    $roleId = $_GET['role'] ?? '';
+    $branchId = $_GET['branch'] ?? '';
+    $status = $_GET['status'] ?? '';
+
     $userModel = new UserModel();
-    $users = $userModel->getUsers($page, $itemsPerPage);
-    $totalRecords = $userModel->getUsersCount();
+    $users = $userModel->getUsers($page, $itemsPerPage, $search, $roleId, $branchId, $status);
+    $totalRecords = $userModel->getUsersCount($search, $roleId, $branchId, $status);
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
-    $roleModal = new RoleModel();
-    $roles = $roleModal->getAllRoles();
+    $roleModel = new RoleModel();
+    $roles = $roleModel->getAllRoles();
 
-    $branchModal = new BranchModel();
-    $branches = $branchModal->getBranches();
+    $branchModel = new BranchModel();
+    $branches = $branchModel->getBranches();
 
     View::renderTemplate('Users', [
       'title' => 'Users',
@@ -28,8 +33,13 @@ class UserController extends Controller
       'page' => $page,
       'itemsPerPage' => $itemsPerPage,
       'totalPages' => $totalPages,
+      'totalRecords' => $totalRecords,
       'roles' => $roles,
       'branches' => $branches,
+      'search' => $search,
+      'roleId' => $roleId,
+      'branchId' => $branchId,
+      'status' => $status
     ]);
   }
 
@@ -47,6 +57,12 @@ class UserController extends Controller
     $roleModal = new RoleModel();
     $roles = $roleModal->getAllRoles();
 
+    $auditLogModel = new AuditLogModel();
+    $activities = $auditLogModel->getAuditLogsById($user['id']);
+
+    //error_log(print_r($user, true)); // Debugging line
+    error_log(print_r($activities, true)); // Debugging line
+
     $branchModal = new BranchModel();
     $branches = $branchModal->getBranches();
 
@@ -55,6 +71,7 @@ class UserController extends Controller
       'user' => $user,
       'roles' => $roles,
       'branches' => $branches,
+      'activities' => $activities,
     ]);
   }
 

@@ -1,7 +1,6 @@
 <?php
 
 use App\Services\RBACService;
-
 $roles = $roles ?? [];
 $branches = $branches ?? [];
 $activities = $activities ?? [];
@@ -52,6 +51,11 @@ $activities = $activities ?? [];
                             Save
                         </button>
                     </div>
+                    <?php
+                    // Debug logging for user and session IDs
+                    error_log('Debug User ID: ' . (isset($user['id']) ? $user['id'] : 'Not set'));
+                    error_log('Debug Session User ID: ' . (isset($_SESSION['id']) ? $_SESSION['id'] : 'Not set'));
+                    ?>
                     <?php if (RBACService::hasPermission('edit_user') || RBACService::hasPermission('delete_user')): ?>
                         <div class="dropdown">
                             <button class="dropdown-trigger icon-btn" title="More options">
@@ -64,7 +68,7 @@ $activities = $activities ?? [];
                                         Edit Profile
                                     </button>
                                 <?php endif; ?>
-                                <?php if (RBACService::hasPermission('delete_user') && $_SESSION['id'] != $user['id']): ?>
+                                <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
                                     <button class="dropdown-item danger" onclick="deleteUser(<?= $user['id'] ?>)">
                                         <span class="icon">delete</span>
                                         Delete User
@@ -217,20 +221,38 @@ $activities = $activities ?? [];
                 <div class="card">
                     <h3>Activity Log</h3>
                     <div class="activity-list">
-                        <ul class="activity-list">
-                            <?php foreach ($activities as $activity): ?>
-                                <li class="activity-item">
-                                    <span class="activity-icon icon"><?= $activity['icon'] ?></span>
-                                    <div class="activity-details">
-                                        <div><?= htmlspecialchars($activity['message']) ?></div>
-                                        <div class="activity-time">
-                                            <?= date('M d, Y H:i', strtotime($activity['time'])) ?>
-                                            from <?= $activity['ip'] ?>
-                                        </div>
-                                    </div>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Table</th>
+                                    <th>Action</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($activities as $activity): ?>
+                                    <?php
+                                    // Parse metadata JSON
+                                    $metadata = json_decode($activity['metadata'], true);
+                                    $ip = htmlspecialchars($metadata['ip'] ?? 'N/A');
+                                    $table_name = htmlspecialchars($activity['table_name'] ?? 'N/A');
+                                    $user_agent = htmlspecialchars($metadata['user_agent'] ?? 'N/A');
+                                    // Handle empty action_type
+                                    $action_type = htmlspecialchars($activity['action_type'] ?: 'Unknown');
+                                    // Format timestamp
+                                    $timestamp = date('M d, Y H:i', strtotime($activity['created_at']));
+                                    ?>
+                                    <tr>
+                                        <td><?= $timestamp ?></td>
+                                        <td><?= $table_name ?></td>
+                                        <td><?= $action_type ?></td>
+                                        <td><?= $ip ?></td>
+                                        <td><?= $user_agent ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
