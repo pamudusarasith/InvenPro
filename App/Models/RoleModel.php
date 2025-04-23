@@ -147,110 +147,6 @@ class RoleModel extends Model
         $result = $stmt ? $stmt->fetch() : null;
         return $result ?: [];
     }
-    
-
-    /**
-     * Get permission names for a role, grouped by category
-     * @param int $roleId
-     * @return array
-     */
-    public function getPermissionsByRole(int $roleId): array
-    {
-        $sql = 'SELECT p.id, p.permission_name, p.description, pc.category_name
-                FROM permission p
-                JOIN role_permission rp ON p.id = rp.permission_id
-                JOIN permission_category pc ON p.category_id = pc.id
-                WHERE rp.role_id = ?
-                ORDER BY pc.category_name, p.permission_name';
-        $stmt = self::$db->query($sql, [$roleId]);
-        $rows = $stmt->fetchAll();
-    
-        $result = [];
-    
-        foreach ($rows as $row) {
-            $categoryKey = strtolower(str_replace(' ', '_', $row['category_name']));
-            if (!isset($result[$roleId])) {
-                $result[$roleId] = [];
-            }
-            if (!isset($result[$roleId][$categoryKey])) {
-                $result[$roleId][$categoryKey] = [];
-            }
-            $result[$roleId][$categoryKey][] = $row['description'];
-        }
-    
-        return $result;
-    }
-
-    
-
-    /**
-     * Get all permission categories by
-     * @return array
-     */
-    public function getRolePermissionCategories(int $roleId): array
-    {
-        $sql = 'SELECT pc.category_name
-                FROM permission p
-                JOIN role_permission rp ON p.id = rp.permission_id
-                JOIN permission_category pc ON p.category_id = pc.id
-                WHERE rp.role_id = ?
-                GROUP BY pc.category_name
-                ORDER BY pc.category_name';
-        $stmt = self::$db->query($sql, [$roleId]);
-        $categories = $stmt->fetchAll();
-        return array_column($categories, 'category_name');
-    }
-
-
-    /**
-     * Get permission names for a role (for $rolePermissions structure)
-     * @param int $roleId
-     * @return array
-     */
-    public function getRolePermissionIds(int $roleId): array
-    {
-        $sql = 'SELECT pr.id
-                FROM permission pr
-                JOIN role_permission rp ON pr.id = rp.permission_id
-                WHERE rp.role_id = ?
-                ORDER BY pr.id';
-        $stmt = self::$db->query($sql, [$roleId]);
-        $permissions = $stmt->fetchAll();
-
-        return array_column($permissions, 'id');
-    }
-
-    /**
-     * Get permission names for a role, grouped by category
-     * @param int $roleId
-     * @return array
-     */
-    public function getRolePermissionNamesGrouped(int $roleId): array
-    {
-        $sql = 'SELECT pc.category_name, p.permission_name
-                FROM permission p
-                JOIN role_permission rp ON p.id = rp.permission_id
-                JOIN permission_category pc ON p.category_id = pc.id
-                WHERE rp.role_id = ?
-                ORDER BY pc.category_name, p.permission_name';
-        $stmt = self::$db->query($sql, [$roleId]);
-        $rows = $stmt->fetchAll();
-    
-        $result = [];
-    
-        foreach ($rows as $row) {
-            $categoryKey = strtolower(str_replace(' ', '_', $row['category_name']));
-            if (!isset($result[$roleId])) {
-                $result[$roleId] = [];
-            }
-            if (!isset($result[$roleId][$categoryKey])) {
-                $result[$roleId][$categoryKey] = [];
-            }
-            $result[$roleId][$categoryKey][] = $row['permission_name'];
-        }
-    
-        return $result;
-    }
 
     /**
      * Add a new role with permissions
@@ -307,94 +203,137 @@ class RoleModel extends Model
 
         return $roleId;
     }
-    
-    
 
     /**
-     * Update an existing role
-     * @param int $roleId
-     * @param array $data
-     * @return bool
+     * Update a role by ID
+     * @param array $data Contains role_name, description, permissions (array of permission IDs)
+     * @return bool True on success, false on failure
      */
-    public function updateRole(int $roleId, array $data): bool
+    public function updateRole(array $data): bool
     {
-        $sql = 'UPDATE role SET role_name = ?, description = ?, created_at = ? WHERE id = ?';
-        return self::$db->query($sql, [
-            $data['role_name'],
-            $data['description'],
-            $data['created_at'] ?? date('Y-m-d H:i:s'),
-            $roleId
-        ]);
+        if (empty($data['role_id'])) {
+            return false;
+        }
 
-    }
-
-    /**
-     * Update permissions for a role
-     * @param int $roleId
-     * @param array $permissionIds
-     * @return bool
-     */
-    public function updateRolePermissions(int $roleId, array $permissionIds): bool
-    {
         self::$db->beginTransaction();
 
         try {
-            // Delete existing permissions
-            $deleteSql = 'DELETE FROM role_permission WHERE role_id = ?';
-            self::$db->query($deleteSql, [$roleId]);
+            // Fetch the current role details
+            $currentRole = $this->getRoleById($data['role_id']);
+            if (!$currentRole) {
+                self::$db->rollBack();
+                return false; // Role does not exist
+            }
 
-            // Insert new permissions
-            if (!empty($permissionIds)) {
+            if ($currentRole['role_name'] !== $data['role_name']) {
+                $existingRole = $this->getRoleByName($data['role_name']);
+                if ($existingRole) {
+                    self::$db->rollBack();
+                    return false; // Role name already exists
+                }
+            }
+
+            // Update role details
+            $sql = 'UPDATE role SET role_name = ?, description = ? WHERE id = ?';
+            $result = self::$db->query($sql, [
+                $data['role_name'],
+                $data['description'] ?? '',
+                $data['role_id']
+            ]);
+
+            if (!$result) {
+                self::$db->rollBack();
+                return false;
+            }
+
+            $roleId = $data['role_id'];
+            $permissionsToAdd = $data['addedPermissions'] ?? [];
+            $permissionsToRemove = $data['removedPermissions'] ?? [];
+
+            // Add new permissions
+            if (!empty($permissionsToAdd)) {
                 $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
                 $insertParts = [];
                 $params = [];
-
-                foreach ($permissionIds as $permId) {
+                foreach ($permissionsToAdd as $permId) {
                     $insertParts[] = '(?, ?, ?)';
                     $params[] = $roleId;
                     $params[] = $permId;
                     $params[] = date('Y-m-d H:i:s');
                 }
-
                 $insertSql .= implode(', ', $insertParts);
-                self::$db->query($insertSql, $params);
+
+                if (!self::$db->query($insertSql, $params)) {
+                    self::$db->rollBack();
+                    return false;
+                }
+            }
+
+            // Remove permissions
+            if (!empty($permissionsToRemove)) {
+                $placeholders = implode(',', array_fill(0, count($permissionsToRemove), '?'));
+                $deleteSql = "DELETE FROM role_permission WHERE role_id = ? AND permission_id IN ($placeholders)";
+                $params = array_merge([$roleId], $permissionsToRemove);
+
+                if (!self::$db->query($deleteSql, $params)) {
+                    self::$db->rollBack();
+                    return false;
+                }
+            }
+
+            // Commit transaction
+            self::$db->commit();
+
+            return true;
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            self::$db->rollBack();
+            error_log("Error updating role: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Delete a role by ID
+     * @param int $roleId
+     * @return bool True on success, false on failure
+     */
+    public function deleteRole(int $roleId): bool
+    {
+        if (empty($roleId)) {
+            return false;
+        }
+
+        self::$db->beginTransaction();
+
+        try {
+            // Delete associated permissions
+            $deletePermissionsSql = 'DELETE FROM role_permission WHERE role_id = ?';
+            $deletePermissionsResult = self::$db->query($deletePermissionsSql, [$roleId]);
+
+            if (!$deletePermissionsResult) {
+                self::$db->rollBack();
+                return false;
+            }
+
+            // Delete the role
+            $deleteRoleSql = 'DELETE FROM role WHERE id = ?';
+            $deleteRoleResult = self::$db->query($deleteRoleSql, [$roleId]);
+
+            if (!$deleteRoleResult) {
+                self::$db->rollBack();
+                return false;
             }
 
             self::$db->commit();
             return true;
         } catch (\Exception $e) {
             self::$db->rollBack();
-            error_log('Error updating role permissions: ' . $e->getMessage());
+            error_log("Error deleting role: " . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Get role permissions details for display (similar to $rolePermissionsDetails)
-     * @param int $roleId
-     * @return array
-     */
-    public function getRolePermissionsDetails(int $roleId): array
-    {
-        $sql = 'SELECT p.id, p.permission_name, p.description, pc.category_name
-                FROM permission p
-                JOIN role_permission rp ON p.id = rp.permission_id
-                JOIN permission_category pc ON p.category_id = pc.id
-                WHERE rp.role_id = ?
-                ORDER BY pc.category_name, p.permission_name';
-        $stmt = self::$db->query($sql, [$roleId]);
-        $permissions = $stmt->fetchAll();
-
-        $result = [];
-        foreach ($permissions as $perm) {
-            $categoryKey = strtolower(str_replace(' ', '_', $perm['category_name']));
-            if (!isset($result[$categoryKey])) {
-                $result[$categoryKey] = [];
-            }
-            $result[$categoryKey][] = $perm['description'];
-        }
-
-        return $result;
-    }
+    
+    
 }
-?>
