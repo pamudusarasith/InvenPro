@@ -25,6 +25,5 @@
 @import "components/tabs.css";
 
 @import "pages/inventory.css";
-@import "pages/orders.css";
 @import "pages/pos.css";
 @import "pages/product-details.css";
