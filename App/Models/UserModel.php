@@ -89,7 +89,7 @@ class UserModel extends Model
     return $result;
   }
 
-  public function createUser(array $data): void
+  public function createUser(array $data): int
   {
     $sql = '
       INSERT INTO user (email, password, role_id, branch_id)
@@ -101,6 +101,7 @@ class UserModel extends Model
       $data['role_id'],
       $data['branch_id']
     ]);
+    return self::$db->lastInsertId();
   }
 
   public function updateUser(int $id, array $data): void
