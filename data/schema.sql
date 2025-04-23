@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 21, 2025 at 05:45 AM
+-- Generation Time: Apr 23, 2025 at 08:06 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -95,8 +95,8 @@ CREATE TABLE `category` (
 
 CREATE TABLE `coupon` (
   `id` int(11) NOT NULL,
-  `code` varchar(50) NOT NULL,
   `discount_id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
@@ -165,17 +165,17 @@ CREATE TABLE `customer_return_item` (
 
 CREATE TABLE `discount` (
   `id` int(11) NOT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `discount_type` enum('percentage','fixed') NOT NULL,
   `application_method` enum('regular','coupon') NOT NULL DEFAULT 'regular',
   `value` decimal(12,2) NOT NULL,
   `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `end_date` timestamp NOT NULL DEFAULT NULL,
+  `end_date` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  `branch_id` int(11) DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -189,6 +189,21 @@ CREATE TABLE `discount_condition` (
   `discount_id` int(11) NOT NULL,
   `condition_type` enum('min_quantity','min_amount','time_of_day','day_of_week','loyalty_points') NOT NULL,
   `condition_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`condition_value`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `discount_usage`
+--
+
+CREATE TABLE `discount_usage` (
+  `id` int(11) NOT NULL,
+  `discount_id` int(11) NOT NULL,
+  `sale_id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `discount_amount` decimal(12,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -273,6 +288,17 @@ CREATE TABLE `permission` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `permission_category`
+--
+
+CREATE TABLE `permission_category` (
+  `id` int(11) NOT NULL,
+  `category_name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `product`
 --
 
@@ -333,7 +359,7 @@ CREATE TABLE `purchase_order` (
   `reference` varchar(50) NOT NULL,
   `branch_id` int(11) NOT NULL,
   `supplier_id` int(11) NOT NULL,
-  `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `order_date` date NOT NULL,
   `expected_date` date DEFAULT NULL,
   `status` enum('pending','open','completed','canceled') NOT NULL DEFAULT 'pending',
   `total_amount` decimal(12,2) DEFAULT NULL,
@@ -342,6 +368,240 @@ CREATE TABLE `purchase_order` (
   `created_by` int(11) NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Triggers `purchase_order`
+--
+DELIMITER $$
+CREATE TRIGGER `purchase_order_after_insert` AFTER INSERT ON `purchase_order` FOR EACH ROW BEGIN
+    DECLARE meta_data JSON;
+    
+    -- Build basic metadata JSON
+    SET meta_data = JSON_OBJECT(
+        'operation', 'INSERT'
+    );
+    
+    -- Add only core session variables if set
+    IF @ip_address IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.ip_address', @ip_address);
+    END IF;
+    
+    IF @user_agent IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.user_agent', @user_agent);
+    END IF;
+
+    -- Insert audit record
+    INSERT INTO audit_log (
+        table_name,
+        record_id,
+        action_type,
+        changes,
+        metadata,
+        changed_by,
+        branch_id
+    )
+    VALUES (
+        'purchase_order',
+        JSON_OBJECT('id', NEW.id),
+        'INSERT',
+        JSON_OBJECT(
+            'reference', NEW.reference,
+            'branch_id', NEW.branch_id,
+            'supplier_id', NEW.supplier_id,
+            'order_date', NEW.order_date,
+            'expected_date', NEW.expected_date,
+            'status', NEW.status,
+            'total_amount', NEW.total_amount,
+            'notes', NEW.notes,
+            'created_by', NEW.created_by,
+            'created_at', NEW.created_at
+        ),
+        meta_data,
+        @user_id,
+        @branch_id
+    );
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `purchase_order_after_update` AFTER UPDATE ON `purchase_order` FOR EACH ROW BEGIN
+    -- Initialize JSON variables
+    DECLARE changes JSON;
+    DECLARE meta_data JSON;
+    
+    -- Initialize with empty objects
+    SET changes = JSON_OBJECT();
+    SET meta_data = JSON_OBJECT('operation', 'UPDATE');
+    
+    -- Only track fields that actually changed
+    IF NOT(OLD.reference <=> NEW.reference) THEN
+        SET changes = JSON_SET(changes, '$.reference', JSON_OBJECT('old', OLD.reference, 'new', NEW.reference));
+    END IF;
+    
+    IF NOT(OLD.branch_id <=> NEW.branch_id) THEN
+        SET changes = JSON_SET(changes, '$.branch_id', JSON_OBJECT('old', OLD.branch_id, 'new', NEW.branch_id));
+    END IF;
+    
+    IF NOT(OLD.supplier_id <=> NEW.supplier_id) THEN
+        SET changes = JSON_SET(changes, '$.supplier_id', JSON_OBJECT('old', OLD.supplier_id, 'new', NEW.supplier_id));
+    END IF;
+    
+    IF NOT(OLD.order_date <=> NEW.order_date) THEN
+        SET changes = JSON_SET(changes, '$.order_date', JSON_OBJECT('old', OLD.order_date, 'new', NEW.order_date));
+    END IF;
+    
+    IF NOT(OLD.expected_date <=> NEW.expected_date) THEN
+        SET changes = JSON_SET(changes, '$.expected_date', JSON_OBJECT('old', OLD.expected_date, 'new', NEW.expected_date));
+    END IF;
+    
+    IF NOT(OLD.status <=> NEW.status) THEN
+        SET changes = JSON_SET(changes, '$.status', JSON_OBJECT('old', OLD.status, 'new', NEW.status));
+    END IF;
+    
+    IF NOT(OLD.total_amount <=> NEW.total_amount) THEN
+        SET changes = JSON_SET(changes, '$.total_amount', JSON_OBJECT('old', OLD.total_amount, 'new', NEW.total_amount));
+    END IF;
+    
+    IF NOT(OLD.notes <=> NEW.notes) THEN
+        SET changes = JSON_SET(changes, '$.notes', JSON_OBJECT('old', OLD.notes, 'new', NEW.notes));
+    END IF;
+    
+    -- Add core session variables
+    IF @ip_address IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.ip_address', @ip_address);
+    END IF;
+    
+    IF @user_agent IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.user_agent', @user_agent);
+    END IF;
+    
+    -- Only insert audit log if there were changes
+    IF JSON_LENGTH(changes) > 0 THEN
+        INSERT INTO audit_log (
+            table_name,
+            record_id,
+            action_type,
+            changes,
+            metadata,
+            changed_by,
+            branch_id
+        )
+        VALUES (
+            'purchase_order',
+            JSON_OBJECT('id', NEW.id),
+            'UPDATE',
+            changes,
+            meta_data,
+            @user_id,
+            @branch_id
+        );
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `purchase_order_hard_delete` BEFORE DELETE ON `purchase_order` FOR EACH ROW BEGIN
+    DECLARE meta_data JSON;
+    
+    -- Build metadata JSON
+    SET meta_data = JSON_OBJECT(
+        'operation', 'HARD_DELETE'
+    );
+    
+    -- Add core session variables
+    IF @ip_address IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.ip_address', @ip_address);
+    END IF;
+    
+    IF @user_agent IS NOT NULL THEN
+        SET meta_data = JSON_SET(meta_data, '$.user_agent', @user_agent);
+    END IF;
+
+    INSERT INTO audit_log (
+        table_name,
+        record_id,
+        action_type,
+        changes,
+        metadata,
+        changed_by,
+        branch_id
+    )
+    VALUES (
+        'purchase_order',
+        JSON_OBJECT('id', OLD.id),
+        'DELETE',
+        JSON_OBJECT(
+            'reference', OLD.reference,
+            'branch_id', OLD.branch_id,
+            'supplier_id', OLD.supplier_id,
+            'order_date', OLD.order_date,
+            'expected_date', OLD.expected_date,
+            'status', OLD.status,
+            'total_amount', OLD.total_amount,
+            'notes', OLD.notes,
+            'created_by', OLD.created_by,
+            'created_at', OLD.created_at,
+            'deleted_at', OLD.deleted_at
+        ),
+        meta_data,
+        @user_id,
+        @branch_id
+    );
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `purchase_order_soft_delete` AFTER UPDATE ON `purchase_order` FOR EACH ROW BEGIN
+    DECLARE meta_data JSON;
+    
+    -- Only trigger for soft deletes (when deleted_at changes from NULL to a timestamp)
+    IF OLD.deleted_at IS NULL AND NEW.deleted_at IS NOT NULL THEN
+        -- Build metadata JSON
+        SET meta_data = JSON_OBJECT(
+            'operation', 'SOFT_DELETE'
+        );
+        
+        -- Add core session variables
+        IF @ip_address IS NOT NULL THEN
+            SET meta_data = JSON_SET(meta_data, '$.ip_address', @ip_address);
+        END IF;
+        
+        IF @user_agent IS NOT NULL THEN
+            SET meta_data = JSON_SET(meta_data, '$.user_agent', @user_agent);
+        END IF;
+
+        INSERT INTO audit_log (
+            table_name,
+            record_id,
+            action_type,
+            changes,
+            metadata,
+            changed_by,
+            branch_id
+        )
+        VALUES (
+            'purchase_order',
+            JSON_OBJECT('id', NEW.id),
+            'DELETE',
+            JSON_OBJECT(
+                'reference', OLD.reference,
+                'branch_id', OLD.branch_id,
+                'supplier_id', OLD.supplier_id,
+                'order_date', OLD.order_date,
+                'expected_date', OLD.expected_date,
+                'status', OLD.status,
+                'total_amount', OLD.total_amount,
+                'notes', OLD.notes,
+                'deleted_at', NEW.deleted_at
+            ),
+            meta_data,
+        @user_id,
+        @branch_id
+        );
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -612,6 +872,15 @@ ALTER TABLE `discount_condition`
   ADD KEY `discount_id` (`discount_id`);
 
 --
+-- Indexes for table `discount_usage`
+--
+ALTER TABLE `discount_usage`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `discount_id` (`discount_id`),
+  ADD KEY `sale_id` (`sale_id`),
+  ADD KEY `customer_id` (`customer_id`);
+
+--
 -- Indexes for table `loyalty_transaction`
 --
 ALTER TABLE `loyalty_transaction`
@@ -649,6 +918,12 @@ ALTER TABLE `permission`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `permission_name` (`permission_name`),
   ADD KEY `category_id` (`category_id`);
+
+--
+-- Indexes for table `permission_category`
+--
+ALTER TABLE `permission_category`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `product`
@@ -833,6 +1108,12 @@ ALTER TABLE `discount_condition`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `discount_usage`
+--
+ALTER TABLE `discount_usage`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `loyalty_transaction`
 --
 ALTER TABLE `loyalty_transaction`
@@ -860,6 +1141,12 @@ ALTER TABLE `notification_type`
 -- AUTO_INCREMENT for table `permission`
 --
 ALTER TABLE `permission`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `permission_category`
+--
+ALTER TABLE `permission_category`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -983,6 +1270,14 @@ ALTER TABLE `discount`
 --
 ALTER TABLE `discount_condition`
   ADD CONSTRAINT `discount_condition_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `discount_usage`
+--
+ALTER TABLE `discount_usage`
+  ADD CONSTRAINT `discount_usage_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`),
+  ADD CONSTRAINT `discount_usage_ibfk_3` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`id`),
+  ADD CONSTRAINT `discount_usage_ibfk_4` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`);
 
 --
 -- Constraints for table `loyalty_transaction`

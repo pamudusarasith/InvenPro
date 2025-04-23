@@ -11,6 +11,7 @@ class OrderController extends Controller
 {
   public function __construct()
   {
+    parent::__construct();
     RBACService::requireAuthentication();
   }
 
@@ -141,17 +142,18 @@ class OrderController extends Controller
 
     $order = array_merge($order, $_POST);
 
-    $_POST['expected_date'] = $_POST['expected_date'] ?: null;
-    $_POST['notes'] = $_POST['notes'] ?: null;
-
-    if (!$this->validator->validateUpdateOrder($_POST)) {
+    $order['order_date'] = $order['order_date'] ? explode(' ', $order['order_date'])[0] : null;
+    $order['expected_date'] = $order['expected_date'] ?: null;
+    $order['notes'] = $order['notes'] ?: null;
+    error_log(print_r($order, true));
+    if (!$this->validator->validateUpdateOrder($order)) {
       $_SESSION['message'] = $this->validator->getError();
       $_SESSION['message_type'] = 'error';
       View::redirect('/orders/' . $orderId);
       return;
     }
 
-    $orderModel->updateOrder($orderId, $_POST);
+    $orderModel->updateOrder($orderId, $order);
 
     $_SESSION['message'] = 'Order updated successfully';
     $_SESSION['message_type'] = 'success';
@@ -231,7 +233,14 @@ class OrderController extends Controller
       return;
     }
 
-    $orderModel->changeOrderStatus($orderId, 'open');
+    if ($order['expected_date'] && $order['expected_date'] < date('Y-m-d')) {
+      $_SESSION['message'] = 'Order cannot be approved due to past expected date';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/orders/' . $orderId);
+      return;
+    }
+
+    $orderModel->approveOrder($orderId);
 
     $_SESSION['message'] = 'Order approved successfully';
     $_SESSION['message_type'] = 'success';

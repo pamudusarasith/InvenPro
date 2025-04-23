@@ -294,6 +294,16 @@ class OrderModel extends Model
     self::$db->query($sql, [$status, $orderId]);
   }
 
+  public function approveOrder(int $orderId)
+  {
+    $sql = '
+      UPDATE purchase_order
+      SET status = ?, order_date = NOW()
+      WHERE id = ?
+    ';
+    self::$db->query($sql, ['open', $orderId]);
+  }
+
   public function receiveOrderItems(int $orderId, array $data): void
   {
     try {

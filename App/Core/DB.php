@@ -47,6 +47,15 @@ class DB
   public function query($sql, $params = [])
   {
     try {
+      $stmt = $this->connection->prepare('
+        SET @user_id = ?, @branch_id = ?, @ip_address = ?, @user_agent = ?;
+      ');
+      $stmt->execute([
+        $_SESSION['user']['id'] ?? null,
+        $_SESSION['user']['branch_id'] ?? null,
+        $_SERVER['REMOTE_ADDR'] ?? null,
+        $_SERVER['HTTP_USER_AGENT'] ?? null
+      ]);
       $stmt = $this->connection->prepare($sql);
       $stmt->execute($params);
       return $stmt;

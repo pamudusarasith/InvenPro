@@ -154,7 +154,7 @@ $canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
 
     <div class="tab-nav">
       <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-      <button class="tab-btn" onclick="switchTab('timeline')">Timeline</button>
+      <!-- <button class="tab-btn" onclick="switchTab('timeline')">Timeline</button> -->
     </div>
 
     <input type="hidden" name="supplier_id" value="<?= $order['supplier_id'] ?>">
