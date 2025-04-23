@@ -57,22 +57,16 @@ $activities = $activities ?? [];
                     //error_log('Debug User ID: ' . (isset($user['id']) ? $user['id'] : 'Not set'));
                     //error_log('Debug Session User ID: ' . (isset($_SESSION['id']) ? $_SESSION['id'] : 'Not set'));
                     ?>
-                    <?php if (RBACService::hasPermission('edit_user') || RBACService::hasPermission('delete_user')): ?>
+                    <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'])): ?>
                         <div class="dropdown">
                             <button class="dropdown-trigger icon-btn" title="More options">
                                 <span class="icon">more_vert</span>
                             </button>
                             <div class="dropdown-menu">
-                                <?php if (RBACService::hasPermission('edit_user')): ?>
+                                <?php if ((isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id']))): ?>
                                     <button class="dropdown-item" onclick="enableEditing()">
                                         <span class="icon">edit</span>
                                         Edit Profile
-                                    </button>
-                                <?php endif; ?>
-                                <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
-                                    <button class="dropdown-item danger" onclick="deleteUser(<?= $user['id'] ?>)">
-                                        <span class="icon">delete</span>
-                                        Delete User
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -121,7 +115,7 @@ $activities = $activities ?? [];
             <button class="tab-btn" onclick="switchTab('activity')">Activity Log</button>
         </div>
 
-        <form id="details-form" method="POST" action="/users/<?= $user['id'] ?>/update">
+        <form id="details-form" method="POST" action="/profile/update">
             <div id="overview" class="tab-content active">
                 <div class="card">
                     <h3>Account Information</h3>
@@ -277,12 +271,12 @@ $activities = $activities ?? [];
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Reset Password</h2>
-                    <button class="btn btn-secondary" onclick="closePasswordResetDialog()">
+                    <button class="close-btn" onclick="closePasswordResetDialog()">
                         <span class="icon">close</span>
                     </button>
                 </div>
 
-                <form id="passwordResetForm" method="POST" action="/users/<?= $user['id'] ?>/reset-password" onsubmit="validateFrom(event);">
+                <form id="passwordResetForm" method="POST" action="/profile/reset-password" onsubmit="validateFrom(event);">
                     <div class="form-grid">
                         <div class="form-field span-1">
                             <label for="new_password">Old Password</label>
@@ -358,19 +352,6 @@ $activities = $activities ?? [];
         if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
             location.reload();
         }
-    }
-
-    // User actions
-    function deleteUser(userId) {
-        if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-            return;
-        }
-        // Implement delete user logic
-        const form = document.createElement('form');
-        form.method = 'GET';
-        form.action = '/users/<?= $user['id'] ?>/delete';
-        document.body.appendChild(form);
-        form.submit();
     }
 
     function saveChanges() {

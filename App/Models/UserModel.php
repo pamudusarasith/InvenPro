@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Models\AuditLogModel;
 
 class UserModel extends Model
 {
@@ -23,14 +24,37 @@ class UserModel extends Model
     return $stmt->fetch();
   }
 
-  public function getUsersCount(): int
+  public function getUsersCount(string $search = '', string $roleId = '', string $branchId = '', string $status = ''): int
   {
-    $sql = 'SELECT COUNT(*) FROM user WHERE deleted_at IS NULL';
-    $stmt = self::$db->query($sql);
+    $sql = 'SELECT COUNT(*) FROM user u WHERE u.deleted_at IS NULL';
+    $params = [];
+
+    if ($search) {
+      $sql .= ' AND (u.display_name LIKE ? OR u.email LIKE ?)';
+      $params[] = "%$search%";
+      $params[] = "%$search%";
+    }
+
+    if ($roleId) {
+      $sql .= ' AND u.role_id = ?';
+      $params[] = $roleId;
+    }
+
+    if ($branchId) {
+      $sql .= ' AND u.branch_id = ?';
+      $params[] = $branchId;
+    }
+
+    if ($status) {
+      $sql .= ' AND u.is_locked = ?';
+      $params[] = $status === 'locked' ? 1 : 0;
+    }
+
+    $stmt = self::$db->query($sql, $params);
     return (int) $stmt->fetchColumn();
   }
 
-  public function getUsers(int $page, int $itemsPerPage)
+  public function getUsers(int $page, int $itemsPerPage, string $search = '', string $roleId = '', string $branchId = '', string $status = '')
   {
     $offset = ($page - 1) * $itemsPerPage;
     $sql = '
@@ -46,10 +70,35 @@ class UserModel extends Model
       LEFT JOIN role r ON u.role_id = r.id
       LEFT JOIN branch b ON u.branch_id = b.id
       WHERE u.deleted_at IS NULL
-      ORDER BY u.id
-      LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, [$itemsPerPage, $offset]);
+    $params = [];
+
+    if ($search) {
+      $sql .= ' AND (u.display_name LIKE ? OR u.email LIKE ?)';
+      $params[] = "%$search%";
+      $params[] = "%$search%";
+    }
+
+    if ($roleId) {
+      $sql .= ' AND u.role_id = ?';
+      $params[] = $roleId;
+    }
+
+    if ($branchId) {
+      $sql .= ' AND u.branch_id = ?';
+      $params[] = $branchId;
+    }
+
+    if ($status) {
+      $sql .= ' AND u.is_locked = ?';
+      $params[] = $status === 'locked' ? 1 : 0;
+    }
+
+    $sql .= ' ORDER BY u.id LIMIT ? OFFSET ?';
+    $params[] = $itemsPerPage;
+    $params[] = $offset;
+
+    $stmt = self::$db->query($sql, $params);
     $result = $stmt->fetchAll();
 
     foreach ($result as &$user) {
@@ -71,6 +120,7 @@ class UserModel extends Model
         u.email,
         u.force_profile_setup,
         r.role_name,
+        b.id AS branch_id,
         b.branch_name,
         u.is_locked,
         u.failed_login_attempts,
@@ -89,18 +139,56 @@ class UserModel extends Model
     return $result;
   }
 
-  public function createUser(array $data): void
+  public function createUser(array $data): int
   {
     $sql = '
-      INSERT INTO user (email, password, role_id, branch_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO user (first_name, last_name, email, password, role_id, branch_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     ';
     self::$db->query($sql, [
+      $data['first_name'],
+      $data['last_name'],
       $data['email'],
       password_hash($data['password'], PASSWORD_BCRYPT),
       $data['role_id'],
       $data['branch_id']
     ]);
+
+    $id = self::$db->lastInsertId();
+
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'CREATE',
+        changes: json_encode($data),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+    );
+
+    return $id;
+  }
+
+  public function updateUserPassword(int $id, string $password): void
+  {
+    $sql = 'UPDATE user SET password = ?,  WHERE id = ?';
+    self::$db->query($sql, [password_hash($password, PASSWORD_BCRYPT), $id]);
+
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'UPDATE_PASSWORD',
+        changes: json_encode(['id' => $id, 'password' => 'updated']),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
+
+    $_SESSION['message'] = 'Password updated successfully';
+    $_SESSION['message_type'] = 'success';
   }
 
   public function updateUser(int $id, array $data): void
@@ -125,11 +213,108 @@ class UserModel extends Model
       $data['is_locked'],
       $id
     ]);
+
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'UPDATE',
+        changes: json_encode(['id' => $id, $data]),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+    );
+
+    $_SESSION['message'] = 'User updated successfully';
+    $_SESSION['message_type'] = 'success';
+
   }
 
   public function deleteUser(int $id): void
   {
-    $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
+      // Fetch user details to get branch_id
+      $user = $this->getUserById($id);
+      if (!$user) {
+          throw new \Exception('User not found');
+      }
+
+      // Soft delete the user
+      $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
+      self::$db->query($sql, [$id]);
+
+      // Log the action
+      $auditLogModel = new AuditLogModel();
+      $auditLogModel->logAction(
+          tableName: 'user',
+          recordId: $id,
+          actionType: 'DELETE',
+          changes: json_encode($user),
+          metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+          changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+          branchId: isset($user['branch_id']) ? $user['branch_id'] : null
+      );
+
+      $_SESSION['message'] = 'User deleted successfully';
+      $_SESSION['message_type'] = 'success';
+  }
+
+  public function recordLastLogin(int $id): void
+  {
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
+    self::$db->query($sql, [$ip, $id]);
+
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'LOGIN',
+        changes: json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
+        metadata: json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
+  }
+
+  public function getFailedLoginAttempts(string $email): int
+  {
+    $sql = 'SELECT failed_login_attempts FROM user WHERE email = ?';
+    $stmt = self::$db->query($sql, [$email]);
+    return (int) $stmt->fetchColumn();
+  }
+
+  public function recordFailedLoginAttempt(string $email): void
+  {
+    $timestamp = date('Y-m-d H:i:s');
+    
+    $attempts = $this->getFailedLoginAttempts($email);
+    if ($attempts >= 3) {
+      return; // User is already locked out
+    }
+
+    $sql = 'UPDATE user SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = ? WHERE email = ?';
+    self::$db->query($sql, [$timestamp, $email]);
+  }
+
+  public function resetFailedLoginAttempts(string $email): void
+  {
+    $sql = 'UPDATE user SET failed_login_attempts = 0 WHERE email = ?';
+    self::$db->query($sql, [$email]);
+  }
+
+  public function resetFailedLoginAttemptsById(int $id): void
+  {
+    $sql = 'UPDATE user SET failed_login_attempts = 0 WHERE id = ?';
     self::$db->query($sql, [$id]);
   }
+
+  public function lockUser(int $id): void
+  {
+    $sql = 'UPDATE user SET is_locked = 1 WHERE id = ?';
+    self::$db->query($sql, [$id]);
+  }
+
 }
+
+  

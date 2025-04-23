@@ -92,6 +92,56 @@ function switchTab(tabId) {
   document.getElementById(tabId).classList.add("active");
 }
 
+function insertPagination(container, currentPage, totalPages, changeCallback) {
+  let pages = new Set([
+    1,
+    totalPages,
+    currentPage,
+    Math.max(1, currentPage - 1),
+    Math.min(totalPages, currentPage + 1),
+  ]);
+  pages = Array.from(pages).sort();
+
+  container.innerHTML = "";
+  const prevBtn = document.createElement("button");
+  prevBtn.classList.add("page-btn");
+  prevBtn.disabled = currentPage <= 1;
+  prevBtn.innerHTML = "<span class='icon'>navigate_before</span>";
+  prevBtn.onclick = () => changeCallback(currentPage - 1);
+  container.appendChild(prevBtn);
+
+  for (let i = 0; i < pages.length; i++) {
+    if (i > 0 && pages[i] - pages[i - 1] > 1) {
+      const dots = document.createElement("span");
+      dots.classList.add("page-dots");
+      dots.textContent = "...";
+      container.appendChild(dots);
+    }
+    const pageBtn = document.createElement("button");
+    pageBtn.classList.add("page-number");
+    if (pages[i] === currentPage) {
+      pageBtn.classList.add("active");
+    }
+    pageBtn.textContent = pages[i];
+    pageBtn.onclick = () => changeCallback(pages[i]);
+    container.appendChild(pageBtn);
+  }
+
+  const nextBtn = document.createElement("button");
+  nextBtn.classList.add("page-btn");
+  nextBtn.disabled = currentPage >= totalPages;
+  nextBtn.innerHTML = "<span class='icon'>navigate_next</span>";
+  nextBtn.onclick = () => changeCallback(currentPage + 1);
+  container.appendChild(nextBtn);
+}
+
+function changeItemsPerPage(itemsPerPage) {
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set("ipp", itemsPerPage);
+  currentUrl.searchParams.delete("p");
+  window.location.href = currentUrl.href;
+}
+
 // Initialize dropdowns when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("messagePopup");
