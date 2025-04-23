@@ -31,12 +31,12 @@
 }
 
 .btn-danger {
-  background: var(--danger-600);
-  color: var(--surface-white);
+  background: var(--surface-white);
+  color: var(--danger-600);
 }
 
 .btn-danger:hover {
-  background: var(--danger-700);
+  background: var(--danger-100);
   transform: translateY(-1px);
 }
 

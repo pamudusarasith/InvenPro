@@ -172,6 +172,27 @@ class UserModel extends Model
     
   }
 
+  public function updateUserPassword(int $id, string $password): void
+  {
+    $sql = 'UPDATE user SET password = ?,  WHERE id = ?';
+    self::$db->query($sql, [password_hash($password, PASSWORD_BCRYPT), $id]);
+
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        tableName: 'user',
+        recordId: $id,
+        actionType: 'UPDATE_PASSWORD',
+        changes: json_encode(['id' => $id, 'password' => 'updated']),
+        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
+
+    $_SESSION['message'] = 'Password updated successfully';
+    $_SESSION['message_type'] = 'success';
+  }
+
   public function updateUser(int $id, array $data): void
   {
     $sql = '
@@ -282,6 +303,12 @@ class UserModel extends Model
   {
     $sql = 'UPDATE user SET failed_login_attempts = 0 WHERE email = ?';
     self::$db->query($sql, [$email]);
+  }
+
+  public function resetFailedLoginAttemptsById(int $id): void
+  {
+    $sql = 'UPDATE user SET failed_login_attempts = 0 WHERE id = ?';
+    self::$db->query($sql, [$id]);
   }
 
   public function lockUser(int $id): void

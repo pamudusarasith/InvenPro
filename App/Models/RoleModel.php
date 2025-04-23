@@ -43,7 +43,7 @@ class RoleModel extends Model
     }
 
     /**
-     * Get all roles with permission count and categories
+     * Get all roles with permission count and categories, ordered by role name
      * @return array
      */
     public function getAllRoles(): array
@@ -56,25 +56,98 @@ class RoleModel extends Model
                 LEFT JOIN permission p ON rp.permission_id = p.id
                 LEFT JOIN permission_category pc ON p.category_id = pc.id
                 GROUP BY r.id
-                ORDER BY r.id';
+                ORDER BY r.role_name';
+        $stmt = self::$db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Get all roles with permissions grouped by category
+     * @return array
+     */
+    public function getAllRolesPermissionsGrouped(): array
+    {
+        $sql = '
+        SELECT r.id as role_id, 
+               r.role_name, 
+               r.description,
+               r.created_at,
+               p.id as permission_id,
+               p.permission_name, 
+               pc.id as category_id,
+               pc.category_name
+        FROM role r
+        LEFT JOIN role_permission rp ON r.id = rp.role_id
+        LEFT JOIN permission p ON rp.permission_id = p.id
+        LEFT JOIN permission_category pc ON p.category_id = pc.id
+        ORDER BY r.id, pc.category_name, p.permission_name';
         $stmt = self::$db->query($sql);
         $roles = $stmt->fetchAll();
 
+
         $result = [];
+
         foreach ($roles as $role) {
-            $result[] = [
-                'id' => $role['id'],
-                'role_name' => $role['role_name'],
-                'description' => $role['description'],
-                'permission_count' => (int)$role['permission_count'],
-                'permission_categories' => $role['permission_categories'] ? explode(',', $role['permission_categories']) : [],
-                'created_at' => substr($role['created_at'], 0, 10)
-            ];
+            $roleId = $role['role_id'];
+            $categoryKey = strtolower(str_replace(' ', '_', $role['category_name'] ?? ''));
+
+            $userCountCurrentRole = $this->getUserCountByRole($roleId);
+
+            if (!isset($result[$roleId])) {
+                $result[$roleId] = [
+                    'role_name' => $role['role_name'],
+                    'description' => $role['description'],
+                    'created_at' => substr($role['created_at'], 0, 10),
+                    'permission_count' => 0,
+                    'user_count' => $userCountCurrentRole ?? 0,
+                    'permission_categories' => [],
+                    'permissions' => []
+                ];
+            }
+
+            if ($role['category_name'] && !in_array($role['category_name'], $result[$roleId]['permission_categories'])) {
+                $result[$roleId]['permission_categories'][$role['category_id']] = str_replace(' ', '_', $role['category_name'] ?? '');
+            }
+
+            if ($role['permission_name']) {
+                if (!isset($result[$roleId]['permissions'][$categoryKey])) {
+                    $result[$roleId]['permissions'][$categoryKey] = [];
+                }
+                $result[$roleId]['permissions'][$categoryKey][] = $role['permission_name'];
+                $result[$roleId]['permission_count']++;
+            }
         }
 
         return $result;
     }
 
+    /**
+     * Get the count of users assigned to a specific role
+     * @param int $roleId 
+     * @return array
+     */
+    public function getUserCountByRole($roleId): int
+    {
+        $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ?';
+        $stmt = self::$db->query($sql, [$roleId]);
+        $result = $stmt->fetch();
+        return (int)$result['user_count'];
+        
+    }
+
+    /**
+     * Get a role by Role Name
+     * @param string $roleName
+     * @return array|null
+     */
+    public function getRoleByName(string $roleName): array
+    {
+        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ?';
+        $stmt = self::$db->query($sql, [$roleName]);
+        $result = $stmt ? $stmt->fetch() : null;
+        return $result ?: [];
+    }
+    
 
     /**
      * Get permission names for a role, grouped by category
@@ -128,39 +201,6 @@ class RoleModel extends Model
         return array_column($categories, 'category_name');
     }
 
-    /**
-     * Get all permissions grouped by category
-     * @return array
-     */
-    public function getAllPermissionsGrouped(): array
-    {
-        $sql = 'SELECT pc.id as category_id, pc.category_name,
-                       p.id as permission_id, p.permission_name, p.description
-                FROM permission p
-                JOIN permission_category pc ON p.category_id = pc.id
-                ORDER BY pc.category_name, p.permission_name';
-        $stmt = self::$db->query($sql);
-        $rows = $stmt->fetchAll();
-
-        $result = [];
-        foreach ($rows as $row) {
-            $categoryKey = strtolower(str_replace(' ', '_', $row['category_name']));
-            if (!isset($result[$categoryKey])) {
-                $result[$categoryKey] = [
-                    'category_name' => $row['category_name'],
-                    'permissions' => []
-                ];
-            }
-            $result[$categoryKey]['permissions'][] = [
-                'id' => $row['permission_id'],
-                'permission_name' => $row['permission_name'],
-                'description' => $row['description'],
-                'category_id' => $row['category_id']
-            ];
-        }
-
-        return $result;
-    }
 
     /**
      * Get permission names for a role (for $rolePermissions structure)
@@ -211,78 +251,64 @@ class RoleModel extends Model
     
         return $result;
     }
-    
 
     /**
-     * Get permission categories
-     * @return array
+     * Add a new role with permissions
+     * @param array $data Contains role_name, description, permissions (array of permission IDs)
+     * @return int|false Role ID or false on failure
      */
-    public function getPermissionCategories(): array
+    public function addRole(array $data)
     {
-        $sql = 'SELECT id, category_name FROM permission_category ORDER BY category_name';
-        $stmt = self::$db->query($sql);
-        $categories = $stmt->fetchAll();
-
-        $result = [];
-        foreach ($categories as $category) {
-            $key = strtolower(str_replace(' ', '_', $category['category_name']));
-            $result[$key] = $category['category_name'];
+        if (empty($data['role_name'])) {
+            return false;
         }
 
-        return $result;
-    }
-
-    /**
-     * Get user count by role
-     * @return array
-     */
-    public function getUserCountByRole(): array
-    {
-        $sql = 'SELECT role_id, COUNT(*) as user_count FROM user GROUP BY role_id';
-        $stmt = self::$db->query($sql);
-        $counts = $stmt->fetchAll();
-
-        $result = [];
-        foreach ($counts as $count) {
-            $result[$count['role_id']] = (int)$count['user_count'];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new role
-     * @param array $data
-     * @return int The ID of the created role
-     */
-    public function createRole(array $data): int
-    {
         $sql = 'INSERT INTO role (role_name, description, created_at) VALUES (?, ?, ?)';
-        self::$db->query($sql, [
+        $result = self::$db->query($sql, [
             $data['role_name'],
-            $data['description'],
-            $data['created_at'] ?? date('Y-m-d H:i:s')
+            $data['description'] ?? '',
+            date('Y-m-d H:i:s')
         ]);
 
-        $id = self::$db->lastInsertId();
+        if (!$result) {
+            return false;
+        }
+
+        $roleId = self::$db->lastInsertId();
+
+        if (!empty($data['permissions'])) {
+            $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
+            $insertParts = [];
+            $params = [];
+            foreach ($data['permissions'] as $permId) {
+                $insertParts[] = '(?, ?, ?)';
+                $params[] = $roleId;
+                $params[] = $permId;
+                $params[] = date('Y-m-d H:i:s');
+            }
+
+            $insertSql .= implode(', ', $insertParts);
+            if (!self::$db->query($insertSql, $params)) {
+                return false;
+            }
+        }
 
         $auditLogModel = new AuditLogModel();
         $auditLogModel->logAction(
         tableName: 'role',
-        recordId: $id,
+        recordId: $roleId,
         actionType: 'CREATE',
-        changes: json_encode(['id' => $id , $data]),
+        changes: json_encode(['id' => $roleId , $data]),
         metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
         changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
         branchId: isset($data['branch_id']) ? $data['branch_id'] : null  
         );
 
-        $_SESSION['message'] = 'Role created successfully';
-        $_SESSION['message_type'] = 'success';
-        
-        return $id;
-    }
 
+        return $roleId;
+    }
+    
+    
 
     /**
      * Update an existing role
