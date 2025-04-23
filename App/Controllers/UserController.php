@@ -45,8 +45,8 @@ class UserController extends Controller
 
   public function details(array $params): void
   {
-    $userModal = new UserModel();
-    $user = $userModal->getUserById($params['id']);
+    $userModel = new UserModel();
+    $user = $userModel->getUserById($params['id']);
 
     if (!$user) {
       $_SESSION['message'] = 'User not found';
@@ -82,16 +82,90 @@ class UserController extends Controller
       exit;
     }
 
-    $_POST['password'] = "1234";
-    // TODO: Make a random password and email it to the user
+    // Generate a random password for the new user
+    $_POST['password'] = $this->generateRandomPassword();
 
-    $userModal = new UserModel();
-    $userModal->createUser($_POST);
+    $userModel = new UserModel();
+    $userId = $userModel->createUser($_POST);
 
-    $_SESSION['message'] = 'User created successfully';
-    $_SESSION['message_type'] = 'success';
+    if ($userId) {
+      // Send email with credentials
+      $this->sendNewAccountEmail($_POST['email'], $_POST['password'], $_POST['role_id']);
+
+      $_SESSION['message'] = 'User created successfully. Login credentials have been sent to their email.';
+      $_SESSION['message_type'] = 'success';
+    } else {
+      $_SESSION['message'] = 'Failed to create user';
+      $_SESSION['message_type'] = 'error';
+    }
 
     View::redirect('/users');
+  }
+
+  /**
+   * Generate a secure random password
+   *
+   * @param int $length Length of the password
+   * @return string Random password
+   */
+  private function generateRandomPassword(int $length = 10): string
+  {
+    $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $numbers = '0123456789';
+    $specialChars = '!@#$%^&*()_-+=<>?';
+
+    $characters = $lowercase . $uppercase . $numbers . $specialChars;
+    $password = '';
+
+    // Fill the password
+    for ($i = 0; $i < $length; $i++) {
+      $password .= $characters[random_int(0, strlen($characters) - 1)];
+    }
+
+    // Shuffle the password to make it more random
+    return str_shuffle($password);
+  }
+
+  /**
+   * Send account credentials email to new user
+   *
+   * @param string $email User's email address
+   * @param string $password Temporary password
+   * @param int $roleId User's role ID
+   * @return bool Whether the email was sent successfully
+   */
+  private function sendNewAccountEmail(string $email, string $password, int $roleId): bool
+  {
+    try {
+      // Get role name from role ID
+      $roleModel = new RoleModel();
+      $role = $roleModel->getRoleById($roleId);
+      $roleName = $role ? $role['role_name'] : 'User';
+
+      // Prepare data for the template
+      $data = [
+        'email' => $email,
+        'password' => $password,
+        'role' => $roleName,
+        'login_url' => 'http://' . $_SERVER['HTTP_HOST']
+      ];
+
+      // Template path
+      $templatePath = __DIR__ . '/../Views/emails/NewAccount.php';
+
+      // Send email using EmailService with PHP template
+      $emailService = \App\Services\EmailService::getInstance();
+      return $emailService->sendPhpTemplate(
+        $email,
+        'Your New InvenPro Account',
+        $templatePath,
+        $data
+      );
+    } catch (\Exception $e) {
+      error_log('Failed to send new account email: ' . $e->getMessage());
+      return false;
+    }
   }
 
   public function updateUser(array $params): void
@@ -103,8 +177,8 @@ class UserController extends Controller
 
     $_POST['is_locked'] = $_POST['status'] == 'locked' ? 1 : 0;
 
-    $userModal = new UserModel();
-    $userModal->updateUser($params['id'], $_POST);
+    $userModel = new UserModel();
+    $userModel->updateUser($params['id'], $_POST);
 
     $_SESSION['message'] = 'User updated successfully';
     $_SESSION['message_type'] = 'success';
@@ -114,8 +188,8 @@ class UserController extends Controller
 
   public function deleteUser(array $params): void
   {
-    $userModal = new UserModel();
-    $userModal->deleteUser($params['id']);
+    $userModel = new UserModel();
+    $userModel->deleteUser($params['id']);
 
     $_SESSION['message'] = 'User deleted successfully';
     $_SESSION['message_type'] = 'success';

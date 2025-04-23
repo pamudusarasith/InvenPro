@@ -139,7 +139,7 @@ class UserModel extends Model
     return $result;
   }
 
-  public function createUser(array $data): void
+  public function createUser(array $data): int
   {
     $sql = '
       INSERT INTO user (first_name, last_name, email, password, role_id, branch_id)
@@ -167,9 +167,7 @@ class UserModel extends Model
         branchId: isset($data['branch_id']) ? $data['branch_id'] : null
     );
 
-    $_SESSION['message'] = 'User created successfully';
-    $_SESSION['message_type'] = 'success';
-    
+    return $id;
   }
 
   public function updateUser(int $id, array $data): void
