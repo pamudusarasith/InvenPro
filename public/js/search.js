@@ -23,6 +23,7 @@ class SearchHandler {
       query: "",
       results: [],
       page: 0,
+      isResultsHovered: false,
     };
 
     this.init();
@@ -40,11 +41,20 @@ class SearchHandler {
       this.search(e.target.value)
     );
 
-    // Handle input blur - close results after a small delay
-    this.inputElement.addEventListener("focusout", () => {
-      setTimeout(() => {
+    // Track when mouse enters/leaves the results container
+    this.resultsContainer.addEventListener("mouseenter", () => {
+      this.state.isResultsHovered = true;
+    });
+
+    this.resultsContainer.addEventListener("mouseleave", () => {
+      this.state.isResultsHovered = false;
+    });
+
+    // Handle input blur - close results only if not interacting with results
+    this.inputElement.addEventListener("focusout", (e) => {
+      if (!this.state.isResultsHovered) {
         this.resultsContainer.innerHTML = "";
-      }, 1000);
+      }
     });
 
     // Handle scrolling for pagination
@@ -135,6 +145,7 @@ class SearchHandler {
    * @param {Object} item - Selected item
    */
   handleSelect(item) {
+    this.clear();
     if (this.onSelect) {
       this.onSelect(item);
     }

@@ -10,13 +10,20 @@ class OrderController extends Controller
 {
   public function index()
   {
-    $page = $_GET['page'] ?? 1;
+    $page = $_GET['p'] ?? 1;
     $itemsPerPage = $_GET['ipp'] ?? 10;
+    $query = $_GET['q'] ?? '';
+    $status = $_GET['status'] ?? '';
+    $from = $_GET['from'] ?? '';
+    $to = $_GET['to'] ?? '';
     $orderModel = new OrderModel();
-    $orders = $orderModel->getOrders($page, $itemsPerPage);
+    $orders = $orderModel->getOrders($page, $itemsPerPage, $query, $status, $from, $to);
+    $totalRecords = $orderModel->getOrdersCount($query, $status, $from, $to);
+    $totalPages = ceil($totalRecords / $itemsPerPage);
     View::renderTemplate('PurchaseOrders', [
       'title' => 'Purchase Orders',
-      'orders' => $orders
+      'orders' => $orders,
+      'totalPages' => $totalPages,
     ]);
   }
 
