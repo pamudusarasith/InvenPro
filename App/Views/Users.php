@@ -87,7 +87,7 @@ $branches = $branches ?? [];
                     <?= htmlspecialchars($user['status']) ?>
                   </span>
                 </td>
-                <td><?= $user['last_login'] ? date('M d, Y H:i', $user['last_login']) : "N/A" ?></td>
+                <td><?= $user['last_login'] ? date('M d, Y H:i', strtotime($user['last_login'])) : "N/A" ?></td>
               </tr>
           <?php endforeach;
           } ?>
