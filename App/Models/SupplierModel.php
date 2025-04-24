@@ -150,4 +150,18 @@ class SupplierModel extends Model
     ]);
     return $stmt->fetchAll();
   }
+
+  public function getActiveSuppliersCount(): int
+  {
+    if ($_SESSION['user']['branch_id'] == 1) {
+      $sql = 'SELECT COUNT(*) FROM supplier WHERE deleted_at IS NULL';
+      $stmt = self::$db->query($sql);
+      return $stmt->fetchColumn();
+    } else {
+      $sql = 'SELECT COUNT(*) FROM supplier WHERE deleted_at IS NULL AND branch_id = ?';
+      $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id']]);
+      return $stmt->fetchColumn();
+    }
+  }
+  
 }
