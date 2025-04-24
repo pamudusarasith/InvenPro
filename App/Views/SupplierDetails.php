@@ -171,42 +171,45 @@ $branches = $branches ?? [];
 
       <div id="products" class="tab-content">
         <div class="card">
-          <h3>Assigned Products</h3>
-          <div class="content">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Product Code</th>
-                  <th>Product Name</th>
-                  <th>Preferred</th>
-                  <th>Last Order</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php foreach ($supplier_products as $product): ?>
-                  <tr>
-                    <td><?= htmlspecialchars($product['product_code']) ?></td>
-                    <td><?= htmlspecialchars($product['product_name']) ?></td>
-                  
-                    <td>
-                      <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
-                        <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
-                      </span>
-                    </td>
-                    <td><?= $product['last_order'] ? date('M d, Y', strtotime($product['last_order'])) : '-' ?></td>
-                    <td>
-                      <button type="button" class="icon-btn" onclick="editProduct(<?= $product['id'] ?>)">
-                        <span class="icon">edit</span>
-                      </button>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              </tbody>
+            <h3>Assigned Products</h3>
+            <div class="content">
+                <table class="data-table" id="AssignedProductsTable">
+                    <thead>
+                        <tr>
+                          <th>Product Code</th>
+                          <th>Product Name</th>
+                          <th>Preferred</th>
+                          <th>Actions</th>
+                         </tr>
+                </thead>
+                <tbody>
+                  <?php if (!empty($supplier_products)): ?>
+                    <?php foreach ($supplier_products as $product): ?>
+                      <tr>
+                        <td><?= htmlspecialchars($product['product_code']) ?></td>
+                        <td><?= htmlspecialchars($product['product_name']) ?></td>
+                        <td>
+                          <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
+                            <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
+                          </span>
+                        </td>
+                        <td>
+                          <button class="icon-btn danger" title="Delete"
+                                  onclick="deleteAssignedProduct(<?= $product['sp_id']; ?>)">
+                            <span class="icon">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr><td colspan="4">No assigned products found.</td></tr>
+                  <?php endif; ?>
+                </tbody>
             </table>
-          </div>
         </div>
-      </div>
+    </div>
+</div>
+
 
       <div id="orders" class="tab-content">
         <!-- Similar structure for purchase orders -->
@@ -239,21 +242,22 @@ $branches = $branches ?? [];
             </div>
           </div>
 
-        <div class="form-field span-2" style="display: none;" id="product_details">
-          <p><strong>Product Code:</strong> <span id="product_code"></span></p>
-          <p><strong>Product Name:</strong> <span id="product_name"></span></p>
+          <div class="form-field span-2" style="display: none;" id="product_details">
+            <p><strong>Product Code:</strong> <span id="product_code"></span></p>
+            <p><strong>Product Name:</strong> <span id="product_name"></span></p>
+            <input type="hidden" name="product_id" id="product_id">
+          </div>
         </div>
-  </div>
-</form>
 
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAssignDialog()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary">Add Product</button>
         </div>
       </form>
     </div>
   </dialog>
+
 <?php endif; ?>
 
 <!-- Include message popup from existing code -->
@@ -276,26 +280,26 @@ if ($messageType === 'success') {
 
 <script src="/js/search.js"></script>
 <script>
+  function selectproduct(product) {
+    document.querySelector("#product_details").style.display = "flex";
+    document.querySelector("#product_code").textContent = product.product_code;
+    document.querySelector("#product_name").textContent = product.product_name;
+    document.querySelector("#product_id").value = product.id;
+  }
 
-function selectproduct(product) {
-  document.querySelector("#product_details").style.display = "flex";
-  document.querySelector("#product_code").textContent = product.product_code;
-  document.querySelector("#product_name").textContent = product.product_name;
-}
-
-new SearchHandler({
-  apiEndpoint: '/api/products/search',
-  inputElement: document.querySelector("#assign-product input"),
-  resultsContainer: document.querySelector("#assign-product .search-results"),
-  itemsPerPage: 5,
-  renderResultItem: (product) => {
-    const element = document.createElement("div");
-    element.classList.add("search-result");
-    element.textContent = product.product_name;
-    element.addEventListener("click", () => selectproduct(product)); // bind click handler
-    return element;
-  },
-});
+  new SearchHandler({
+    apiEndpoint: '/api/products/search',
+    inputElement: document.querySelector("#assign-product input"),
+    resultsContainer: document.querySelector("#assign-product .search-results"),
+    itemsPerPage: 5,
+    renderResultItem: (product) => {
+      const element = document.createElement("div");
+      element.classList.add("search-result");
+      element.textContent = product.product_name;
+      element.addEventListener("click", () => selectproduct(product)); // bind click handler
+      return element;
+    },
+  });
 
 
   // Reuse existing tab switching functionality
@@ -308,19 +312,19 @@ new SearchHandler({
   }
 
   function enableEditing() {
-        // Add edit mode class to header
-        document.querySelector('.details-header').classList.add('edit-mode');
+    // Add edit mode class to header
+    document.querySelector('.details-header').classList.add('edit-mode');
 
-        // Enable all form inputs
-        document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
-            input.disabled = false;
-        });
+    // Enable all form inputs
+    document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
+      input.disabled = false;
+    });
 
-        // Scroll to form
-        document.querySelector('.tab-content.active').scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
+    // Scroll to form
+    document.querySelector('.tab-content.active').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
 
   function cancelEdit() {
     if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
@@ -376,8 +380,11 @@ new SearchHandler({
     dialog.close();
   }
 
-  function editProduct(productId) {
-    // Implement product editing logic
+  function deleteAssignedProduct(productID) {
+    if (!confirm('Are you sure want delete this assigned product?')) {
+      return;
+    }
+    window.location.href = `/suppliers/${supplierId}/products`;
   }
 
   <?php if ($message): ?>

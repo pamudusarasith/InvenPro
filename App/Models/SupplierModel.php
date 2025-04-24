@@ -93,6 +93,12 @@ class SupplierModel extends Model
     self::$db->query($sql, [$id]);
   }
 
+  public function deleteAssignedProduct(int $id): void
+  {
+    $sql = 'UPDATE supplier_product SET deleted_at = NOW() WHERE product_id = ?';
+    self::$db->query($sql, [$id]);
+  }
+
   public function searchSuppliers(string $query, int $page, int $itemsPerPage): array
   {
     $offset = ($page - 1) * $itemsPerPage;
@@ -150,4 +156,37 @@ class SupplierModel extends Model
     ]);
     return $stmt->fetchAll();
   }
+
+ public function assignProduct(int $supplierId, array $data): void
+{
+  $sql = '
+    INSERT INTO supplier_product (supplier_id, product_id, branch_id, is_preferred_supplier)
+    VALUES (?, ?, ?, ?)
+  ';
+
+  self::$db->query($sql, [
+    $supplierId,
+    $data['product_id'],
+    $_SESSION['user']['branch_id'] ?? null,
+    1 // Hardcoded as preferred; adjust as needed
+  ]);
 }
+
+
+public function getSupplierProducts(int $supplierId): array
+{
+    $sql = '
+        SELECT
+            p.product_code,
+            p.product_name,
+            sp.is_preferred_supplier
+        FROM product p
+        INNER JOIN supplier_product sp ON sp.product_id = p.id
+        WHERE sp.supplier_id = ? AND sp.branch_id = ?
+    ';
+    $stmt = self::$db->query($sql, [$supplierId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll(); 
+}
+
+}
+
