@@ -242,13 +242,15 @@
   font-size: 1.25rem;
 }
 
-.applied-discounts,
-.applied-coupons {
+/* Renamed from applied-discounts to discounts-items for consistency */
+.discounts-items,
+.coupons-items {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
+/* Renamed from discount-item to align with component naming */
 .discount-item,
 .coupon-item {
   display: flex;
@@ -266,6 +268,7 @@
   transform: translateX(-2px);
 }
 
+/* Renamed from discount-info to align with component naming */
 .discount-info,
 .coupon-info {
   display: flex;
@@ -275,18 +278,21 @@
   margin-right: 0.5rem;
 }
 
+/* Renamed from discount-name to align with component naming */
 .discount-name,
 .coupon-name {
   color: var(--text-primary);
   font-weight: 500;
 }
 
+/* Renamed from discount-value to align with component naming */
 .discount-value,
 .coupon-value {
   color: var(--success-600);
   font-weight: 600;
 }
 
+/* Loader styling */
 .loader {
   width: 50px;
   padding: 8px;
@@ -298,9 +304,10 @@
   mask: var(--_m);
   -webkit-mask-composite: source-out;
   mask-composite: subtract;
-  animation: l3 1s infinite linear;
+  animation: loader-spin 1s infinite linear;
 }
-@keyframes l3 {
+
+@keyframes loader-spin {
   to {
     transform: rotate(1turn);
   }
@@ -332,4 +339,15 @@
   width: 60px;
   padding: 10px;
   background: var(--primary-600);
+}
+
+/* Customer info styling */
+.summary-item.customer-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--primary-600);
+  font-weight: 500;
 }
