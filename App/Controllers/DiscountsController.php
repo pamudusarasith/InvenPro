@@ -3,28 +3,61 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
+use App\Models\DiscountModel;
+use App\Services\RBACService;
 
 class DiscountsController extends Controller
 {
+  public function __construct()
+  {
+    parent::__construct();
+    RBACService::requireAuthentication();
+  }
+
   public function index()
   {
-    $discountModel = new \App\Models\DiscountModel();
-    $discounts = $discountModel->getDiscounts();
+    if (!RBACService::hasPermission('view_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to view discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+    $query = $_GET['q'] ?? '';
+    $status = $_GET['status'] ?? '';
+    $from = $_GET['from'] ?? '';
+    $to = $_GET['to'] ?? '';
+    $applicationMethod = $_GET['application'] ?? '';
+    $type = $_GET['type'] ?? '';
+    $discountModel = new DiscountModel();
+    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type);
+    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type);
+    $totalPages = ceil($totalRecords / $itemsPerPage);
 
     View::renderTemplate("Discounts", [
       "title" => "Discounts",
       "discounts" => $discounts,
+      "totalPages" => $totalPages,
     ]);
   }
 
   public function createDiscount()
   {
+    if (!RBACService::hasPermission('add_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to create discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $_POST['end_date'] = $_POST['end_date'] ?: null;
     foreach ($_POST['coupons'] as &$coupon) {
       $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
     }
 
-    if (!$this->validator->validateCreateDiscount($_POST)) {
+    if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
       $_SESSION['message'] = $this->validator->getError();
       $_SESSION['message_type'] = 'error';
       View::redirect('/discounts');
@@ -35,9 +68,117 @@ class DiscountsController extends Controller
       $condition['condition_value'] = json_encode($condition['condition_value']);
     }
 
-    $discountModel = new \App\Models\DiscountModel();
+    $discountModel = new DiscountModel();
     $discountModel->createDiscount($_POST);
     $_SESSION['message'] = 'Discount created successfully';
+    $_SESSION['message_type'] = 'success';
+    View::redirect('/discounts');
+  }
+
+  public function updateDiscount(array $params)
+  {
+    if (!RBACService::hasPermission('edit_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to edit discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $discountModel = new DiscountModel();
+    if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
+      $_SESSION['message'] = 'Discount not found';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/discounts');
+      return;
+    }
+
+    $_POST['end_date'] = $_POST['end_date'] ?: null;
+    foreach ($_POST['coupons'] as &$coupon) {
+      $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
+    }
+
+    if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
+      $_SESSION['message'] = $this->validator->getError();
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/discounts');
+      return;
+    }
+
+    foreach ($_POST['conditions'] as &$condition) {
+      $condition['condition_value'] = json_encode($condition['condition_value']);
+    }
+
+    $discountModel->updateDiscount($params['id'], $_POST);
+    $_SESSION['message'] = 'Discount updated successfully';
+    $_SESSION['message_type'] = 'success';
+    View::redirect('/discounts');
+  }
+
+  public function deleteDiscount(array $params)
+  {
+    if (!RBACService::hasPermission('delete_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to delete discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $discountModel = new DiscountModel();
+    if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
+      $_SESSION['message'] = 'Discount not found';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/discounts');
+      return;
+    }
+
+    $discountModel->deleteDiscount($params['id']);
+    $_SESSION['message'] = 'Discount deleted successfully';
+    $_SESSION['message_type'] = 'success';
+    View::redirect('/discounts');
+  }
+
+  public function activateDiscount(array $params)
+  {
+    if (!RBACService::hasPermission('activate_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to activate discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $discountModel = new DiscountModel();
+    if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
+      $_SESSION['message'] = 'Discount not found';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/discounts');
+      return;
+    }
+
+    $discountModel->changeStatus($params['id'], 1);
+    $_SESSION['message'] = 'Discount activated successfully';
+    $_SESSION['message_type'] = 'success';
+    View::redirect('/discounts');
+  }
+
+  public function deactivateDiscount(array $params)
+  {
+    if (!RBACService::hasPermission('deactivate_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to deactivate discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $discountModel = new DiscountModel();
+    if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
+      $_SESSION['message'] = 'Discount not found';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/discounts');
+      return;
+    }
+
+    $discountModel->changeStatus($params['id'], 0);
+    $_SESSION['message'] = 'Discount deactivated successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/discounts');
   }

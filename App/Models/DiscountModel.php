@@ -6,10 +6,24 @@ use App\Core\Model;
 
 class DiscountModel extends Model
 {
-  public function getDiscounts(): array
+  public function discountExists(int $discountId): bool
+  {
+    $sql = '
+        SELECT COUNT(*) as count
+        FROM discount
+        WHERE id = ? AND branch_id = ?
+      ';
+    $stmt = self::$db->query($sql, [$discountId, $_SESSION['user']['branch_id']]);
+    $result = $stmt->fetch();
+    return (bool)$result['count'];
+  }
+
+  public function getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type): array
   {
     try {
       self::$db->beginTransaction();
+      $params = [$_SESSION['user']['branch_id']];
+
       $sql = '
         SELECT
           id,
@@ -23,9 +37,53 @@ class DiscountModel extends Model
           is_active
         FROM discount
         WHERE branch_id = ?
+          AND deleted_at IS NULL
       ';
 
-      $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id']]);
+      // Add filters
+      if (!empty($query)) {
+        $sql .= ' AND (name LIKE ? OR description LIKE ?)';
+        $params[] = "%$query%";
+        $params[] = "%$query%";
+      }
+
+      if ($status !== '') {
+        $sql .= ' AND is_active = ?';
+        $params[] = $status;
+      }
+
+      if (!empty($from)) {
+        $sql .= ' AND start_date >= ?';
+        $params[] = $from;
+      }
+
+      if (!empty($to)) {
+        $sql .= ' AND end_date <= ?';
+        $params[] = $to;
+      }
+
+      if (!empty($applicationMethod)) {
+        $sql .= ' AND application_method = ?';
+        $params[] = $applicationMethod;
+      }
+
+      if (!empty($type)) {
+        $sql .= ' AND discount_type = ?';
+        $params[] = $type;
+      }
+
+      // Add pagination
+      $sql .= ' ORDER BY id DESC';
+
+      if ($page !== null && $itemsPerPage !== null) {
+        $offset = ($page - 1) * $itemsPerPage;
+        $sql .= ' LIMIT ? OFFSET ?';
+        $params[] = $itemsPerPage;
+        $params[] = $offset;
+      }
+      error_log($sql);
+      error_log(print_r($params, true));
+      $stmt = self::$db->query($sql, $params);
       $discounts = $stmt->fetchAll();
 
       $sql = '
@@ -36,6 +94,7 @@ class DiscountModel extends Model
         FROM discount_condition
         WHERE discount_id = ?
       ';
+
       foreach ($discounts as &$discount) {
         $stmt = self::$db->query($sql, [$discount['id']]);
         $conditions = $stmt->fetchAll();
@@ -53,8 +112,9 @@ class DiscountModel extends Model
         FROM coupon
         WHERE discount_id = ?
       ';
+
       foreach ($discounts as &$discount) {
-        if (!$discount['application_method'] == 'coupon') {
+        if ($discount['application_method'] !== 'coupon') {
           continue;
         }
         $stmt = self::$db->query($sql, [$discount['id']]);
@@ -71,6 +131,55 @@ class DiscountModel extends Model
       self::$db->rollBack();
       throw $e;
     }
+  }
+
+  public function getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type): int
+  {
+    $params = [$_SESSION['user']['branch_id']];
+
+    $sql = '
+        SELECT COUNT(*) as count
+        FROM discount
+        WHERE branch_id = ?
+          AND deleted_at IS NULL
+      ';
+
+    // Add filters
+    if (!empty($query)) {
+      $sql .= ' AND (name LIKE ? OR description LIKE ?)';
+      $params[] = "%$query%";
+      $params[] = "%$query%";
+    }
+
+    if ($status !== '') {
+      $sql .= ' AND is_active = ?';
+      $params[] = $status;
+    }
+
+    if (!empty($from)) {
+      $sql .= ' AND start_date >= ?';
+      $params[] = $from;
+    }
+
+    if (!empty($to)) {
+      $sql .= ' AND end_date <= ?';
+      $params[] = $to;
+    }
+
+    if (!empty($applicationMethod)) {
+      $sql .= ' AND application_method = ?';
+      $params[] = $applicationMethod;
+    }
+
+    if (!empty($type)) {
+      $sql .= ' AND discount_type = ?';
+      $params[] = $type;
+    }
+
+    $stmt = self::$db->query($sql, $params);
+    $result = $stmt->fetch();
+
+    return (int)$result['count'];
   }
 
   public function createDiscount(array $data): void
@@ -130,5 +239,95 @@ class DiscountModel extends Model
       self::$db->rollBack();
       throw $e;
     }
+  }
+
+  public function updateDiscount(int $discountId, array $data): void
+  {
+    try {
+      self::$db->beginTransaction();
+
+      $sql = '
+        UPDATE discount
+        SET name = ?, description = ?, discount_type = ?, application_method = ?, value = ?, start_date = ?, end_date = ?
+        WHERE id = ? AND branch_id = ?
+      ';
+
+      self::$db->query($sql, [
+        $data['name'],
+        $data['description'],
+        $data['discount_type'],
+        $data['application_method'],
+        $data['value'],
+        $data['start_date'],
+        $data['end_date'],
+        $discountId,
+        $_SESSION['user']['branch_id']
+      ]);
+
+      // Update conditions
+      $sql = '
+        DELETE FROM discount_condition
+        WHERE discount_id = ?
+      ';
+      self::$db->query($sql, [$discountId]);
+
+      foreach ($data['conditions'] as $condition) {
+        $sql = '
+          INSERT INTO discount_condition (discount_id, condition_type, condition_value)
+          VALUES (?, ?, ?)
+        ';
+        self::$db->query($sql, [
+          $discountId,
+          $condition['condition_type'],
+          $condition['condition_value']
+        ]);
+      }
+
+      $sql = '
+          DELETE FROM coupon
+          WHERE discount_id = ?
+        ';
+      self::$db->query($sql, [$discountId]);
+
+      // Update coupons
+      if ($data['application_method'] == 'coupon') {
+        foreach ($data['coupons'] as $coupon) {
+          $sql = '
+            INSERT INTO coupon (discount_id, code, is_active)
+            VALUES (?, ?, ?)
+          ';
+          self::$db->query($sql, [
+            $discountId,
+            $coupon['code'],
+            $coupon['is_active']
+          ]);
+        }
+      }
+
+      self::$db->commit();
+    } catch (\Exception $e) {
+      self::$db->rollBack();
+      throw $e;
+    }
+  }
+
+  public function deleteDiscount(int $discountId): void
+  {
+    $sql = '
+        UPDATE discount
+        SET deleted_at = NOW()
+        WHERE id = ? AND branch_id = ?
+      ';
+    self::$db->query($sql, [$discountId, $_SESSION['user']['branch_id']]);
+  }
+
+  public function changeStatus(int $discountId, int $status): void
+  {
+    $sql = '
+        UPDATE discount
+        SET is_active = ?
+        WHERE id = ? AND branch_id = ?
+      ';
+    self::$db->query($sql, [$status, $discountId, $_SESSION['user']['branch_id']]);
   }
 }
