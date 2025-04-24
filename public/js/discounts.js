@@ -891,3 +891,44 @@ function copyToClipboard(text) {
       openPopupWithMessage("Failed to copy to clipboard", "error");
     });
 }
+
+function applyFilters() {
+  const status = document.getElementById("statusFilter").value;
+  const type = document.getElementById("typeFilter").value;
+  const application = document.getElementById("applicationFilter").value;
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
+  const searchQuery = document.getElementById("discountSearch").value;
+
+  const url = new URL(window.location.href);
+  status
+    ? url.searchParams.set("status", status)
+    : url.searchParams.delete("status");
+  type ? url.searchParams.set("type", type) : url.searchParams.delete("type");
+  application
+    ? url.searchParams.set("application", application)
+    : url.searchParams.delete("application");
+  fromDate
+    ? url.searchParams.set("from", fromDate)
+    : url.searchParams.delete("from");
+  toDate ? url.searchParams.set("to", toDate) : url.searchParams.delete("to");
+  searchQuery
+    ? url.searchParams.set("q", searchQuery)
+    : url.searchParams.delete("q");
+
+  window.location.href = url.href;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.querySelectorAll(".pagination").forEach((pagination) => {
+    const currentPage = parseInt(pagination.dataset.page);
+    const totalPages = parseInt(pagination.dataset.totalPages);
+
+    // Insert pagination
+    insertPagination(pagination, currentPage, totalPages, (page) => {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set("p", page);
+      window.location.href = currentUrl.href;
+    });
+  });
+});

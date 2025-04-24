@@ -4,22 +4,54 @@ namespace App\Controllers;
 
 use App\Core\{Controller, View};
 use App\Models\DiscountModel;
+use App\Services\RBACService;
 
 class DiscountsController extends Controller
 {
+  public function __construct()
+  {
+    parent::__construct();
+    RBACService::requireAuthentication();
+  }
+
   public function index()
   {
-    $discountModel = new \App\Models\DiscountModel();
-    $discounts = $discountModel->getDiscounts();
+    if (!RBACService::hasPermission('view_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to view discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+    $query = $_GET['q'] ?? '';
+    $status = $_GET['status'] ?? '';
+    $from = $_GET['from'] ?? '';
+    $to = $_GET['to'] ?? '';
+    $applicationMethod = $_GET['application'] ?? '';
+    $type = $_GET['type'] ?? '';
+    $discountModel = new DiscountModel();
+    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type);
+    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type);
+    $totalPages = ceil($totalRecords / $itemsPerPage);
 
     View::renderTemplate("Discounts", [
       "title" => "Discounts",
       "discounts" => $discounts,
+      "totalPages" => $totalPages,
     ]);
   }
 
   public function createDiscount()
   {
+    if (!RBACService::hasPermission('add_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to create discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $_POST['end_date'] = $_POST['end_date'] ?: null;
     foreach ($_POST['coupons'] as &$coupon) {
       $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
@@ -45,6 +77,13 @@ class DiscountsController extends Controller
 
   public function updateDiscount(array $params)
   {
+    if (!RBACService::hasPermission('edit_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to edit discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $discountModel = new DiscountModel();
     if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
       $_SESSION['message'] = 'Discount not found';
@@ -77,6 +116,13 @@ class DiscountsController extends Controller
 
   public function deleteDiscount(array $params)
   {
+    if (!RBACService::hasPermission('delete_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to delete discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $discountModel = new DiscountModel();
     if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
       $_SESSION['message'] = 'Discount not found';
@@ -93,6 +139,13 @@ class DiscountsController extends Controller
 
   public function activateDiscount(array $params)
   {
+    if (!RBACService::hasPermission('activate_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to activate discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $discountModel = new DiscountModel();
     if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
       $_SESSION['message'] = 'Discount not found';
@@ -109,6 +162,13 @@ class DiscountsController extends Controller
 
   public function deactivateDiscount(array $params)
   {
+    if (!RBACService::hasPermission('deactivate_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to deactivate discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+
     $discountModel = new DiscountModel();
     if (!$params['id'] || !$discountModel->discountExists($params['id'])) {
       $_SESSION['message'] = 'Discount not found';

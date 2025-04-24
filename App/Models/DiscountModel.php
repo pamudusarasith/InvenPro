@@ -18,10 +18,12 @@ class DiscountModel extends Model
     return (bool)$result['count'];
   }
 
-  public function getDiscounts(): array
+  public function getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type): array
   {
     try {
       self::$db->beginTransaction();
+      $params = [$_SESSION['user']['branch_id']];
+
       $sql = '
         SELECT
           id,
@@ -38,7 +40,50 @@ class DiscountModel extends Model
           AND deleted_at IS NULL
       ';
 
-      $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id']]);
+      // Add filters
+      if (!empty($query)) {
+        $sql .= ' AND (name LIKE ? OR description LIKE ?)';
+        $params[] = "%$query%";
+        $params[] = "%$query%";
+      }
+
+      if ($status !== '') {
+        $sql .= ' AND is_active = ?';
+        $params[] = $status;
+      }
+
+      if (!empty($from)) {
+        $sql .= ' AND start_date >= ?';
+        $params[] = $from;
+      }
+
+      if (!empty($to)) {
+        $sql .= ' AND end_date <= ?';
+        $params[] = $to;
+      }
+
+      if (!empty($applicationMethod)) {
+        $sql .= ' AND application_method = ?';
+        $params[] = $applicationMethod;
+      }
+
+      if (!empty($type)) {
+        $sql .= ' AND discount_type = ?';
+        $params[] = $type;
+      }
+
+      // Add pagination
+      $sql .= ' ORDER BY id DESC';
+
+      if ($page !== null && $itemsPerPage !== null) {
+        $offset = ($page - 1) * $itemsPerPage;
+        $sql .= ' LIMIT ? OFFSET ?';
+        $params[] = $itemsPerPage;
+        $params[] = $offset;
+      }
+      error_log($sql);
+      error_log(print_r($params, true));
+      $stmt = self::$db->query($sql, $params);
       $discounts = $stmt->fetchAll();
 
       $sql = '
@@ -49,6 +94,7 @@ class DiscountModel extends Model
         FROM discount_condition
         WHERE discount_id = ?
       ';
+
       foreach ($discounts as &$discount) {
         $stmt = self::$db->query($sql, [$discount['id']]);
         $conditions = $stmt->fetchAll();
@@ -66,8 +112,9 @@ class DiscountModel extends Model
         FROM coupon
         WHERE discount_id = ?
       ';
+
       foreach ($discounts as &$discount) {
-        if (!$discount['application_method'] == 'coupon') {
+        if ($discount['application_method'] !== 'coupon') {
           continue;
         }
         $stmt = self::$db->query($sql, [$discount['id']]);
@@ -84,6 +131,55 @@ class DiscountModel extends Model
       self::$db->rollBack();
       throw $e;
     }
+  }
+
+  public function getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type): int
+  {
+    $params = [$_SESSION['user']['branch_id']];
+
+    $sql = '
+        SELECT COUNT(*) as count
+        FROM discount
+        WHERE branch_id = ?
+          AND deleted_at IS NULL
+      ';
+
+    // Add filters
+    if (!empty($query)) {
+      $sql .= ' AND (name LIKE ? OR description LIKE ?)';
+      $params[] = "%$query%";
+      $params[] = "%$query%";
+    }
+
+    if ($status !== '') {
+      $sql .= ' AND is_active = ?';
+      $params[] = $status;
+    }
+
+    if (!empty($from)) {
+      $sql .= ' AND start_date >= ?';
+      $params[] = $from;
+    }
+
+    if (!empty($to)) {
+      $sql .= ' AND end_date <= ?';
+      $params[] = $to;
+    }
+
+    if (!empty($applicationMethod)) {
+      $sql .= ' AND application_method = ?';
+      $params[] = $applicationMethod;
+    }
+
+    if (!empty($type)) {
+      $sql .= ' AND discount_type = ?';
+      $params[] = $type;
+    }
+
+    $stmt = self::$db->query($sql, $params);
+    $result = $stmt->fetch();
+
+    return (int)$result['count'];
   }
 
   public function createDiscount(array $data): void
