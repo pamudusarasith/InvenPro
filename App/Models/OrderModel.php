@@ -62,6 +62,7 @@ class OrderModel extends Model
     $stmt = self::$db->query($sql, $params);
     return $stmt->fetchAll();
   }
+
   public function getOrdersCount($query, $status, $from, $to): int
   {
     $whereClauses = [];
@@ -395,5 +396,29 @@ class OrderModel extends Model
       // Log the exception or handle it as needed
       throw $e;
     }
+  }
+
+  public function getPendingAndOpenOrdersCount(): array
+  {
+    $params = ['pending', 'open'];
+    $branchCondition = '';
+
+    if ($_SESSION['user']['branch_id'] != 1) {
+      $branchCondition = ' AND branch_id = ?';
+      $params[] = $_SESSION['user']['branch_id'];
+    }
+
+    $sql = '
+      SELECT 
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS pending_count,
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS open_count
+      FROM purchase_order
+      WHERE deleted_at IS NULL' . $branchCondition;
+
+    $result = self::$db->query($sql, $params)->fetch();
+    return [
+      'pending' => (int) $result['pending_count'],
+      'open' => (int) $result['open_count']
+    ];
   }
 }

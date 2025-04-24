@@ -13,7 +13,7 @@ class CustomerModel extends Model
     self::$db->query($sql, $data);
   }
 
-  public function getCustomerByPhone(string $phone): array | bool
+  public function getCustomerByPhone(string $phone): array|bool
   {
     $sql = '
     SELECT
@@ -26,5 +26,12 @@ class CustomerModel extends Model
     ';
     $stmt = self::$db->query($sql, ['phone' => $phone]);
     return $stmt->fetch();
+  }
+
+  public function getActiveCustomersCount(): int
+  {
+    $sql = 'SELECT COUNT(*) FROM customer WHERE deleted_at IS NULL';
+    $stmt = self::$db->query($sql);
+    return (int) $stmt->fetchColumn();
   }
 }

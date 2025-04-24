@@ -158,13 +158,13 @@ class UserModel extends Model
 
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'CREATE',
-        changes: json_encode($data),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+        'user',
+        $id,
+        'CREATE',
+        json_encode($data),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($data['branch_id']) ? $data['branch_id'] : null
     );
 
     return $id;
@@ -178,13 +178,13 @@ class UserModel extends Model
     // Log the action
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'UPDATE_PASSWORD',
-        changes: json_encode(['id' => $id, 'password' => 'updated']),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+        'user',
+        $id,
+        'UPDATE_PASSWORD',
+        json_encode(['id' => $id, 'password' => 'updated']),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
     );
 
     $_SESSION['message'] = 'Password updated successfully';
@@ -217,13 +217,13 @@ class UserModel extends Model
     // Log the action
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'UPDATE',
-        changes: json_encode(['id' => $id, $data]),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
+        'user',
+        $id,
+        'UPDATE',
+        json_encode(['id' => $id, $data]),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($data['branch_id']) ? $data['branch_id'] : null
     );
 
     $_SESSION['message'] = 'User updated successfully';
@@ -246,13 +246,13 @@ class UserModel extends Model
       // Log the action
       $auditLogModel = new AuditLogModel();
       $auditLogModel->logAction(
-          tableName: 'user',
-          recordId: $id,
-          actionType: 'DELETE',
-          changes: json_encode($user),
-          metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-          changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-          branchId: isset($user['branch_id']) ? $user['branch_id'] : null
+          'user',
+          $id,
+          'DELETE',
+          json_encode($user),
+          json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+          isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+          isset($user['branch_id']) ? $user['branch_id'] : null
       );
 
       $_SESSION['message'] = 'User deleted successfully';
@@ -267,13 +267,13 @@ class UserModel extends Model
 
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'LOGIN',
-        changes: json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
-        metadata: json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+        'user',
+        $id,
+        'LOGIN',
+        json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
+        json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
     );
   }
 
