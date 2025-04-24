@@ -55,6 +55,7 @@ return [
     '/products/new' => 'App\Controllers\ProductsController::createProduct',
     '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
+    '/api/pos/discounts/get' => 'App\Controllers\DiscountsController::getDiscounts',
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
     '/roles/new' => 'App\Controllers\RoleController::addRole',

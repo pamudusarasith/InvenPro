@@ -3,7 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
+use App\Models\CustomerModel;
 use App\Models\DiscountModel;
+use App\Services\DiscountService;
 use App\Services\RBACService;
 
 class DiscountsController extends Controller
@@ -181,5 +183,35 @@ class DiscountsController extends Controller
     $_SESSION['message'] = 'Discount deactivated successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/discounts');
+  }
+
+  public function getDiscounts()
+  {
+    if (!RBACService::hasPermission('view_discounts')) {
+      $_SESSION['message'] = 'You do not have permission to view discounts';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/dashboard');
+      return;
+    }
+    $data = self::recvJSON();
+
+    if (isset($data['customer_id'])) {
+      $customerModel = new CustomerModel();
+      $points = $customerModel->getLoyaltyPoints($data['customer_id']);
+    }
+
+    $discountModel = new DiscountModel();
+    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), null, null);
+
+    $eligibleDiscounts = DiscountService::getEligibleDiscounts(
+      $data['items'],
+      $discounts,
+      isset($points) ? $points : null
+    );
+
+    self::sendJSON([
+      "success" => true,
+      "data" => $eligibleDiscounts,
+    ]);
   }
 }

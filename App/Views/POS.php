@@ -197,38 +197,31 @@ use App\Services\RBACService;
                     <label for="coupon">Coupon Code</label>
                     <div class="coupon-field">
                         <input type="text" id="coupon" name="coupon_code">
-                        <button type="button" class="btn btn-primary" onclick="applyCoupon()">
+                        <button type="button" class="btn btn-primary" onclick="pos.applyCoupon()">
                             Apply
                         </button>
                     </div>
                 </div>
             </div>
+            <div class="coupons-list">
+                <h3>Applied Coupons</h3>
+                <div class="coupons-items">
+                    <!-- Coupons will be dynamically added here -->
+                    <div class="no-coupons">
+                        <span class="icon">local_offer</span>
+                        <p>No coupons applied</p>
+                    </div>
+                </div>
+            </div>
             <div class="discounts-list">
                 <h3>Applied Discounts</h3>
-                <div class="no-discounts">
-                    <span class="icon">percent</span>
-                    <p>No discounts applied</p>
+                <div class="discounts-items">
+                    <!-- Discounts will be dynamically added here -->
+                    <div class="no-discounts">
+                        <span class="icon">percent</span>
+                        <p>No discounts applied</p>
+                    </div>
                 </div>
-                <!-- <div class="applied-discounts">
-                    <div class="discount-item">
-                        <div class="discount-info">
-                            <span class="discount-name">New Year Sale</span>
-                            <span class="discount-value">-10%</span>
-                        </div>
-                        <button class="icon-btn danger" title="Remove discount">
-                            <span class="icon">close</span>
-                        </button>
-                    </div>
-                    <div class="discount-item">
-                        <div class="discount-info">
-                            <span class="discount-name">Loyalty Points</span>
-                            <span class="discount-value">-Rs. 500.00</span>
-                        </div>
-                        <button class="icon-btn danger" title="Remove discount">
-                            <span class="icon">close</span>
-                        </button>
-                    </div>
-                </div> -->
             </div>
             <div class="checkout-summary">
                 <div class="summary-item">
@@ -257,6 +250,10 @@ use App\Services\RBACService;
     </div>
 </dialog>
 
+<dialog id="loaderDialog">
+    <div class="loader"></div>
+</dialog>
+
 <script>
     class POS {
         constructor() {
@@ -265,7 +262,8 @@ use App\Services\RBACService;
             this.cartSubtotal = 0;
             this.cartDiscount = 0;
             this.customer = null;
-            this.coupon = null;
+            this.coupons = [];
+            this.discounts = [];
         }
 
         init() {
@@ -316,11 +314,12 @@ use App\Services\RBACService;
         renderSearchResults(products) {
             document.querySelector(".products-grid").innerHTML = "";
             products.forEach((product) => {
-                product.prices.forEach((price) => {
+                Object.entries(product.prices).forEach(([price, available_quantity]) => {
                     const productCard = this.createProductCard({
                         key: `${product.id}/${price}`,
                         ...product,
                         price,
+                        available_quantity,
                     });
                     document.querySelector(".products-grid").appendChild(productCard);
                 });
@@ -348,6 +347,7 @@ use App\Services\RBACService;
 
                 this.renderSearchResults(data.data);
             } catch (error) {
+                this.hideLoader();
                 console.error(error);
             }
         }
@@ -363,7 +363,7 @@ use App\Services\RBACService;
                 <div class="cart-item-quantity">Qty: ${product.quantity.toFixed(
                 3
                 )}</div>
-                <div class="cart-item-subtotal">$${(
+                <div class="cart-item-subtotal">Rs. ${(
                 product.price * product.quantity
                 ).toFixed(2)}</div>
             `;
@@ -392,7 +392,12 @@ use App\Services\RBACService;
                 product.quantity = 1;
                 this.cart.set(product.key, product);
             }
-
+            if (this.cart.get(product.key).quantity > product.available_quantity) {
+                openPopupWithMessage(
+                    "Not enough stock available. Check again.",
+                    "warning"
+                );
+            }
             this.updateCart();
         }
 
@@ -445,6 +450,12 @@ use App\Services\RBACService;
                 e.preventDefault();
                 product.quantity = parseFloat(form.elements["quantity"].value);
                 this.cart.set(product.key, product);
+                if (this.cart.get(product.key).quantity > product.available_quantity) {
+                    openPopupWithMessage(
+                        "Not enough stock available. Check again.",
+                        "warning"
+                    );
+                }
                 this.updateCart();
                 this.closeCartItemEdit();
             };
@@ -461,12 +472,147 @@ use App\Services\RBACService;
             document.getElementById("cartItemEditDialog").close();
         }
 
-        openCheckoutDialog() {
-            if (this.cart.size === 0) {
-                alert("Cart is empty");
+        renderCoupons() {
+            const couponsList = document.querySelector(".coupons-items");
+            couponsList.innerHTML = "";
+            this.coupons.forEach((coupon) => {
+                const couponItem = document.createElement("div");
+                couponItem.classList.add("coupon-item");
+                couponItem.innerHTML = `
+                    <div class="coupon-info">
+                        <span class="coupon-name">${coupon.code}</span>
+                        <span class="coupon-value">${coupon.value}</span>
+                    </div>
+                    <button type="button" class="icon-btn danger" title="Remove coupon">
+                        <span class="icon">close</span>
+                    </button>
+                `;
+                couponItem.querySelector("button").onclick = () => (
+                    this.removeCoupon(coupon)
+                );
+                couponsList.appendChild(couponItem);
+            });
+        }
+
+        applyCoupon() {
+            const couponCode = document.getElementById("coupon").value;
+            if (!couponCode) {
+                openPopupWithMessage("Please enter a coupon code", "warning");
                 return;
             }
 
+            const couponDiscounts = this.discounts.filter(
+                (discount) =>
+                discount.application_method === "coupon" &&
+                discount.coupons.some((coupon) => coupon.code === couponCode)
+            );
+
+            if (couponDiscounts.length === 0) {
+                openPopupWithMessage("Invalid coupon code", "error");
+                return;
+            }
+
+            couponDiscounts.forEach((discount) => {
+                discount.coupons.forEach((coupon) => {
+                    if (coupon.code === couponCode) {
+                        this.coupons.push({
+                            ...coupon,
+                            value: discount.value
+                        });
+                        this.cartDiscount += discount.calculated_amount;
+                        this.renderCoupons();
+                    }
+                });
+            });
+        }
+
+        removeCoupon(coupon) {
+            this.cartDiscount -= coupon.value;
+            this.coupons = this.coupons.filter((c) => c.code !== coupon.code);
+            this.renderCoupons();
+        }
+
+        renderDiscounts() {
+            const discountsList = document.querySelector(".discounts-items");
+            discountsList.innerHTML = "";
+            const regularDiscounts = this.discounts.filter(
+                (discount) => discount.application_method === "regular"
+            );
+            if (regularDiscounts.length === 0) {
+                discountsList.innerHTML = `
+                    <div class="no-discounts">
+                        <span class="icon">percent</span>
+                        <p>No discounts applied</p>
+                    </div>
+                `;
+                return;
+            }
+
+            regularDiscounts.forEach((discount) => {
+                this.cartDiscount += discount.calculated_amount;
+
+                const discountItem = document.createElement("div");
+                discountItem.classList.add("discount-item");
+                discountItem.innerHTML = `
+                    <div class="discount-info">
+                        <span class="discount-name">${discount.name}</span>
+                        <span class="discount-value">${discount.discount_type == "fixed" ? "Rs. " : ""}${discount.value}${discount.discount_type == "percentage" ? "%" : ""}</span>
+                    </div>
+                `;
+                discountsList.appendChild(discountItem);
+            });
+        }
+
+        async getDiscounts() {
+            try {
+                const items = Array.from(this.cart.values()).map((product) => {
+                    return {
+                        product_id: product.id,
+                        price: product.price,
+                        quantity: product.quantity,
+                    };
+                });
+                const data = {
+                    customer_id: this.customer ? this.customer.id : null,
+                    items,
+                };
+
+                this.showLoader();
+                const response = await fetch("/api/pos/discounts/get", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                this.hideLoader();
+
+                if (result.success) {
+                    this.discounts = result.data;
+                    return true;
+                } else {
+                    console.error(result.message);
+                }
+            } catch (error) {
+                this.hideLoader();
+                console.error(error);
+            }
+            return false;
+        }
+
+        async openCheckoutDialog() {
+            if (this.cart.size === 0) {
+                openPopupWithMessage("Your cart is empty", "warning");
+                return;
+            }
+
+            const fetchedDiscounts = await this.getDiscounts();
+
+            this.cartDiscount = 0;
+            if (fetchedDiscounts) {
+                this.renderDiscounts();
+            }
             this.cartTotal = this.cartSubtotal - this.cartDiscount;
 
             document.querySelector(
@@ -485,6 +631,9 @@ use App\Services\RBACService;
             modal.querySelector(".form-actions button[type='button']").onclick = () =>
                 this.closeCheckoutDialog();
             modal.showModal();
+            if (!fetchedDiscounts) {
+                openPopupWithMessage("Failed to fetch discounts", "error");
+            }
         }
 
         closeCheckoutDialog() {
@@ -495,40 +644,46 @@ use App\Services\RBACService;
         async checkout(e) {
             e.preventDefault();
             const form = e.target;
-            const items = Array.from(
-                this.cart.values().map((product) => {
+            try {
+                const items = Array.from(this.cart.values()).map((product) => {
                     return {
                         product_id: product.id,
                         price: product.price,
                         quantity: product.quantity,
                     };
-                })
-            );
-            const data = {
-                customer_id: this.customer ? this.customer.id : null,
-                items,
-                payment_method: form.elements["payment_method"].value,
-                notes: form.elements["notes"].value,
-                discounts: [],
-            };
+                });
+                const data = {
+                    customer_id: this.customer ? this.customer.id : null,
+                    items,
+                    payment_method: form.elements["payment_method"].value,
+                    notes: form.elements["notes"].value,
+                    discounts: [],
+                };
 
-            const response = await fetch("/api/pos/checkout", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            });
+                this.showLoader();
+                const response = await fetch("/api/pos/checkout", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
 
-            const result = await response.json();
+                const result = await response.json();
+                this.hideLoader();
 
-            if (result.success) {
-                this.clearCart();
-                this.closeCheckoutDialog();
-                openPopupWithMessage(result.message, "success");
-            } else {
-                this.closeCheckoutDialog();
-                openPopupWithMessage(result.message, "error");
+                if (result.success) {
+                    this.clearCart();
+                    this.closeCheckoutDialog();
+                    openPopupWithMessage(result.message, "success");
+                } else {
+                    this.closeCheckoutDialog();
+                    openPopupWithMessage(result.message, "error");
+                }
+            } catch (error) {
+                this.hideLoader();
+                console.error(error);
+                openPopupWithMessage("An error occurred during checkout", "error");
             }
         }
 
@@ -594,22 +749,38 @@ use App\Services\RBACService;
             const form = e.target;
             const phone = form.elements["phone"].value;
 
-            const response = await fetch(`/api/pos/customer/search?q=${phone}`);
-            const result = await response.json();
+            try {
+                this.showLoader();
+                const response = await fetch(`/api/pos/customer/search?q=${phone}`);
+                const result = await response.json();
+                this.hideLoader();
 
-            if (result.success) {
-                this.customer = result.data;
-                this.updateCart();
-            } else {
-                openPopupWithMessage(result.message, "error");
+                if (result.success) {
+                    this.customer = result.data;
+                    this.updateCart();
+                } else {
+                    openPopupWithMessage(result.message, "error");
+                }
+
+                this.closeCustomerSearchDialog();
+            } catch (error) {
+                this.hideLoader();
+                console.error(error);
+                openPopupWithMessage("An error occurred while searching for the customer", "error");
             }
-
-            this.closeCustomerSearchDialog();
         }
 
         clearCustomer() {
             this.customer = null;
             this.updateCart();
+        }
+
+        showLoader() {
+            document.getElementById("loaderDialog").showModal();
+        }
+
+        hideLoader() {
+            document.getElementById("loaderDialog").close();
         }
     }
 

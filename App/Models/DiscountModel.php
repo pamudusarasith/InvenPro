@@ -53,12 +53,12 @@ class DiscountModel extends Model
       }
 
       if (!empty($from)) {
-        $sql .= ' AND start_date >= ?';
+        $sql .= ' AND start_date <= ?';
         $params[] = $from;
       }
 
       if (!empty($to)) {
-        $sql .= ' AND end_date <= ?';
+        $sql .= ' AND (end_date >= ? OR end_date IS NULL)';
         $params[] = $to;
       }
 

@@ -27,4 +27,18 @@ class CustomerModel extends Model
     $stmt = self::$db->query($sql, ['phone' => $phone]);
     return $stmt->fetch();
   }
+
+  public function getLoyaltyPoints(int $customerId): array | bool
+  {
+    $sql = '
+    SELECT
+      points
+    FROM customer
+    WHERE
+      id = ?
+      AND deleted_at IS NULL
+    ';
+    $stmt = self::$db->query($sql, [$customerId]);
+    return $stmt->fetch();
+  }
 }
