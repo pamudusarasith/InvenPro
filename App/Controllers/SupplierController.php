@@ -50,12 +50,14 @@ class SupplierController extends Controller
       View::redirect('/suppliers');
     }
     $product = $supplierModel->getSupplierProducts($params['id']);
+    $order = $supplierModel->getOrderDetails($params['id']);
 
     View::renderTemplate('SupplierDetails', [
       'title' => 'Supplier Details',
       'supplier' => $supplier,
       'branches' => $branches,
       'supplier_products' => $product,
+      'order' => $order,
     ]);
   }
 
@@ -142,14 +144,26 @@ class SupplierController extends Controller
     View::redirect('/suppliers/' . $params['id']);
   }
 
-  public function deleteProduct(array $params): void
+  public function deleteAssignedProduct(array $params): void
   {
-    $supplierModel = new SupplierModel();
-    $supplierModel->deleteAssignedProduct($params['id'], $_POST['product_id']);
+    error_log("POST data: " . print_r($_POST, true));
 
-    $_SESSION['message'] = 'Product deleted successfully';
-    $_SESSION['message_type'] = 'success';
-
-    View::redirect('/suppliers/' . $params['id']);
+      $productId = $_POST['product_id'] ?? null;
+      if (!$productId) {
+          $_SESSION['message'] = 'Invalid product';
+          $_SESSION['message_type'] = 'error';
+          View::redirect('/suppliers/' . $params['id']);
+          return;
+      }
+  
+      $supplierModel = new SupplierModel();
+      $supplierModel->deleteAssignedProduct($productId, $params['id']);
+;
+  
+      $_SESSION['message'] = 'Assigned product deleted successfully';
+      $_SESSION['message_type'] = 'success';
+      View::redirect('/suppliers/' . $params['id']);
   }
+  
+
 }

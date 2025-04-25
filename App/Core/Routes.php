@@ -50,6 +50,7 @@ return [
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
     '/suppliers/{id}/products'=>'App\Controllers\SupplierController::assignProduct',
+    '/suppliers/{id}/products/delete' => 'App\Controllers\SupplierController::deleteAssignedProduct',
     '/products/new' => 'App\Controllers\ProductsController::createProduct',
     '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',

@@ -194,10 +194,12 @@ $branches = $branches ?? [];
                           </span>
                         </td>
                         <td>
-                          <button class="icon-btn danger" title="Delete"
-                                  onclick="deleteAssignedProduct(<?= $product['sp_id']; ?>)">
+                        <button class="icon-btn danger" title="Delete"
+                                onclick="deleteAssignedProduct(<?= $product['product_id']; ?>)">
                             <span class="icon">delete</span>
-                          </button>
+                        </button>
+
+
                         </td>
                       </tr>
                     <?php endforeach; ?>
@@ -205,14 +207,51 @@ $branches = $branches ?? [];
                     <tr><td colspan="4">No assigned products found.</td></tr>
                   <?php endif; ?>
                 </tbody>
-            </table>
+               </table>
+            </div>
         </div>
     </div>
-</div>
 
 
       <div id="orders" class="tab-content">
         <!-- Similar structure for purchase orders -->
+        <div class="card">
+            <h3>Purchase Orders</h3>
+            <div class="content">
+            <table class="data-table clickable">
+                  <thead>
+                    <tr>
+                      <th>Reference</th>
+                      <th>Order Date</th>
+                      <th>Status</th>
+                      <th>Total Amount</th>
+                      <th>Items</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php if (empty($orders)): ?>
+                      <tr>
+                        <td colspan="7" style="text-align: center;">No purchase orders found</td>
+                      </tr>
+                    <?php else: ?>
+                      <?php foreach ($orders as $order): ?>
+                        <tr onclick="window.location.href='/orders/<?= $order['id'] ?>'">
+                          <td><?= htmlspecialchars($order['reference']) ?></td>
+                          <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
+                          <td>
+                            <span class="badge <?= getStatusBadgeClass($order['status']) ?>">
+                              <?= ucfirst($order['status']) ?>
+                            </span>
+                          </td>
+                          <td><?= $order['total_amount'] ? "Rs." . number_format($order['total_amount'], 2) : "N/A" ?></td>
+                          <td><?= $order['items'] ?></td>
+                        </tr>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
+                  </tbody>
+                </table>
+            </div>
+        </div>
       </div>
 
       <div id="returns" class="tab-content">
@@ -380,11 +419,25 @@ if ($messageType === 'success') {
     dialog.close();
   }
 
-  function deleteAssignedProduct(productID) {
-    if (!confirm('Are you sure want delete this assigned product?')) {
-      return;
-    }
-    window.location.href = `/suppliers/${supplierId}/products`;
+  
+
+    function deleteAssignedProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/suppliers/<?= $supplier_id ?>/products/delete`;
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'product_id';
+    input.value = productId;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    
+    window.location.href = '/suppliers/${supplierId}/products';
   }
 
   <?php if ($message): ?>
