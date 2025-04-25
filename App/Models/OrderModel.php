@@ -6,8 +6,37 @@ use App\Core\Model;
 
 class OrderModel extends Model
 {
-  public function getOrders(int $page, int $itemsPerPage): array
+  public function getOrders(int $page, int $itemsPerPage, $query, $status, $from, $to): array
   {
+    $whereClauses = [];
+    $params = [$_SESSION['user']['branch_id']];
+
+    if ($query) {
+      $whereClauses[] = '(po.reference LIKE ? OR s.supplier_name LIKE ?)';
+      $params[] = "%$query%";
+      $params[] = "%$query%";
+    }
+
+    if ($status) {
+      $whereClauses[] = 'po.status = ?';
+      $params[] = $status;
+    }
+
+    if ($from) {
+      $whereClauses[] = 'po.order_date >= ?';
+      $params[] = $from;
+    }
+
+    if ($to) {
+      $whereClauses[] = 'po.order_date <= ?';
+      $params[] = $to;
+    }
+
+    $whereClause = implode(' AND ', $whereClauses);
+    if ($whereClause) {
+      $whereClause = 'AND ' . $whereClause;
+    }
+
     $offset = ($page - 1) * $itemsPerPage;
     $sql = '
       SELECT
@@ -23,12 +52,58 @@ class OrderModel extends Model
       LEFT JOIN purchase_order_item poi ON po.id = poi.po_id
       WHERE po.deleted_at IS NULL
         AND po.branch_id = ?
+      ' . $whereClause . '
       GROUP BY po.id
       ORDER BY po.id DESC
       LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $itemsPerPage, $offset]);
+    array_push($params, $itemsPerPage, $offset);
+
+    $stmt = self::$db->query($sql, $params);
     return $stmt->fetchAll();
+  }
+
+  public function getOrdersCount($query, $status, $from, $to): int
+  {
+    $whereClauses = [];
+    $params = [$_SESSION['user']['branch_id']];
+
+    if ($query) {
+      $whereClauses[] = '(po.reference LIKE ? OR s.supplier_name LIKE ?)';
+      $params[] = "%$query%";
+      $params[] = "%$query%";
+    }
+
+    if ($status) {
+      $whereClauses[] = 'po.status = ?';
+      $params[] = $status;
+    }
+
+    if ($from) {
+      $whereClauses[] = 'po.order_date >= ?';
+      $params[] = $from;
+    }
+
+    if ($to) {
+      $whereClauses[] = 'po.order_date <= ?';
+      $params[] = $to;
+    }
+
+    $whereClause = implode(' AND ', $whereClauses);
+    if ($whereClause) {
+      $whereClause = 'AND ' . $whereClause;
+    }
+
+    $sql = '
+      SELECT COUNT(*) AS total
+      FROM purchase_order po
+      INNER JOIN supplier s ON po.supplier_id = s.id
+      WHERE po.deleted_at IS NULL
+      AND po.branch_id = ?
+      ' . $whereClause;
+
+    $stmt = self::$db->query($sql, $params);
+    return (int) $stmt->fetchColumn();
   }
 
   public function getOrderDetails(int $orderId): array
@@ -220,6 +295,16 @@ class OrderModel extends Model
     self::$db->query($sql, [$status, $orderId]);
   }
 
+  public function approveOrder(int $orderId)
+  {
+    $sql = '
+      UPDATE purchase_order
+      SET status = ?, order_date = NOW()
+      WHERE id = ?
+    ';
+    self::$db->query($sql, ['open', $orderId]);
+  }
+
   public function receiveOrderItems(int $orderId, array $data): void
   {
     try {
@@ -311,5 +396,29 @@ class OrderModel extends Model
       // Log the exception or handle it as needed
       throw $e;
     }
+  }
+
+  public function getPendingAndOpenOrdersCount(): array
+  {
+    $params = ['pending', 'open'];
+    $branchCondition = '';
+
+    if ($_SESSION['user']['branch_id'] != 1) {
+      $branchCondition = ' AND branch_id = ?';
+      $params[] = $_SESSION['user']['branch_id'];
+    }
+
+    $sql = '
+      SELECT 
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS pending_count,
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS open_count
+      FROM purchase_order
+      WHERE deleted_at IS NULL' . $branchCondition;
+
+    $result = self::$db->query($sql, $params)->fetch();
+    return [
+      'pending' => (int) $result['pending_count'],
+      'open' => (int) $result['open_count']
+    ];
   }
 }

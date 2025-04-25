@@ -79,6 +79,21 @@
   font-size: 1.125rem;
 }
 
+.date-filter {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.date-input {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--surface-white);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
 .card-actions {
   display: flex;
   justify-content: center;
@@ -425,36 +440,36 @@
   .discount-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .checkbox-grid {
     grid-template-columns: 1fr 1fr;
   }
-  
+
   .discount-header {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .coupon-field {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
-  
+
   .coupon-status {
     max-width: none;
     justify-content: flex-start;
   }
-  
+
   .detail-row {
     flex-direction: column;
     margin-bottom: 1rem;
   }
-  
+
   .detail-row .label {
     width: auto;
     margin-bottom: 0.25rem;
@@ -465,11 +480,11 @@
   .checkbox-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .card-actions {
     flex-wrap: wrap;
   }
-  
+
   .card-actions .btn {
     flex: 1 0 100%;
     margin-bottom: 0.5rem;

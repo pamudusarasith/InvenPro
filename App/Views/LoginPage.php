@@ -105,7 +105,7 @@
 
 <body>
 <?php
-  var_dump($_SESSION)
+  //var_dump($_SESSION)
   ?>
   <div class="login-container">
     <img src="/images/logo-light.png" alt="InvenPro Logo" class="logo">
