@@ -231,6 +231,14 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
             <small>Leave empty for no end date</small>
           </div>
 
+          <div class="form-field span-2">
+            <div class="toggle-switch">
+              <input type="checkbox" id="isCombinable" name="is_combinable">
+              <label for="isCombinable"></label>
+              <span class="toggle-label">Can be combined with other discounts</span>
+            </div>
+          </div>
+
           <!-- Coupons Section - Only visible when coupon-based is selected -->
           <div id="couponsSection" class="form-field span-2" style="display: none;">
             <div class="section-title">
@@ -314,6 +322,10 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
           <span class="label">End Date:</span>
           <span id="detail-end-date" class="value"></span>
         </div>
+        <div class="detail-row">
+          <span class="label">Combinable:</span>
+          <span id="detail-combinable" class="value"></span>
+        </div>
       </div>
 
       <div id="coupon-section" class="coupon-section">
@@ -390,18 +402,16 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
   <template id="min_quantity_template">
     <div class="form-grid">
       <div class="form-field span-2">
-        <label for="order-items">Product *</label>
-        <div id="order-items" class="search-bar">
+        <label>Product *</label>
+        <div class="search-bar">
           <span class="icon">search</span>
           <input type="text" placeholder="Search products..." oninput="searchProducts(event)">
           <div class="search-results"></div>
         </div>
-        <div class="selected-product">
-          <span class="selected-product-name">Product Name</span>
-          <button type="button" class="icon-btn danger" onclick="removeSelectedProduct(this)">
-            <span class="icon">delete</span>
-          </button>
-          <input type="hidden" name="conditions[INDEX][condition_value][product_id]" value="PRODUCT_ID">
+        <div class="selected-product" style="display: none;">
+          <span class="selected-product-name"></span>
+          <input type="hidden" name="conditions[INDEX][condition_value][product_id]">
+          <input type="hidden" name="conditions[INDEX][condition_value][product_name]">
         </div>
       </div>
       <div class="form-field span-2">
@@ -460,4 +470,5 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
 <script>
   const discounts = <?= json_encode($discounts) ?>;
 </script>
+<script src="/js/search.js"></script>
 <script src="/js/discounts.js"></script>

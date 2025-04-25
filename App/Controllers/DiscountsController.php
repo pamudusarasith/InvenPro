@@ -55,6 +55,7 @@ class DiscountsController extends Controller
     }
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
+    $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
     foreach ($_POST['coupons'] as &$coupon) {
       $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
     }
@@ -95,6 +96,7 @@ class DiscountsController extends Controller
     }
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
+    $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
     foreach ($_POST['coupons'] as &$coupon) {
       $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
     }
@@ -188,9 +190,10 @@ class DiscountsController extends Controller
   public function getDiscounts()
   {
     if (!RBACService::hasPermission('view_discounts')) {
-      $_SESSION['message'] = 'You do not have permission to view discounts';
-      $_SESSION['message_type'] = 'error';
-      View::redirect('/dashboard');
+      self::sendJSON([
+        "success" => false,
+        "message" => "You do not have permission to view discounts"
+      ]);
       return;
     }
     $data = self::recvJSON();
@@ -201,9 +204,9 @@ class DiscountsController extends Controller
     }
 
     $discountModel = new DiscountModel();
-    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), null, null);
+    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), "regular", null);
 
-    $eligibleDiscounts = DiscountService::getEligibleDiscounts(
+    $selectedDiscounts = DiscountService::calculateOptimalDiscounts(
       $data['items'],
       $discounts,
       isset($points) ? $points : null
@@ -211,7 +214,7 @@ class DiscountsController extends Controller
 
     self::sendJSON([
       "success" => true,
-      "data" => $eligibleDiscounts,
+      "data" => $selectedDiscounts,
     ]);
   }
 }

@@ -83,7 +83,7 @@ class ProductModel extends Model
     return $stmt->fetchAll();
   }
 
-  public function searchProduct(string $query, int $page, int $itemsPerPage): array
+  public function searchProducts(string $query, int $page, int $itemsPerPage): array
   {
     $offset = ($page - 1) * $itemsPerPage;
     $sql = '
@@ -93,22 +93,22 @@ class ProductModel extends Model
         u.unit_symbol
       FROM product p
       INNER JOIN unit u ON p.unit_id = u.id
-      WHERE p.deleted_at IS NULL AND (
-        p.product_name LIKE ? OR
-        p.product_code LIKE ?)
+      INNER JOIN branch_product bp ON p.id = bp.product_id
+      WHERE p.deleted_at IS NULL
+        AND bp.branch_id = ?
+        AND (
+          p.product_name LIKE ? OR
+          p.product_code LIKE ?)
       LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
-    $products = $stmt->fetchAll();
-
-    foreach ($products as $i => $product) {
-      $products[$i]['batches'] = $this->getBatchesByProductId($product['id']);
-      if (empty($products[$i]['batches'])) {
-        unset($products[$i]);
-      }
-    }
-
-    return array_values($products);
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      "%$query%",
+      $itemsPerPage,
+      $offset,
+    ]);
+    return $stmt->fetchAll();
   }
 
   public function assignProduct(string $query, int $page, int $itemsPerPage): array
@@ -139,9 +139,12 @@ class ProductModel extends Model
       SELECT
         p.id,
         p.product_code,
-        p.product_name
+        p.product_name,
+        u.unit_symbol,
+        u.is_int
       FROM product p
       INNER JOIN product_batch pb ON p.id = pb.product_id
+      INNER JOIN unit u ON p.unit_id = u.id
       WHERE p.deleted_at IS NULL
         AND pb.deleted_at IS NULL
         AND pb.is_active = 1

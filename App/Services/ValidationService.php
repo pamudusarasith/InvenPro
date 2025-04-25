@@ -363,6 +363,8 @@ class ValidationService
       ->rule('start_date', new Required('Start Date is required'))
       ->rule('start_date', new IsDateTime('Y-m-d', 'Invalid Start Date'))
       ->rule('end_date', new IsDateTime('Y-m-d', 'Invalid End Date'))
+      ->rule('is_combinable', new Required('Is Combinable is required'))
+      ->rule('is_combinable', new IsBoolean(false, 'Is Combinable must be a boolean'))
       ->rule('conditions', new Required('Conditions are required'))
       ->rule('conditions', new IsArray(0, null, 'Conditions must be an array'))
       ->rule('conditions.*.condition_type', new Required('Condition Type is required'))

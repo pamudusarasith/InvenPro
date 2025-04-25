@@ -224,6 +224,12 @@ function editDiscount(id) {
   setFormValue("discountValue", discount.value);
   setFormValue("applicationMethod", discount.application_method);
 
+  // Set is_combinable checkbox
+  const isCombinable = document.getElementById("isCombinable");
+  if (isCombinable) {
+    isCombinable.checked = discount.is_combinable == 1;
+  }
+
   // Handle dates
   setFormValue("startDate", formatDateForInput(new Date(discount.start_date)));
 
@@ -354,6 +360,8 @@ function viewDiscountDetails(id) {
 
   setElementText("detail-end-date", endDateText);
 
+  setElementText("detail-combinable", discount.is_combinable ? "Yes" : "No");
+
   // Handle coupons section
   const couponSection = document.getElementById("coupon-section");
   const couponList = document.getElementById("coupon-list");
@@ -415,7 +423,7 @@ function viewDiscountDetails(id) {
             break;
 
           case "min_quantity":
-            conditionText = `Minimum quantity: ${conditionValue.quantity} items`;
+            conditionText = `Minimum quantity: ${conditionValue.product_name} - ${conditionValue.min_quantity}`;
             break;
 
           case "loyalty_points":
@@ -664,17 +672,24 @@ function addCondition(existingCondition = null) {
             break;
 
           case "min_quantity":
-            if (conditionValue.product_id) {
-              setConditionValue(
-                conditionCard,
-                "product_id",
-                conditionValue.product_id
-              );
-            }
+            setConditionValue(
+              conditionCard,
+              "product_id",
+              conditionValue.product_id
+            );
+            setConditionValue(
+              conditionCard,
+              "product_name",
+              conditionValue.product_name
+            );
+            conditionCard.querySelector(".selected-product-name").textContent =
+              conditionValue.product_name;
+            conditionCard.querySelector(".selected-product").style.display =
+              "flex";
             setConditionValue(
               conditionCard,
               "min_quantity",
-              conditionValue.quantity
+              conditionValue.min_quantity
             );
             break;
 
@@ -776,6 +791,35 @@ function updateConditionFields(select) {
       );
     }
   });
+
+  if (conditionType === "min_quantity") {
+    new SearchHandler({
+      apiEndpoint: "/api/products/search",
+      inputElement: clone.querySelector(".search-bar input"),
+      resultsContainer: clone.querySelector(".search-bar .search-results"),
+      itemsPerPage: 5,
+      renderResultItem: (product) => {
+        const element = document.createElement("div");
+        element.classList.add("search-result");
+        element.textContent = product.product_name;
+        return element;
+      },
+      onSelect: (product, ctx) => {
+        ctx.element.querySelector(
+          ".selected-product-name"
+        ).textContent = `${product.product_name} (${product.unit_symbol})`;
+        ctx.element.querySelector("input[name*='product_id']").value =
+          product.id;
+        ctx.element.querySelector(
+          "input[name*='product_name']"
+        ).value = `${product.product_name} (${product.unit_symbol})`;
+        ctx.element.style.display = "flex";
+      },
+      selectionContext: {
+        element: clone.querySelector(".selected-product"),
+      },
+    });
+  }
 
   conditionBody.appendChild(clone);
 }
@@ -919,7 +963,7 @@ function applyFilters() {
   window.location.href = url.href;
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".pagination").forEach((pagination) => {
     const currentPage = parseInt(pagination.dataset.page);
     const totalPages = parseInt(pagination.dataset.totalPages);

@@ -16,7 +16,7 @@ use App\Services\RBACService;
                 <div class="card glass" style="padding: 1rem;">
                     <div class="search-bar">
                         <span class="icon">search</span>
-                        <input type="text" id="productSearch" placeholder="Search products by name or code...">
+                        <input type="text" id="productSearch" placeholder="Search products by name or code..." autocomplete="off">
                     </div>
                 </div>
 
@@ -72,6 +72,69 @@ use App\Services\RBACService;
     </div>
 </div>
 
+<template id="productCardTemplate">
+    <div class="product-card card glass">
+        <div class="product-info">
+            <div class="product-name"></div>
+            <div class="product-code"></div>
+            <div class="product-price"></div>
+            <div class="product-actions">
+                <button class="edit-btn">
+                    <span class="icon">edit</span>
+                </button>
+                <button class="add-btn">
+                    <span class="icon">add_shopping_cart</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+<template id="cartItemTemplate">
+    <div class="cart-item">
+        <div class="cart-item-info">
+            <div class="cart-item-name"></div>
+            <div class="cart-item-price"></div>
+        </div>
+        <div class="cart-item-quantity"></div>
+        <div class="cart-item-subtotal"></div>
+        <button class="icon-btn edit edit-btn">
+            <span class="icon">edit</span>
+        </button>
+        <button class="icon-btn danger delete-btn">
+            <span class="icon">delete</span>
+        </button>
+    </div>
+</template>
+<template id="couponItemTemplate">
+    <div class="coupon-item">
+        <div class="coupon-info">
+            <span class="coupon-name"></span>
+            <span class="coupon-value"></span>
+        </div>
+        <button type="button" class="icon-btn danger" title="Remove coupon">
+            <span class="icon">close</span>
+        </button>
+    </div>
+</template>
+<template id="noCouponsTemplate">
+    <div class="no-coupons">
+        <span class="icon">local_offer</span>
+        <p>No coupons applied</p>
+    </div>
+</template>
+<template id="discountItemTemplate">
+    <div class="discount-item">
+        <span class="discount-name"></span>
+        <span class="discount-value"></span>
+    </div>
+</template>
+<template id="noDiscountsTemplate">
+    <div class="no-discounts">
+        <span class="icon">percent</span>
+        <p>No discounts applied</p>
+    </div>
+</template>
+
 <dialog id="cartItemEditDialog" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -84,7 +147,7 @@ use App\Services\RBACService;
             <div class="form-grid">
                 <div class="form-field span-2">
                     <label for="quantity">Quantity</label>
-                    <input type="number" id="quantity" name="quantity" min="0" step="0.001" required>
+                    <input type="number" id="quantity" name="quantity" min="0" required>
                 </div>
             </div>
             <div class="form-actions">
@@ -196,31 +259,23 @@ use App\Services\RBACService;
                 <div class="form-field span-2">
                     <label for="coupon">Coupon Code</label>
                     <div class="coupon-field">
-                        <input type="text" id="coupon" name="coupon_code">
+                        <input type="text" id="coupon" placeholder="Enter coupon code" autocomplete="off">
                         <button type="button" class="btn btn-primary" onclick="pos.applyCoupon()">
                             Apply
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="coupons-list">
+            <!-- <div class="coupons-list">
                 <h3>Applied Coupons</h3>
-                <div class="coupons-items">
+                <div class="coupons-items"> -->
                     <!-- Coupons will be dynamically added here -->
-                    <div class="no-coupons">
-                        <span class="icon">local_offer</span>
-                        <p>No coupons applied</p>
-                    </div>
-                </div>
-            </div>
+                <!-- </div>
+            </div> -->
             <div class="discounts-list">
                 <h3>Applied Discounts</h3>
                 <div class="discounts-items">
                     <!-- Discounts will be dynamically added here -->
-                    <div class="no-discounts">
-                        <span class="icon">percent</span>
-                        <p>No discounts applied</p>
-                    </div>
                 </div>
             </div>
             <div class="checkout-summary">
