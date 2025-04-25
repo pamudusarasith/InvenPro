@@ -1,42 +1,174 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
-    <style>
-
-        /* Chart Container (Unchanged) */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: auto;
-            aspect-ratio: 2 / 1;
-        }
-
-        .chart-container canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .tooltip {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 12px;
-            pointer-events: none;
-            display: none;
-        }     
-    </style>
-</head>
-<body>
-
 <?php
-$timePeriod = $_GET['timePeriod'] ?? 'today';
-?>
 
+use App\Services\RBACService;
+
+// Simulate data coming from controller
+$reportTypes = [
+    'sales' => 'Sales Report',
+    'inventory' => 'Inventory Report',
+    'suppliers' => 'Supplier Performance',
+    'orders' => 'Purchase Orders',
+    'low_stock' => 'Low Stock Analysis',
+    'customers' => 'Customer Analysis',
+    'product_category' => 'Product Category Analysis',
+    'inventory_value' => 'Inventory Valuation',
+    'batch_expiry' => 'Batch Expiry Report'
+];
+
+$timePeriods = [
+    'today' => 'Today',
+    'yesterday' => 'Yesterday',
+    'this_week' => 'This Week',
+    'last_week' => 'Last Week',
+    'this_month' => 'This Month',
+    'last_month' => 'Last Month',
+    'this_year' => 'This Year',
+    'last_year' => 'Last Year',
+    'custom' => 'Custom Range'
+];
+
+// Selected filters (simulated data)
+$selectedReportType = $_GET['report_type'] ?? 'sales';
+$selectedTimePeriod = $_GET['time_period'] ?? 'this_month';
+$startDate = $_GET['start_date'] ?? date('Y-m-d', strtotime('-30 days'));
+$endDate = $_GET['end_date'] ?? date('Y-m-d');
+
+// KPI Metrics (simulated data)
+$kpiMetrics = [
+    [
+        'label' => 'Total Sales',
+        'value' => 'LKR 427,350.00',
+        'trend' => '+12.5%',
+        'trend_type' => 'positive',
+        'icon' => 'payments',
+        'type' => 'primary'
+    ],
+    [
+        'label' => 'Total Orders',
+        'value' => '142',
+        'trend' => '+8.3%',
+        'trend_type' => 'positive',
+        'icon' => 'shopping_cart',
+        'type' => 'success'
+    ],
+    [
+        'label' => 'Average Order Value',
+        'value' => 'LKR 3,009.51',
+        'trend' => '+4.2%',
+        'trend_type' => 'positive',
+        'icon' => 'inventory',
+        'type' => 'accent'
+    ],
+    [
+        'label' => 'Profit Margin',
+        'value' => '24.6%',
+        'trend' => '-1.8%',
+        'trend_type' => 'negative',
+        'icon' => 'trending_up',
+        'type' => 'warning'
+    ]
+];
+
+// Top selling products (simulated data)
+$topSellingProducts = [
+    ['product_name' => 'Organic Ceylon Tea 250g', 'quantity' => 152, 'revenue' => 'LKR 45,600.00'],
+    ['product_name' => 'Fresh Milk 1L', 'quantity' => 135, 'revenue' => 'LKR 33,750.00'],
+    ['product_name' => 'Whole Wheat Bread 700g', 'quantity' => 124, 'revenue' => 'LKR 24,800.00'],
+    ['product_name' => 'Free-Range Eggs (12pk)', 'quantity' => 103, 'revenue' => 'LKR 20,600.00'],
+    ['product_name' => 'Basmati Rice 5kg', 'quantity' => 89, 'revenue' => 'LKR 44,500.00']
+];
+
+// Daily sales data (simulated data)
+$dailySalesData = [
+    ['date' => 'Apr 01', 'sales' => 12500],
+    ['date' => 'Apr 05', 'sales' => 17800],
+    ['date' => 'Apr 10', 'sales' => 14300],
+    ['date' => 'Apr 15', 'sales' => 21000],
+    ['date' => 'Apr 20', 'sales' => 15600],
+    ['date' => 'Apr 25', 'sales' => 19200],
+];
+
+// Stock status (simulated data)
+$stockStatus = [
+    'in_stock' => 268,
+    'low_stock' => 43,
+    'out_of_stock' => 17,
+    'total_value' => 'LKR 2,432,750.00'
+];
+
+// Recent purchase orders (simulated data)
+$recentPurchaseOrders = [
+    ['reference' => 'PO-20250420-12345', 'supplier' => 'Ceylon Tea Suppliers', 'date' => '2025-04-20', 'status' => 'completed', 'total' => 'LKR 125,000.00'],
+    ['reference' => 'PO-20250418-12344', 'supplier' => 'Fresh Farm Dairies', 'date' => '2025-04-18', 'status' => 'open', 'total' => 'LKR 87,500.00'],
+    ['reference' => 'PO-20250415-12343', 'supplier' => 'Organic Grains Ltd', 'date' => '2025-04-15', 'status' => 'completed', 'total' => 'LKR 103,750.00'],
+    ['reference' => 'PO-20250410-12342', 'supplier' => 'Island Rice Mills', 'date' => '2025-04-10', 'status' => 'completed', 'total' => 'LKR 145,000.00'],
+    ['reference' => 'PO-20250405-12341', 'supplier' => 'Global Spice Traders', 'date' => '2025-04-05', 'status' => 'canceled', 'total' => 'LKR 76,250.00']
+];
+
+// Additional data for new reports
+$categoryData = [
+    ['name' => 'Beverages', 'count' => 42],
+    ['name' => 'Dairy', 'count' => 38],
+    ['name' => 'Bakery', 'count' => 24],
+    ['name' => 'Grains', 'count' => 19],
+    ['name' => 'Spices', 'count' => 31]
+];
+
+$supplierPerformance = [
+    ['name' => 'Ceylon Tea Suppliers', 'on_time' => 92, 'quality' => 88],
+    ['name' => 'Fresh Farm Dairies', 'on_time' => 85, 'quality' => 95],
+    ['name' => 'Organic Grains Ltd', 'on_time' => 78, 'quality' => 92],
+    ['name' => 'Island Rice Mills', 'on_time' => 90, 'quality' => 85],
+    ['name' => 'Global Spice Traders', 'on_time' => 72, 'quality' => 90]
+];
+
+$categoryRevenueData = [
+    ['name' => 'Beverages', 'revenue' => 145000],
+    ['name' => 'Dairy', 'revenue' => 98000],
+    ['name' => 'Bakery', 'revenue' => 76500],
+    ['name' => 'Grains', 'revenue' => 68000],
+    ['name' => 'Spices', 'revenue' => 39850]
+];
+
+$expiringBatches = [
+    ['product_name' => 'Fresh Milk 1L', 'batch_code' => 'FM2504001', 'expiry_date' => '2025-05-15', 'quantity' => 45, 'days_left' => 20],
+    ['product_name' => 'Yogurt 500g', 'batch_code' => 'YG2504002', 'expiry_date' => '2025-05-10', 'quantity' => 36, 'days_left' => 15],
+    ['product_name' => 'Cottage Cheese 250g', 'batch_code' => 'CC2504003', 'expiry_date' => '2025-05-07', 'quantity' => 24, 'days_left' => 12],
+    ['product_name' => 'Whole Wheat Bread 700g', 'batch_code' => 'WWB2504001', 'expiry_date' => '2025-05-03', 'quantity' => 18, 'days_left' => 8],
+    ['product_name' => 'Organic Butter 200g', 'batch_code' => 'OB2504001', 'expiry_date' => '2025-05-08', 'quantity' => 12, 'days_left' => 13]
+];
+
+$customerAnalytics = [
+    'loyal_customers' => 87,
+    'new_customers' => 34,
+    'avg_purchase_frequency' => 2.4,
+    'avg_order_value' => 'LKR 3,010',
+    'top_customers' => [
+        ['name' => 'Hotel Seaside', 'total_purchases' => 'LKR 52,350', 'total_orders' => 12],
+        ['name' => 'Green Leaf Restaurant', 'total_purchases' => 'LKR 48,750', 'total_orders' => 15],
+        ['name' => 'City Supermarket', 'total_purchases' => 'LKR 43,200', 'total_orders' => 8],
+        ['name' => 'Royal Bakery', 'total_purchases' => 'LKR 36,500', 'total_orders' => 10],
+        ['name' => 'Wellness Cafe', 'total_purchases' => 'LKR 29,800', 'total_orders' => 9]
+    ]
+];
+
+$lowStockItems = [
+    ['product_name' => 'Basmati Rice 5kg', 'current_stock' => 8, 'reorder_level' => 15, 'days_to_out' => 6],
+    ['product_name' => 'Ceylon Black Tea 250g', 'current_stock' => 12, 'reorder_level' => 20, 'days_to_out' => 5],
+    ['product_name' => 'Coconut Oil 1L', 'current_stock' => 6, 'reorder_level' => 12, 'days_to_out' => 4],
+    ['product_name' => 'Brown Sugar 1kg', 'current_stock' => 10, 'reorder_level' => 18, 'days_to_out' => 7],
+    ['product_name' => 'Curry Powder 200g', 'current_stock' => 5, 'reorder_level' => 15, 'days_to_out' => 3]
+];
+
+// Monthly sales by day (simulated data for line chart)
+$monthlySalesData = [];
+for ($i = 1; $i <= 30; $i++) {
+    $date = sprintf('Apr %02d', $i);
+    $sales = rand(8000, 22000);
+    $monthlySalesData[] = ['date' => $date, 'sales' => $sales];
+}
+
+?>
 
 <div class="body">
     <?php App\Core\View::render("Navbar") ?>
@@ -44,481 +176,882 @@ $timePeriod = $_GET['timePeriod'] ?? 'today';
 
     <div class="main">
         <!-- Header Section -->
-        <div class="page-header">
+        <div class="card glass page-header">
             <div class="header-content">
-                <h2>Reports</h2>
-                <p class="subtitle">System reports and analysis</p>
-            </div>
-            <div class="filters">
-                <select id="filterRole" name="timePeriod" class="form-select" onchange="filterByTimePeriod()">
-                    <option value="all" <?= $timePeriod === 'all' ? 'selected' : '' ?>>All Time</option>
-                    <option value="today" <?= $timePeriod === 'today' ? 'selected' : '' ?>>Today</option>
-                    <option value="week" <?= $timePeriod === 'week' ? 'selected' : '' ?>>Last Week</option>
-                    <option value="month" <?= $timePeriod === 'month' ? 'selected' : '' ?>>Last Month</option>
-                    <option value="year" <?= $timePeriod === 'year' ? 'selected' : '' ?>>Last Year</option>
-                </select>
-                <button type="button" class="btn btn-primary" onclick="refreshData()">Refresh Data</button>
+                <h1>Reports & Analytics</h1>
+                <p class="subtitle">View detailed reports and analytics for your business</p>
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- Sales Overview Card -->
-            <div class="dashboard-card sales">
-                <div class="card-header">
-                    <span class="icon">trending_up</span>
-                    <h3>Today's Sales</h3>
-                </div>
-                <div class="card-content">
-                    <h2><?= htmlspecialchars($reportData['sales']['value']) ?></h2>
-                    <p class="trend <?= htmlspecialchars($reportData['sales']['trendType']) ?>">
-                        <?= htmlspecialchars($reportData['sales']['trend']) ?> from yesterday
-                    </p>
-                </div>
-            </div>
+        <div class="reports-container">
+            <!-- Filters Section -->
+            <div class="card glass">
+                <div class="content">
+                    <div class="report-filters">
+                        <div class="form-field">
+                            <label for="report-type">Report Type</label>
+                            <select id="report-type" name="report_type">
+                                <?php foreach ($reportTypes as $value => $label): ?>
+                                    <option value="<?= $value ?>" <?= $selectedReportType === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-            <!-- Revenue Card -->
-            <div class="dashboard-card revenue">
-                <div class="card-header">
-                    <span class="icon">payments</span>
-                    <h3>Monthly Revenue</h3>
-                </div>
-                <div class="card-content">
-                    <h2><?= htmlspecialchars($reportData['monthlyRevenue']['value']) ?></h2>
-                    <p>This month's earnings</p>
-                </div>
-            </div>
+                        <div class="filter-divider"></div>
 
-            <!-- Low Stock Card -->
-            <div class="dashboard-card low-stock warning">
-                <div class="card-header">
-                    <span class="icon">inventory</span>
-                    <h3>Low Stock Items</h3>
-                </div>
-                <div class="card-content">
-                    <h2><?= htmlspecialchars($reportData['lowStock']['value']) ?></h2>
-                    <p>Items need reordering</p>
-                </div>
-            </div>
+                        <div class="form-field">
+                            <label for="time-period">Time Period</label>
+                            <select id="time-period" name="time_period" onchange="toggleDateRange(this.value)">
+                                <?php foreach ($timePeriods as $value => $label): ?>
+                                    <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-            <!-- Pending Orders Card -->
-            <div class="dashboard-card approved warning">
-                <div class="card-header">
-                    <span class="icon">shopping_cart</span>
-                    <h3>Pending Orders</h3>
-                </div>
-                <div class="card-content">
-                    <h2><?= htmlspecialchars($reportData['pendingOrders']['value']) ?></h2>
-                    <p>Purchase orders to be approved</p>
-                </div>
-            </div>
+                        <div class="filter-divider"></div>
 
-            <!-- Total Products Card -->
-            <div class="dashboard-card products">
-                <div class="card-header">
-                    <span class="icon">category</span>
-                    <h3>Total Products</h3>
-                </div>
-                <div class="card-content">
-                    <h2><?= htmlspecialchars($reportData['totalProducts']['value']) ?></h2>
-                    <p>Active products</p>
-                </div>
-            </div>
-        </div>
+                        <div id="date-range-container" class="date-range" style="<?= $selectedTimePeriod === 'custom' ? '' : 'display: none;' ?>">
+                            <div class="form-field">
+                                <label for="start-date">Start Date</label>
+                                <input type="date" id="start-date" name="start_date" value="<?= $startDate ?>">
+                            </div>
+                            <span>to</span>
+                            <div class="form-field">
+                                <label for="end-date">End Date</label>
+                                <input type="date" id="end-date" name="end_date" value="<?= $endDate ?>">
+                            </div>
+                        </div>
 
-        <div class="dashboard-grid">
-            <div class="dashboard-card products" style="max-width: 70%;">
-                <div class="card-header">
-                    <span class="icon">trending_up</span>
-                    <h3>Sales Trend</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="salesTrendChart"></canvas>
-                    <div id="salesTooltip" class="tooltip"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="dashboard">
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <span class="icon">trending_up</span>
-                    <h3>Low stock</h3>
-                </div>
-        <div class="table-container">
-            <table class="data-table clickable" id="users-table">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Branch</th>
-                    <th>Status</th>
-                    <th>Last Login</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                if (empty($users)) {
-                    echo '<tr><td colspan="7" style="text-align: center;">No users found</td></tr>';
-                } else {
-                    foreach ($users as $user):
-                ?>
-                    <tr onclick="location.href = '/users/<?= $user['id']; ?>'">
-                        <td><?= htmlspecialchars($user['display_name']) ?></td>
-                        <td><?= htmlspecialchars($user['email']) ?></td>
-                        <td><?= ucfirst($user['role_name']) ?></td>
-                        <td><?= htmlspecialchars($user['branch_name']) ?></td>
-                        <td>
-                        <span class="badge <?= $user['is_locked'] ? 'danger' : 'success' ?>">
-                            <?= htmlspecialchars($user['status']) ?>
-                        </span>
-                        </td>
-                        <td><?= $user['last_login'] ? date('M d, Y H:i', strtotime($user['last_login'])) : "N/A" ?></td>
-                    </tr>
-                <?php endforeach;
-                } ?>
-                </tbody>
-            </table>
-
-            <div class="pagination-controls">
-                <div class="items-per-page">
-                <span>Show:</span>
-                <select class="items-select" onchange="changeItemsPerPage(this.value)">
-                    <option value="5" <?= $itemsPerPage == 5 ? "selected" : "" ?>>5</option>
-                    <option value="10" <?= $itemsPerPage == 10 ? "selected" : "" ?>>10</option>
-                    <option value="20" <?= $itemsPerPage == 20 ? "selected" : "" ?>>20</option>
-                    <option value="50" <?= $itemsPerPage == 50 ? "selected" : "" ?>>50</option>
-                    <option value="100" <?= $itemsPerPage == 100 ? "selected" : "" ?>>100</option>
-                </select>
-                <span>entries</span>
-                </div>
-                <?php if ($totalPages > 1): ?>
-                <div class="pagination">
-                    <?php if ($page > 1): ?>
-                    <button class="page-btn" onclick="changePage(<?= min($totalPages, $page - 1) ?>)">
-                        <span class="icon">chevron_left</span>
-                    </button>
-                    <?php endif; ?>
-
-                    <div class="page-numbers">
-                    <?php
-                    $maxButtons = 3;
-                    $halfMax = floor($maxButtons / 2);
-                    $start = max(1, min($page - $halfMax, $totalPages - $maxButtons + 1));
-                    $end = min($totalPages, $start + $maxButtons - 1);
-
-                    if ($start > 1) {
-                        echo '<span class="page-number">1</span>';
-                        if ($start > 2) {
-                        echo '<span class="page-dots">...</span>';
-                        }
-                    }
-
-                    for ($i = $start; $i <= $end; $i++) {
-                        echo '<span class="page-number ' . ($page == $i ? 'active' : '') . '"
-                            onclick="changePage(' . $i . ')">' . $i . '</span>';
-                    }
-
-                    if ($end < $totalPages) {
-                        if ($end < $totalPages - 1) {
-                        echo '<span class="page-dots">...</span>';
-                        }
-                        echo '<span class="page-number">' . $totalPages . '</span>';
-                    }
-                    ?>
+                        <button type="button" class="btn btn-primary" onclick="generateReport()">
+                            <span class="icon">analytics</span>
+                            Generate Report
+                        </button>
                     </div>
-
-
-                    <?php if ($page < $totalPages): ?>
-                    <button class="page-btn" onclick="changePage(<?= $page + 1 ?>)">
-                        <span class="icon">chevron_right</span>
-                    </button>
-                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
             </div>
-        </div>
+
+            <!-- KPI Metrics -->
+            <div class="kpi-grid">
+                <?php foreach ($kpiMetrics as $metric): ?>
+                    <div class="kpi-card <?= $metric['type'] ?>">
+                        <div class="kpi-header">
+                            <span class="icon"><?= $metric['icon'] ?></span>
+                            <h4 class="kpi-label"><?= $metric['label'] ?></h4>
+                        </div>
+                        <div class="kpi-value"><?= $metric['value'] ?></div>
+                        <div class="kpi-trend <?= $metric['trend_type'] ?>">
+                            <span class="icon"><?= $metric['trend_type'] === 'positive' ? 'trending_up' : 'trending_down' ?></span>
+                            <span><?= $metric['trend'] ?> from last period</span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Report Sections -->
+            <div class="report-sections">
+                <!-- Sales Overview -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Sales Overview</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('sales', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('sales', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                                <button class="dropdown-item" onclick="printReport('sales')">
+                                    <span class="icon">print</span>
+                                    Print Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-summary">
+                            <div class="summary-item">
+                                <div class="summary-value">142</div>
+                                <div class="summary-label">Total Orders</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">LKR 427,350</div>
+                                <div class="summary-label">Total Revenue</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">LKR 3,010</div>
+                                <div class="summary-label">Avg. Order Value</div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="salesTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Selling Products -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Top Selling Products</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('products', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('products', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                                <button class="dropdown-item" onclick="printReport('products')">
+                                    <span class="icon">print</span>
+                                    Print Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Sold</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($topSellingProducts as $product): ?>
+                                        <tr>
+                                            <td><?= $product['product_name'] ?></td>
+                                            <td><?= $product['quantity'] ?></td>
+                                            <td><?= $product['revenue'] ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-secondary" onclick="viewAllProducts()">
+                                <span class="icon">visibility</span>
+                                View All Products
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Status -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Inventory Status</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('inventory', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('inventory', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                                <button class="dropdown-item" onclick="printReport('inventory')">
+                                    <span class="icon">print</span>
+                                    Print Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-summary">
+                            <div class="summary-item">
+                                <div class="summary-value"><?= $stockStatus['in_stock'] ?></div>
+                                <div class="summary-label">In Stock</div>
+                                <div class="summary-trend positive">
+                                    <span class="icon">check_circle</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value"><?= $stockStatus['low_stock'] ?></div>
+                                <div class="summary-label">Low Stock</div>
+                                <div class="summary-trend">
+                                    <span class="icon text-warning">warning</span>
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value"><?= $stockStatus['out_of_stock'] ?></div>
+                                <div class="summary-label">Out of Stock</div>
+                                <div class="summary-trend negative">
+                                    <span class="icon">error</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="inventoryChart"></canvas>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-secondary" onclick="viewInventory()">
+                                <span class="icon">visibility</span>
+                                View Inventory
+                            </button>
+                            <div class="export-options">
+                                <button class="btn btn-secondary" onclick="exportInventory('excel')">
+                                    <span class="icon">download</span>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Purchase Orders -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Recent Purchase Orders</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('orders', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('orders', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                                <button class="dropdown-item" onclick="printReport('orders')">
+                                    <span class="icon">print</span>
+                                    Print Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Reference</th>
+                                        <th>Supplier</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($recentPurchaseOrders as $order): ?>
+                                        <tr>
+                                            <td><?= $order['reference'] ?></td>
+                                            <td><?= $order['supplier'] ?></td>
+                                            <td><?= date('M d, Y', strtotime($order['date'])) ?></td>
+                                            <td>
+                                                <span class="badge <?= $order['status'] === 'completed' ? 'success' : ($order['status'] === 'open' ? 'accent' : 'danger') ?>">
+                                                    <?= ucfirst($order['status']) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= $order['total'] ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-secondary" onclick="viewAllOrders()">
+                                <span class="icon">visibility</span>
+                                View All Orders
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Analysis -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Product Category Analysis</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('category', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('category', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                        <div class="report-summary mt-md">
+                            <div class="summary-item">
+                                <div class="summary-value">5</div>
+                                <div class="summary-label">Categories</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">154</div>
+                                <div class="summary-label">Total Products</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">30.8</div>
+                                <div class="summary-label">Avg Products/Category</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales by Category -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Revenue by Category</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('category_sales', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('category_sales', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="chart-container">
+                            <canvas id="salesByCategoryChart"></canvas>
+                        </div>
+                        <div class="report-summary mt-md">
+                            <div class="summary-item">
+                                <div class="summary-value">LKR 427,350</div>
+                                <div class="summary-label">Total Revenue</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">LKR 85,470</div>
+                                <div class="summary-label">Avg Revenue/Category</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supplier Performance -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Supplier Performance Metrics</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('supplier_performance', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('supplier_performance', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="chart-container">
+                            <canvas id="supplierChart"></canvas>
+                        </div>
+                        <div class="report-summary mt-md">
+                            <div class="summary-item">
+                                <div class="summary-value">83.4%</div>
+                                <div class="summary-label">Avg On-Time Delivery</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value">90%</div>
+                                <div class="summary-label">Avg Quality Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Expiry Report -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Upcoming Batch Expiry</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('batch_expiry', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('batch_expiry', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Batch Code</th>
+                                        <th>Expiry Date</th>
+                                        <th>Quantity</th>
+                                        <th>Days Left</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($expiringBatches as $batch): ?>
+                                        <tr>
+                                            <td><?= $batch['product_name'] ?></td>
+                                            <td><?= $batch['batch_code'] ?></td>
+                                            <td><?= date('M d, Y', strtotime($batch['expiry_date'])) ?></td>
+                                            <td><?= $batch['quantity'] ?></td>
+                                            <td>
+                                                <span class="badge <?= $batch['days_left'] <= 10 ? 'danger' : ($batch['days_left'] <= 15 ? 'warning' : 'success') ?>">
+                                                    <?= $batch['days_left'] ?> days
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-secondary" onclick="markForDiscount()">
+                                <span class="icon">sell</span>
+                                Mark for Discount
+                            </button>
+                            <div class="export-options">
+                                <button class="btn btn-secondary" onclick="viewAllExpiryAlerts()">
+                                    <span class="icon">notification_important</span>
+                                    View All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Low Stock Products -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Low Stock Products</h3>
+                        <div class="dropdown">
+                            <button class="icon-btn dropdown-trigger">
+                                <span class="icon">more_vert</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item" onclick="exportReport('low_stock', 'pdf')">
+                                    <span class="icon">picture_as_pdf</span>
+                                    Export as PDF
+                                </button>
+                                <button class="dropdown-item" onclick="exportReport('low_stock', 'excel')">
+                                    <span class="icon">table_view</span>
+                                    Export as Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Current Stock</th>
+                                        <th>Reorder Level</th>
+                                        <th>Days to Out</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($lowStockItems as $item): ?>
+                                        <tr>
+                                            <td><?= $item['product_name'] ?></td>
+                                            <td><?= $item['current_stock'] ?></td>
+                                            <td><?= $item['reorder_level'] ?></td>
+                                            <td>
+                                                <span class="badge <?= $item['days_to_out'] <= 3 ? 'danger' : ($item['days_to_out'] <= 7 ? 'warning' : 'success') ?>">
+                                                    <?= $item['days_to_out'] ?> days
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm" onclick="createPurchaseOrder('<?= $item['product_name'] ?>')">
+                                                    Reorder
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="report-actions">
+                            <button class="btn btn-secondary" onclick="reorderAllLowStock()">
+                                <span class="icon">autorenew</span>
+                                Reorder All
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <script>
-        // Sales Trend Chart
-        const salesCanvas = document.getElementById('salesTrendChart');
-        const salesCtx = salesCanvas.getContext('2d');
-        const salesTooltip = document.getElementById('salesTooltip');
-        const salesData = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{
-                label: 'Monthly Sales',
-                data: [12000, 19000, 15000, 25000, 22000, 30000],
-                borderColor: '#3498db'
-            }]
-        };
-
-        let salesPoints = [];
-        let animationProgress = 0;
-
-        // Catmull-Rom spline interpolation
-        function getCatmullRomPoint(t, p0, p1, p2, p3, alpha = 0.5) {
-            const t0 = 0;
-            const t1 = Math.pow(Math.hypot(p1.x - p0.x, p1.y - p0.y), alpha) + t0;
-            const t2 = Math.pow(Math.hypot(p2.x - p1.x, p2.y - p1.y), alpha) + t1;
-            const t3 = Math.pow(Math.hypot(p3.x - p2.x, p3.y - p2.y), alpha) + t2;
-
-            const tScaled = t1 + (t2 - t1) * t;
-
-            const A1x = (t1 - tScaled) / (t1 - t0) * p0.x + (tScaled - t0) / (t1 - t0) * p1.x;
-            const A1y = (t1 - tScaled) / (t1 - t0) * p0.y + (tScaled - t0) / (t1 - t0) * p1.y;
-            const A2x = (t2 - tScaled) / (t2 - t1) * p1.x + (tScaled - t1) / (t2 - t1) * p2.x;
-            const A2y = (t2 - tScaled) / (t2 - t1) * p1.y + (tScaled - t1) / (t2 - t1) * p2.y;
-            const A3x = (t3 - tScaled) / (t3 - t2) * p2.x + (tScaled - t2) / (t3 - t2) * p3.x;
-            const A3y = (t3 - tScaled) / (t3 - t2) * p2.y + (tScaled - t2) / (t3 - t2) * p3.y;
-
-            const B1x = (t2 - tScaled) / (t2 - t0) * A1x + (tScaled - t0) / (t2 - t0) * A2x;
-            const B1y = (t2 - tScaled) / (t2 - t0) * A1y + (tScaled - t0) / (t2 - t0) * A2y;
-            const B2x = (t3 - tScaled) / (t3 - t1) * A2x + (tScaled - t1) / (t3 - t1) * A3x;
-            const B2y = (t3 - tScaled) / (t3 - t1) * A2y + (tScaled - t1) / (t3 - t1) * A3y;
-
-            const Cx = (t2 - tScaled) / (t2 - t1) * B1x + (tScaled - t1) / (t2 - t1) * B2x;
-            const Cy = (t2 - tScaled) / (t2 - t1) * B1y + (tScaled - t1) / (t2 - t1) * B2y;
-
-            return { x: Cx, y: Cy };
-        }
-
-        function drawSalesChart() {
-            const container = salesCanvas.parentElement;
-            salesCanvas.width = container.clientWidth;
-            salesCanvas.height = container.clientHeight || 300;
-
-            const width = salesCanvas.width;
-            const height = salesCanvas.height;
-            const padding = 40;
-            const data = salesData.datasets[0].data;
-            const labels = salesData.labels;
-            const maxValue = Math.max(...data);
-            const minValue = 0; // Ensure y-axis starts from zero
-
-            salesCtx.clearRect(0, 0, width, height);
-
-            // Draw grid and axes
-            salesCtx.beginPath();
-            salesCtx.strokeStyle = '#ccc';
-            salesCtx.lineWidth = 1;
-            const yStep = (height - 2 * padding) / 5;
-            const valueStep = (maxValue - 0) / 5; // Ensure y-axis starts from zero
-            for (let i = 0; i <= 5; i++) {
-                const y = height - padding - i * yStep;
-                salesCtx.moveTo(padding, y);
-                salesCtx.lineTo(width - padding, y);
-                salesCtx.font = '12px Arial'; // Set font style
-                salesCtx.fillStyle = '#333'; // Set text color
-                salesCtx.fillText(Math.round(0 + i * valueStep), padding - 40, y + 5); // Adjusted x position
-            }
-            salesCtx.stroke();
-
-            salesCtx.beginPath();
-            salesCtx.moveTo(padding, padding);
-            salesCtx.lineTo(padding, height - padding);
-            salesCtx.lineTo(width - padding, height - padding);
-            salesCtx.strokeStyle = '#000';
-            salesCtx.stroke();
-
-            // Draw x-axis labels
-            const xStep = (width - 2 * padding) / (labels.length - 1);
-            salesCtx.font = '12px Arial'; // Set font style
-            salesCtx.fillStyle = '#333'; // Set text color
-            labels.forEach((label, i) => {
-                salesCtx.fillText(label, padding + i * xStep - 10, height - padding + 20);
-            });
-
-            // Calculate points
-            salesPoints = data.map((value, i) => {
-                const x = padding + i * xStep;
-                const y = height - padding - ((value - minValue) / (maxValue - minValue)) * (height - 2 * padding);
-                return { x, y, value, label: labels[i] };
-            });
-
-            // Extend points for Catmull-Rom
-            const extendedPoints = [
-                { x: salesPoints[0].x - xStep, y: salesPoints[0].y, value: salesPoints[0].value, label: salesPoints[0].label },
-                ...salesPoints,
-                { x: salesPoints[salesPoints.length - 1].x + xStep, y: salesPoints[salesPoints.length - 1].y, value: salesPoints[salesPoints.length - 1].value, label: salesPoints[salesPoints.length - 1].label }
-            ];
-
-            // Draw Catmull-Rom spline
-            salesCtx.beginPath();
-            salesCtx.strokeStyle = salesData.datasets[0].borderColor;
-            salesCtx.lineWidth = 2;
-
-            for (let i = 1; i < extendedPoints.length - 2; i++) {
-                const p0 = extendedPoints[i - 1];
-                const p1 = extendedPoints[i];
-                const p2 = extendedPoints[i + 1];
-                const p3 = extendedPoints[i + 2];
-
-                const steps = 20 * animationProgress;
-                for (let t = 0; t <= 1; t += 1 / steps) {
-                    const point = getCatmullRomPoint(t, p0, p1, p2, p3);
-                    if (t === 0 && i === 1) {
-                        salesCtx.moveTo(point.x, point.y);
-                    } else {
-                        salesCtx.lineTo(point.x, point.y);
-                    }
-                }
-            }
-            salesCtx.stroke();
-
-            // Draw points
-            salesPoints.forEach((point, i) => {
-                if (i / salesPoints.length < animationProgress) {
-                    salesCtx.beginPath();
-                    salesCtx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
-                    salesCtx.fillStyle = salesData.datasets[0].borderColor;
-                    salesCtx.fill();
-                }
-            });
-        }
-
-        // Animate line chart
-        function animateSalesChart() {
-            animationProgress += 0.01;
-            if (animationProgress <= 1) {
-                drawSalesChart();
-                requestAnimationFrame(animateSalesChart);
-            }
-        }
-
-        // Handle tooltips
-        salesCanvas.addEventListener('mousemove', (e) => {
-            const rect = salesCanvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            let found = false;
-            salesPoints.forEach(point => {
-                if (Math.hypot(x - point.x, y - point.y) < 10) {
-                    salesTooltip.style.display = 'block';
-                    salesTooltip.style.left = `${e.clientX + 10}px`;
-                    salesTooltip.style.top = `${e.clientY + 10}px`;
-                    salesTooltip.innerHTML = `${point.label}: $${point.value}`;
-                    found = true;
-                }
-            });
-
-            if (!found) salesTooltip.style.display = 'none';
-        });
-
-        // Handle responsiveness
-        const resizeObserver = new ResizeObserver(() => {
-            animationProgress = 0;
-            animateSalesChart();
-        });
-        resizeObserver.observe(salesCanvas.parentElement);
-
-        // Initial draw
-        animateSalesChart();
-
-        // Table Sorting
-        function sortTable(columnIndex) {
-            const table = document.getElementById('productsTable');
-            let switching = true;
-            let direction = 'asc';
-            let switchCount = 0;
-
-            while (switching) {
-                switching = false;
-                const rows = table.rows;
-
-                for (let i = 1; i < rows.length - 1; i++) {
-                    let shouldSwitch = false;
-                    const x = rows[i].getElementsByTagName('TD')[columnIndex];
-                    const y = rows[i + 1].getElementsByTagName('TD')[columnIndex];
-                    const xValue = x.innerHTML.toLowerCase();
-                    const yValue = y.innerHTML.toLowerCase();
-
-                    if (direction === 'asc' && xValue > yValue) {
-                        shouldSwitch = true;
-                    } else if (direction === 'desc' && xValue < yValue) {
-                        shouldSwitch = true;
-                    }
-
-                    if (shouldSwitch) {
-                        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                        switching = true;
-                        switchCount++;
-                        break;
-                    }
-                }
-
-                if (switchCount === 0 && direction === 'asc') {
-                    direction = 'desc';
-                    switching = true;
-                }
-            }
-        }
-
-        // Pagination Functions
-        function changePage(page) {
-            console.log(`Change to page ${page}`);
-            // Implement server-side pagination logic here
-            alert(`Navigating to page ${page}`);
-        }
-
-        function changeItemsPerPage(items) {
-            console.log(`Show ${items} items per page`);
-            // Implement server-side items per page logic here
-            alert(`Set items per page to ${items}`);
-        }
-
-        // Refresh Data
-        function refreshData() {
-            alert('Data refreshed!');
-            // Implement data refresh logic here
-        }
-
-        document.getElementById('filterTimePeriod').addEventListener('change', applyFilters);
-
-        function applyFilters() {
-            const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
-            const rows = document.querySelectorAll('#users-table tbody tr');
-            rows.forEach(row => {
-            const status = row.cells[4].textContent.toLowerCase();
-            const matchesStatus = statusFilter === '' || status === statusFilter;
-            row.style.display = matchesStatus ? '' : 'none';
-            });
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        function updateFilterParams() {
-            const search = document.getElementById('filterTimeStamp').value;
-            
-            const url = new URL(location.href);
-            url.pathname = '/reports';
-            url.searchParams.set('timePeriod', timePeriod);
-            location.href = url.toString();
-        }
-
-        function changePage(pageNo) {
-            const url = new URL(location.href);
-            url.searchParams.set('p', pageNo);
-            location.href = url.toString();
-        }
-
-        function changeItemsPerPage(itemsPerPage) {
-            const url = new URL(location.href);
-            url.searchParams.set('ipp', itemsPerPage);
-            url.searchParams.delete('p');
-            location.href = url.toString();
-        }
-    </script>
 </div>
-</body>
-</html>
+
+<script>
+    // Toggle custom date range based on selected time period
+    function toggleDateRange(value) {
+        const dateRangeContainer = document.getElementById('date-range-container');
+        if (value === 'custom') {
+            dateRangeContainer.style.display = 'flex';
+        } else {
+            dateRangeContainer.style.display = 'none';
+        }
+    }
+
+    // Generate report based on selected filters
+    function generateReport() {
+        const reportType = document.getElementById('report-type').value;
+        const timePeriod = document.getElementById('time-period').value;
+        let url = `/reports?report_type=${reportType}&time_period=${timePeriod}`;
+        
+        if (timePeriod === 'custom') {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            url += `&start_date=${startDate}&end_date=${endDate}`;
+        }
+        
+        window.location.href = url;
+    }
+
+    // Export report functions
+    function exportReport(reportType, format) {
+        // In a real implementation, this would trigger a download
+        console.log(`Exporting ${reportType} report as ${format}`);
+        alert(`${reportType} report will be exported as ${format}`);
+    }
+
+    // Print report function
+    function printReport(reportType) {
+        // In a real implementation, this would open the print dialog
+        console.log(`Printing ${reportType} report`);
+        alert(`${reportType} report will be printed`);
+    }
+
+    // View all products function
+    function viewAllProducts() {
+        window.location.href = "/inventory";
+    }
+
+    // View inventory function
+    function viewInventory() {
+        window.location.href = "/inventory";
+    }
+
+    // View all orders function
+    function viewAllOrders() {
+        window.location.href = "/purchase-orders";
+    }
+
+    // Export inventory function
+    function exportInventory(format) {
+        // In a real implementation, this would trigger a download
+        console.log(`Exporting inventory report as ${format}`);
+        alert(`Inventory report will be exported as ${format}`);
+    }
+
+    // Mark expiring products for discount
+    function markForDiscount() {
+        console.log('Marking expiring products for discount');
+        alert('Expiring products have been marked for discount');
+    }
+
+    // View all expiry alerts
+    function viewAllExpiryAlerts() {
+        window.location.href = "/inventory?filter=expiring";
+    }
+
+    // Create purchase order for a specific product
+    function createPurchaseOrder(productName) {
+        console.log(`Creating purchase order for ${productName}`);
+        alert(`Purchase order will be created for ${productName}`);
+    }
+
+    // Reorder all low stock items
+    function reorderAllLowStock() {
+        console.log('Reordering all low stock items');
+        alert('Purchase orders have been created for all low stock items');
+    }
+
+    // Add Chart.js for interactive visualizations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only load charts if Chart.js is available
+        if (typeof Chart !== 'undefined') {
+            initializeCharts();
+        } else {
+            // If Chart.js isn't loaded, load it dynamically
+            loadChartJS();
+        }
+    });
+
+    // Function to dynamically load Chart.js
+    function loadChartJS() {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.onload = function() {
+            console.log('Chart.js loaded successfully');
+            initializeCharts();
+        };
+        script.onerror = function() {
+            console.error('Failed to load Chart.js');
+            setupChartPlaceholders();
+        };
+        document.head.appendChild(script);
+    }
+
+    // Initialize all charts on the page
+    function initializeCharts() {
+        // Sales trend chart
+        const salesCtx = document.getElementById('salesTrendChart')?.getContext('2d');
+        if (salesCtx) {
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: <?= json_encode(array_column($dailySalesData, 'date')) ?>,
+                    datasets: [{
+                        label: 'Daily Sales',
+                        data: <?= json_encode(array_column($dailySalesData, 'sales')) ?>,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'LKR ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Inventory distribution chart
+        const inventoryCtx = document.getElementById('inventoryChart')?.getContext('2d');
+        if (inventoryCtx) {
+            new Chart(inventoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['In Stock', 'Low Stock', 'Out of Stock'],
+                    datasets: [{
+                        data: [
+                            <?= $stockStatus['in_stock'] ?>, 
+                            <?= $stockStatus['low_stock'] ?>, 
+                            <?= $stockStatus['out_of_stock'] ?>
+                        ],
+                        backgroundColor: [
+                            'rgba(22, 163, 74, 0.7)',  // success
+                            'rgba(217, 119, 6, 0.7)',  // warning
+                            'rgba(220, 38, 38, 0.7)'   // danger
+                        ],
+                        borderColor: [
+                            'rgba(22, 163, 74, 1)',
+                            'rgba(217, 119, 6, 1)',
+                            'rgba(220, 38, 38, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Category distribution chart
+        const categoryCtx = document.getElementById('categoryChart')?.getContext('2d');
+        if (categoryCtx) {
+            new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: <?= json_encode(array_column($categoryData, 'name')) ?>,
+                    datasets: [{
+                        label: 'Products',
+                        data: <?= json_encode(array_column($categoryData, 'count')) ?>,
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Supplier performance chart
+        const supplierCtx = document.getElementById('supplierChart')?.getContext('2d');
+        if (supplierCtx) {
+            new Chart(supplierCtx, {
+                type: 'radar',
+                data: {
+                    labels: <?= json_encode(array_column($supplierPerformance, 'name')) ?>,
+                    datasets: [{
+                        label: 'On-Time Delivery',
+                        data: <?= json_encode(array_column($supplierPerformance, 'on_time')) ?>,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        pointBackgroundColor: 'rgb(59, 130, 246)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(59, 130, 246)'
+                    }, {
+                        label: 'Quality Rating',
+                        data: <?= json_encode(array_column($supplierPerformance, 'quality')) ?>,
+                        backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                        borderColor: 'rgb(168, 85, 247)',
+                        pointBackgroundColor: 'rgb(168, 85, 247)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(168, 85, 247)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Sales by category chart
+        const salesByCategoryCtx = document.getElementById('salesByCategoryChart')?.getContext('2d');
+        if (salesByCategoryCtx) {
+            new Chart(salesByCategoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: <?= json_encode(array_column($categoryRevenueData, 'name')) ?>,
+                    datasets: [{
+                        data: <?= json_encode(array_column($categoryRevenueData, 'revenue')) ?>,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(168, 85, 247, 0.6)',
+                            'rgba(234, 88, 12, 0.6)',
+                            'rgba(22, 163, 74, 0.6)',
+                            'rgba(217, 119, 6, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    return `${label}: LKR ${value.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Function to set up interactive chart placeholders if Chart.js isn't available
+    function setupChartPlaceholders() {
+        const placeholders = document.querySelectorAll('.chart-placeholder');
+        placeholders.forEach(placeholder => {
+            placeholder.addEventListener('click', function() {
+                alert('Charts would be loaded here in the final implementation');
+            });
+        });
+    }
+</script>
