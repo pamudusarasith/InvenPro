@@ -51,13 +51,12 @@ class SupplierController extends Controller
     }
     $product = $supplierModel->getSupplierProducts($params['id']);
     $order = $supplierModel->getOrderDetails($params['id']);
-
     View::renderTemplate('SupplierDetails', [
       'title' => 'Supplier Details',
       'supplier' => $supplier,
       'branches' => $branches,
       'supplier_products' => $product,
-      'order' => $order,
+      'orders' => $order,
     ]);
   }
 

@@ -7,6 +7,22 @@ $messageType = $_SESSION['message_type'] ?? 'error';
 unset($_SESSION['message'], $_SESSION['message_type']);
 
 $branches = $branches ?? [];
+
+function getStatusBadgeClass($status)
+{
+  switch ($status) {
+    case 'pending':
+      return 'warning';
+    case 'open':
+      return 'accent';
+    case 'completed':
+      return 'success';
+    case 'canceled':
+      return 'danger';
+    default:
+      return 'secondary';
+  }
+}
 ?>
 
 <div class="body">
@@ -171,86 +187,88 @@ $branches = $branches ?? [];
 
       <div id="products" class="tab-content">
         <div class="card">
-            <h3>Assigned Products</h3>
-            <div class="content">
-                <table class="data-table" id="AssignedProductsTable">
-                    <thead>
-                        <tr>
-                          <th>Product Code</th>
-                          <th>Product Name</th>
-                          <th>Preferred</th>
-                          <th>Actions</th>
-                         </tr>
-                </thead>
-                <tbody>
-                  <?php if (!empty($supplier_products)): ?>
-                    <?php foreach ($supplier_products as $product): ?>
-                      <tr>
-                        <td><?= htmlspecialchars($product['product_code']) ?></td>
-                        <td><?= htmlspecialchars($product['product_name']) ?></td>
-                        <td>
-                          <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
-                            <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
-                          </span>
-                        </td>
-                        <td>
-                        <button class="icon-btn danger" title="Delete"
-                                onclick="deleteAssignedProduct(<?= $product['product_id']; ?>)">
-                            <span class="icon">delete</span>
+          <h3>Assigned Products</h3>
+          <div class="content">
+            <table class="data-table" id="AssignedProductsTable">
+              <thead>
+                <tr>
+                  <th>Product Code</th>
+                  <th>Product Name</th>
+                  <th>Preferred</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (!empty($supplier_products)): ?>
+                  <?php foreach ($supplier_products as $product): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($product['product_code']) ?></td>
+                      <td><?= htmlspecialchars($product['product_name']) ?></td>
+                      <td>
+                        <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
+                          <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
+                        </span>
+                      </td>
+                      <td>
+                        <button type="button" class="icon-btn danger" title="Delete"
+                          onclick="deleteAssignedProduct(<?= $product['product_id']; ?>)">
+                          <span class="icon">delete</span>
                         </button>
 
 
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
-                  <?php else: ?>
-                    <tr><td colspan="4">No assigned products found.</td></tr>
-                  <?php endif; ?>
-                </tbody>
-               </table>
-            </div>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="4">No assigned products found.</td>
+                  </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
-    </div>
+      </div>
 
 
       <div id="orders" class="tab-content">
         <!-- Similar structure for purchase orders -->
         <div class="card">
-            <h3>Purchase Orders</h3>
-            <div class="content">
+          <h3>Purchase Orders</h3>
+          <div class="content">
             <table class="data-table clickable">
-                  <thead>
-                    <tr>
-                      <th>Reference</th>
-                      <th>Order Date</th>
-                      <th>Status</th>
-                      <th>Total Amount</th>
-                      <th>Items</th>
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Order Date</th>
+                  <th>Status</th>
+                  <th>Total Amount</th>
+                  <th>Items</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($orders)): ?>
+                  <tr>
+                    <td colspan="7" style="text-align: center;">No purchase orders found</td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach ($orders as $order): ?>
+                    <tr onclick="window.location.href='/orders/<?= $order['id'] ?>'">
+                      <td><?= htmlspecialchars($order['reference']) ?></td>
+                      <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
+                      <td>
+                        <span class="badge <?= getStatusBadgeClass($order['status']) ?>">
+                          <?= ucfirst($order['status']) ?>
+                        </span>
+                      </td>
+                      <td><?= $order['total_amount'] ? "Rs." . number_format($order['total_amount'], 2) : "N/A" ?></td>
+                      <td><?= $order['total_items'] ?></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    <?php if (empty($orders)): ?>
-                      <tr>
-                        <td colspan="7" style="text-align: center;">No purchase orders found</td>
-                      </tr>
-                    <?php else: ?>
-                      <?php foreach ($orders as $order): ?>
-                        <tr onclick="window.location.href='/orders/<?= $order['id'] ?>'">
-                          <td><?= htmlspecialchars($order['reference']) ?></td>
-                          <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
-                          <td>
-                            <span class="badge <?= getStatusBadgeClass($order['status']) ?>">
-                              <?= ucfirst($order['status']) ?>
-                            </span>
-                          </td>
-                          <td><?= $order['total_amount'] ? "Rs." . number_format($order['total_amount'], 2) : "N/A" ?></td>
-                          <td><?= $order['items'] ?></td>
-                        </tr>
-                      <?php endforeach; ?>
-                    <?php endif; ?>
-                  </tbody>
-                </table>
-            </div>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -419,14 +437,14 @@ if ($messageType === 'success') {
     dialog.close();
   }
 
-  
 
-    function deleteAssignedProduct(productId) {
+
+  function deleteAssignedProduct(productId) {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `/suppliers/<?= $supplier_id ?>/products/delete`;
+    form.action = `/suppliers/<?= $supplier['id'] ?>/products/delete`;
 
     const input = document.createElement('input');
     input.type = 'hidden';
@@ -436,8 +454,6 @@ if ($messageType === 'success') {
     form.appendChild(input);
     document.body.appendChild(form);
     form.submit();
-    
-    window.location.href = '/suppliers/${supplierId}/products';
   }
 
   <?php if ($message): ?>

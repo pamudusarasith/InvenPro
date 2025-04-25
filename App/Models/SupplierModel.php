@@ -210,65 +210,22 @@ public function getOrderDetails(int $supplireID): array
         SELECT
           po.id,
           po.reference,
-          po.supplier_id,
-          s.supplier_name,
           po.order_date,
-          po.expected_date,
           po.status,
           po.total_amount,
-          po.notes,
-          u.display_name AS created_by
+          COUNT(DISTINCT poi.product_id) AS total_items
         FROM purchase_order po
         INNER JOIN supplier s ON po.supplier_id = s.id
-        INNER JOIN user u ON po.created_by = u.id
-        WHERE po.id = ?
+        INNER JOIN purchase_order_item poi ON po.id = poi.po_id
+        WHERE s.id = ?
           AND po.deleted_at IS NULL
           AND po.branch_id = ?
       ';
       $stmt = self::$db->query($sql, [$supplireID, $_SESSION['user']['branch_id']]);
-      return $stmt->fetch();
-
-      if ($order) {
-        // Fetch order items
-        $sql = '
-          SELECT
-            poi.product_id,
-            p.product_name,
-            poi.order_qty,
-            poi.received_qty,
-            unit.unit_symbol,
-            unit.is_int
-          FROM purchase_order_item poi
-          INNER JOIN product p ON poi.product_id = p.id
-          INNER JOIN unit ON p.unit_id = unit.id
-          WHERE poi.po_id = ?
-        ';
-        $stmt = self::$db->query($sql, [$supplireID]);
-        $order['items'] = $stmt->fetchAll();
-      }
-
-      $sql = '
-        SELECT
-          id,
-          batch_code,
-          manufactured_date,
-          expiry_date,
-          unit_cost,
-          unit_price,
-          initial_quantity as quantity
-        FROM product_batch
-        WHERE deleted_at IS NULL
-          AND po_id = ?
-          AND product_id = ?
-      ';
-
-      foreach ($order['items'] as &$item) {
-        $stmt = self::$db->query($sql, [$supplireID, $item['product_id']]);
-        $item['batches'] = $stmt->fetchAll();
-      }
+      $orders = $stmt->fetchAll();
 
       self::$db->commit();
-      return $order ?: [];
+      return $orders ?: [];
     } catch (\Exception $e) {
       self::$db->rollBack();
       // Log the exception or handle it as needed
@@ -281,8 +238,7 @@ public function deleteAssignedProduct(int $productId, int $supplierId): void
     error_log("Deleting assigned product ID: " . $productId);
 
     $sql = '
-    UPDATE supplier_product
-    SET deleted_at = NOW()
+    DELETE FROM supplier_product
     WHERE product_id = ? AND supplier_id = ? AND branch_id = ?
 ';
     self::$db->query($sql, [$productId, $supplierId, $_SESSION['user']['branch_id']]);
