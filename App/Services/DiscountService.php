@@ -12,14 +12,12 @@ class DiscountService
    * @param array $cartItems Array of cart items with product_id, batch_id, quantity, unit_price
    * @param array $discounts Array of available discounts
    * @param float|null $loyaltyPoints Customer's loyalty points (if available)
-   * @param array|null $appliedCoupons Array of already applied coupon codes
    * @return array Array of applicable discounts
    */
   public static function calculateOptimalDiscounts(
     array $cartItems, 
     array $discounts, 
-    ?float $loyaltyPoints = null,
-    ?array $appliedCoupons = null
+    ?float $loyaltyPoints = null
   ): array
   {
     $eligibleDiscounts = [];
@@ -51,8 +49,8 @@ class DiscountService
       }
     }
     
-    // Get the best combination of discounts, considering already applied coupons
-    return self::getBestDiscountCombination($eligibleDiscounts, $cartItems, $appliedCoupons);
+    // Get the best combination of discounts
+    return self::getBestDiscountCombination($eligibleDiscounts, $cartItems);
   }
   
   /**
@@ -233,17 +231,15 @@ class DiscountService
   }
 
   /**
-   * Get the best combination of discounts to apply, considering any already applied coupons
+   * Get the best combination of discounts to apply
    * 
    * @param array $eligibleDiscounts Array of eligible discounts
    * @param array $cartItems Array of cart items
-   * @param array|null $appliedCoupons Array of already applied coupon codes
    * @return array The best discounts to apply
    */
   private static function getBestDiscountCombination(
     array $eligibleDiscounts, 
-    array $cartItems,
-    ?array $appliedCoupons = null
+    array $cartItems
   ): array
   {
     // If no eligible discounts, return empty array
@@ -258,196 +254,50 @@ class DiscountService
       return [$discount];
     }
     
-    // Separate discounts into regular and coupon-based
-    $regularDiscounts = [];
-    $couponDiscounts = [];
+    // Group discounts into combinable and non-combinable
+    $combinableDiscounts = [];
+    $nonCombinableDiscounts = [];
     
     foreach ($eligibleDiscounts as $discount) {
-      if ($discount['application_method'] === 'regular') {
-        $regularDiscounts[] = $discount;
-      } else {
-        $couponDiscounts[] = $discount;
-      }
-    }
-    
-    // Check for already applied coupons
-    $previouslyAppliedDiscounts = [];
-    if (!empty($appliedCoupons)) {
-      foreach ($couponDiscounts as $discount) {
-        if (isset($discount['coupons'])) {
-          foreach ($discount['coupons'] as $coupon) {
-            if (in_array($coupon['code'], $appliedCoupons)) {
-              $previouslyAppliedDiscounts[] = $discount;
-              break;
-            }
-          }
-        }
-      }
-    }
-    
-    // Further group discounts into combinable and non-combinable
-    $combinableRegular = [];
-    $nonCombinableRegular = [];
-    $combinableCoupons = [];
-    $nonCombinableCoupons = [];
-    
-    foreach ($regularDiscounts as $discount) {
       if ($discount['is_combinable']) {
-        $combinableRegular[] = $discount;
+        $combinableDiscounts[] = $discount;
       } else {
-        $nonCombinableRegular[] = $discount;
+        $nonCombinableDiscounts[] = $discount;
       }
     }
     
-    foreach ($couponDiscounts as $discount) {
-      if ($discount['is_combinable']) {
-        $combinableCoupons[] = $discount;
-      } else {
-        $nonCombinableCoupons[] = $discount;
-      }
-    }
+    // Calculate the best non-combinable discount (if any)
+    $bestNonCombinable = null;
+    $bestNonCombinableAmount = 0;
     
-    // Calculated the best discount options
-    
-    // 1. Calculate the best non-combinable regular discount (if any)
-    $bestNonCombinableRegular = null;
-    $bestNonCombinableRegularAmount = 0;
-    
-    foreach ($nonCombinableRegular as $discount) {
+    foreach ($nonCombinableDiscounts as $discount) {
       $amount = self::calculateDiscountAmount($discount, $cartItems);
-      if ($amount > $bestNonCombinableRegularAmount) {
-        $bestNonCombinableRegularAmount = $amount;
-        $bestNonCombinableRegular = $discount;
+      if ($amount > $bestNonCombinableAmount) {
+        $bestNonCombinableAmount = $amount;
+        $bestNonCombinable = $discount;
       }
     }
     
-    // 2. Calculate the best non-combinable coupon discount (if any)
-    $bestNonCombinableCoupon = null;
-    $bestNonCombinableCouponAmount = 0;
+    // Calculate total combinable discount amount
+    $totalCombinableAmount = 0;
+    $appliedCombinableDiscounts = [];
     
-    foreach ($nonCombinableCoupons as $discount) {
+    foreach ($combinableDiscounts as $discount) {
       $amount = self::calculateDiscountAmount($discount, $cartItems);
-      if ($amount > $bestNonCombinableCouponAmount) {
-        $bestNonCombinableCouponAmount = $amount;
-        $bestNonCombinableCoupon = $discount;
-      }
-    }
-    
-    // 3. Calculate total combinable regular discount amount
-    $totalCombinableRegularAmount = 0;
-    $appliedCombinableRegular = [];
-    
-    foreach ($combinableRegular as $discount) {
-      $amount = self::calculateDiscountAmount($discount, $cartItems);
-      $totalCombinableRegularAmount += $amount;
+      $totalCombinableAmount += $amount;
       
       $discount['calculated_amount'] = $amount;
-      $appliedCombinableRegular[] = $discount;
+      $appliedCombinableDiscounts[] = $discount;
     }
     
-    // 4. Calculate total combinable coupon discount amount
-    $totalCombinableCouponAmount = 0;
-    $appliedCombinableCoupons = [];
-    
-    foreach ($combinableCoupons as $discount) {
-      // Skip applying new combinable coupons if we already have any non-combinable ones
-      if (!empty($previouslyAppliedDiscounts) && !empty(array_filter($previouslyAppliedDiscounts, function($d) {
-        return !$d['is_combinable'];
-      }))) {
-        continue;
-      }
-      
-      $amount = self::calculateDiscountAmount($discount, $cartItems);
-      $totalCombinableCouponAmount += $amount;
-      
-      $discount['calculated_amount'] = $amount;
-      $appliedCombinableCoupons[] = $discount;
+    // Determine the best strategy
+    if ($totalCombinableAmount >= $bestNonCombinableAmount) {
+      // Using all combinable discounts is better
+      return $appliedCombinableDiscounts;
+    } else {
+      // Using the best non-combinable discount is better
+      $bestNonCombinable['calculated_amount'] = $bestNonCombinableAmount;
+      return [$bestNonCombinable];
     }
-    
-    // Now determine the best strategy
-    $finalDiscounts = [];
-    $maxDiscountAmount = 0;
-    
-    // Calculate total amounts for different combinations
-    
-    // Option 1: All combinable discounts (regular + coupons)
-    $option1Total = $totalCombinableRegularAmount + $totalCombinableCouponAmount;
-    
-    // Option 2: Combinable regular + best non-combinable coupon
-    $option2Total = $totalCombinableRegularAmount + $bestNonCombinableCouponAmount;
-    
-    // Option 3: Best non-combinable regular + combinable coupons
-    $option3Total = $bestNonCombinableRegularAmount + $totalCombinableCouponAmount;
-    
-    // Option 4: Best non-combinable regular only
-    $option4Total = $bestNonCombinableRegularAmount;
-    
-    // Option 5: Best non-combinable coupon only
-    $option5Total = $bestNonCombinableCouponAmount;
-    
-    // Select the best option
-    
-    // Special case: If we have previously applied coupons, we must include them
-    if (!empty($previouslyAppliedDiscounts)) {
-      $previousTotal = 0;
-      foreach ($previouslyAppliedDiscounts as $discount) {
-        $amount = self::calculateDiscountAmount($discount, $cartItems);
-        $discount['calculated_amount'] = $amount;
-        $previousTotal += $amount;
-        $finalDiscounts[] = $discount;
-      }
-      
-      // If previous coupons are all combinable, we can add combinable regular discounts
-      $allPreviousCombinabe = !in_array(false, array_map(function($d) {
-        return $d['is_combinable'];
-      }, $previouslyAppliedDiscounts));
-      
-      if ($allPreviousCombinabe) {
-        $finalDiscounts = array_merge($finalDiscounts, $appliedCombinableRegular);
-        $maxDiscountAmount = $previousTotal + $totalCombinableRegularAmount;
-      } else {
-        $maxDiscountAmount = $previousTotal;
-      }
-      
-      return $finalDiscounts;
-    }
-    
-    // Find the maximum discount option
-    if ($option1Total >= $option2Total && $option1Total >= $option3Total && 
-        $option1Total >= $option4Total && $option1Total >= $option5Total) {
-      // Option 1 is best: All combinable discounts
-      $finalDiscounts = array_merge($appliedCombinableRegular, $appliedCombinableCoupons);
-      $maxDiscountAmount = $option1Total;
-    } elseif ($option2Total >= $option1Total && $option2Total >= $option3Total && 
-              $option2Total >= $option4Total && $option2Total >= $option5Total && 
-              $bestNonCombinableCoupon) {
-      // Option 2 is best: Combinable regular + best non-combinable coupon
-      $finalDiscounts = $appliedCombinableRegular;
-      $bestNonCombinableCoupon['calculated_amount'] = $bestNonCombinableCouponAmount;
-      $finalDiscounts[] = $bestNonCombinableCoupon;
-      $maxDiscountAmount = $option2Total;
-    } elseif ($option3Total >= $option1Total && $option3Total >= $option2Total && 
-              $option3Total >= $option4Total && $option3Total >= $option5Total && 
-              $bestNonCombinableRegular) {
-      // Option 3 is best: Best non-combinable regular + combinable coupons
-      $finalDiscounts = $appliedCombinableCoupons;
-      $bestNonCombinableRegular['calculated_amount'] = $bestNonCombinableRegularAmount;
-      $finalDiscounts[] = $bestNonCombinableRegular;
-      $maxDiscountAmount = $option3Total;
-    } elseif ($option4Total >= $option1Total && $option4Total >= $option2Total && 
-              $option4Total >= $option3Total && $option4Total >= $option5Total &&
-              $bestNonCombinableRegular) {
-      // Option 4 is best: Best non-combinable regular only
-      $bestNonCombinableRegular['calculated_amount'] = $bestNonCombinableRegularAmount;
-      $finalDiscounts[] = $bestNonCombinableRegular;
-      $maxDiscountAmount = $option4Total;
-    } elseif ($bestNonCombinableCoupon) {
-      // Option 5 is best: Best non-combinable coupon only
-      $bestNonCombinableCoupon['calculated_amount'] = $bestNonCombinableCouponAmount;
-      $finalDiscounts[] = $bestNonCombinableCoupon;
-      $maxDiscountAmount = $option5Total;
-    }
-    
-    return $finalDiscounts;
   }
 }

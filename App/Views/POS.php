@@ -105,23 +105,6 @@ use App\Services\RBACService;
         </button>
     </div>
 </template>
-<template id="couponItemTemplate">
-    <div class="coupon-item">
-        <div class="coupon-info">
-            <span class="coupon-name"></span>
-            <span class="coupon-value"></span>
-        </div>
-        <button type="button" class="icon-btn danger" title="Remove coupon">
-            <span class="icon">close</span>
-        </button>
-    </div>
-</template>
-<template id="noCouponsTemplate">
-    <div class="no-coupons">
-        <span class="icon">local_offer</span>
-        <p>No coupons applied</p>
-    </div>
-</template>
 <template id="discountItemTemplate">
     <div class="discount-item">
         <span class="discount-name"></span>
@@ -256,22 +239,7 @@ use App\Services\RBACService;
                     <label for="notes">Notes</label>
                     <textarea id="notes" name="notes" rows="3"></textarea>
                 </div>
-                <div class="form-field span-2">
-                    <label for="coupon">Coupon Code</label>
-                    <div class="coupon-field">
-                        <input type="text" id="coupon" placeholder="Enter coupon code" autocomplete="off">
-                        <button type="button" class="btn btn-primary" onclick="pos.applyCoupon()">
-                            Apply
-                        </button>
-                    </div>
-                </div>
             </div>
-            <!-- <div class="coupons-list">
-                <h3>Applied Coupons</h3>
-                <div class="coupons-items"> -->
-                    <!-- Coupons will be dynamically added here -->
-                <!-- </div>
-            </div> -->
             <div class="discounts-list">
                 <h3>Applied Discounts</h3>
                 <div class="discounts-items">

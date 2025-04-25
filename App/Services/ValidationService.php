@@ -358,8 +358,6 @@ class ValidationService
       ->rule('value', new Required('Value is required'))
       ->rule('value', new IsNumeric('Value must be numeric'))
       ->rule('value', new CompareWithValue('>', 0, 'numeric', 'Value must be greater than 0'))
-      ->rule('application_method', new Required('Application Method is required'))
-      ->rule('application_method', new InArray(['regular', 'coupon'], 'Invalid Application Method'))
       ->rule('start_date', new Required('Start Date is required'))
       ->rule('start_date', new IsDateTime('Y-m-d', 'Invalid Start Date'))
       ->rule('end_date', new IsDateTime('Y-m-d', 'Invalid End Date'))
@@ -446,18 +444,6 @@ class ValidationService
       }
     }
 
-    $couponValidator = new Validator($data);
-    $couponValidator->rule('coupons', new Required('Coupons are required'))
-      ->rule('coupons', new IsArray(0, null, 'Coupons must be an array'))
-      ->rule('coupons.*.code', new Required('Coupon Code is required'))
-      ->rule('coupons.*.code', new IsString(0, 50, 'Coupon Code must be a string between 0 and 50 characters'))
-      ->rule('coupons.*.is_active', new Required('Is Active is required'))
-      ->rule('coupons.*.is_active', new IsBoolean(false, 'Is Active must be a boolean'));
-
-    if ($data['application_method'] === 'coupon' && !$couponValidator->validate()) {
-      $this->errors = $couponValidator->errors();
-      return false;
-    }
     return true;
   }
 

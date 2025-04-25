@@ -7,7 +7,6 @@ class PointOfSaleManager {
     this.calculatedDiscount = 0;
     this.selectedCustomer = null;
     this.discounts = [];
-    this.coupons = new Map();
 
     // DOM element references
     this.elements = {
@@ -18,7 +17,6 @@ class PointOfSaleManager {
       cartMenu: document.getElementById("cart-menu"),
       checkoutForm: document.getElementById("checkoutForm"),
       checkoutDialog: document.getElementById("checkoutDialog"),
-      couponsList: document.querySelector(".coupons-items"),
       discountsList: document.querySelector(".discounts-items"),
       cartItemEditDialog: document.getElementById("cartItemEditDialog"),
       cartItemEditForm: document.getElementById("cartItemEditForm"),
@@ -31,8 +29,6 @@ class PointOfSaleManager {
     this.templates = {
       productCard: document.getElementById("productCardTemplate"),
       cartItem: document.getElementById("cartItemTemplate"),
-      couponItem: document.getElementById("couponItemTemplate"),
-      noCoupons: document.getElementById("noCouponsTemplate"),
       discountItem: document.getElementById("discountItemTemplate"),
       noDiscounts: document.getElementById("noDiscountsTemplate"),
     };
@@ -73,8 +69,6 @@ class PointOfSaleManager {
     this.calculatedSubtotal = 0;
     this.calculatedDiscount = 0;
     this.calculatedTotal = 0;
-    this.appliedCoupons.clear();
-    this.availableDiscounts = [];
     sessionStorage.removeItem("cart");
     sessionStorage.removeItem("customer");
     this.renderCart();
@@ -266,86 +260,6 @@ class PointOfSaleManager {
     this.elements.cartItemEditDialog.close();
   }
 
-  renderCoupons() {
-    this.elements.couponsList.innerHTML = "";
-
-    if (this.appliedCoupons.size === 0) {
-      const noCoupons = this.templates.noCoupons.content.cloneNode(true);
-      this.elements.couponsList.appendChild(noCoupons);
-      return;
-    }
-
-    this.appliedCoupons.forEach((discount, code) => {
-      const couponItem = this.templates.couponItem.content.cloneNode(true);
-      couponItem.querySelector(".coupon-name").textContent = code;
-      couponItem.querySelector(".coupon-value").textContent =
-        discount.discount_type === "fixed"
-          ? `Rs. ${discount.value}`
-          : `${discount.value}%`;
-      couponItem.querySelector("button").onclick = () =>
-        this.removeCoupon(code);
-      couponsList.appendChild(couponItem);
-    });
-  }
-
-  async applyCoupon() {
-    const couponCode = document.getElementById("coupon").value;
-
-    if (!couponCode) {
-      openPopupWithMessage("Please enter a coupon code", "warning");
-      return;
-    }
-
-    const items = Array.from(this.cartItems.values()).map((product) => {
-      return {
-        product_id: product.id,
-        unit_price: product.unit_price,
-        quantity: product.quantity,
-      };
-    });
-
-    const used_coupons = Array.from(this.coupons.keys());
-
-    const requestData = {
-      customer_id: this.selectedCustomer ? this.selectedCustomer.id : null,
-      items,
-      used_coupons,
-      code: couponCode,
-    };
-
-    try {
-      this.showLoader();
-      const response = await fetch("/api/pos/coupons/apply", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
-      const result = await response.json();
-      this.hideLoader();
-      console.log(result);
-    } catch (error) {
-      this.hideLoader();
-      console.error("Error applying coupon:", error);
-      openPopupWithMessage(
-        "An error occurred while applying the coupon",
-        "error"
-      );
-    }
-  }
-
-  removeCoupon(coupon) {
-    this.calculatedDiscount -= coupon.value;
-    this.appliedCoupons = this.appliedCoupons.filter(
-      (c) => c.code !== coupon.code
-    );
-    this.renderCoupons();
-
-    // Update total display
-    this.updateCheckoutSummary();
-  }
-
   renderDiscounts() {
     this.elements.discountsList.innerHTML = "";
 
@@ -357,27 +271,13 @@ class PointOfSaleManager {
 
     this.discounts.forEach((discount) => {
       this.calculatedDiscount += discount.calculated_amount;
-      if (discount.application_method === "regular") {
-        const discountItem =
-          this.templates.discountItem.content.cloneNode(true);
-        discountItem.querySelector(".discount-name").textContent =
-          discount.name;
-        discountItem.querySelector(".discount-value").textContent =
-          discount.discount_type === "fixed"
-            ? `Rs. ${discount.value}`
-            : `${discount.value}%`;
-        this.elements.discountsList.appendChild(discountItem);
-      } else if (discount.application_method === "coupon") {
-        // const couponItem = this.templates.couponItem.content.cloneNode(true);
-        // couponItem.querySelector(".coupon-name").textContent =
-        //   discount.coupons[0].code;
-        // couponItem.querySelector(".coupon-value").textContent =
-        //   discount.discount_type === "fixed"
-        //     ? `Rs. ${discount.value}`
-        //     : `${discount.value}%`;
-        // couponItem.querySelector("button").onclick = () =>
-        //   this.removeCoupon(discount.coupons[0]);
-      }
+      const discountItem = this.templates.discountItem.content.cloneNode(true);
+      discountItem.querySelector(".discount-name").textContent = discount.name;
+      discountItem.querySelector(".discount-value").textContent =
+        discount.discount_type === "fixed"
+          ? `Rs. ${discount.value}`
+          : `${discount.value}%`;
+      this.elements.discountsList.appendChild(discountItem);
     });
   }
 
@@ -429,7 +329,6 @@ class PointOfSaleManager {
 
     // Reset discount and coupon state
     this.calculatedDiscount = 0;
-    this.appliedCoupons = [];
 
     // Fetch available discounts
     const fetchedDiscounts = await this.fetchAvailableDiscounts();
@@ -494,9 +393,6 @@ class PointOfSaleManager {
         items,
         payment_method: form.elements["payment_method"].value,
         notes: form.elements["notes"].value,
-        discounts: this.discounts.map((discount) => {
-          return discount.id;
-        }),
       };
 
       this.showLoader();

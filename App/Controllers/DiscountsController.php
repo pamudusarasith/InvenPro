@@ -197,7 +197,7 @@ class DiscountsController extends Controller
     }
 
     $discountModel = new DiscountModel();
-    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), "regular", null);
+    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), null);
 
     $selectedDiscounts = DiscountService::calculateOptimalDiscounts(
       $data['items'],
