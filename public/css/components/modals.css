@@ -1,4 +1,4 @@
-dialog {
+.modal {
   padding: 0;
   border: none;
   border-radius: 12px;
@@ -10,7 +10,7 @@ dialog {
   animation: dialogSlideIn 0.3s ease;
 }
 
-dialog::backdrop {
+.modal::backdrop {
   background: var(--glass-dark);
   backdrop-filter: blur(4px);
   animation: backdropFadeIn 0.3s ease;

@@ -176,9 +176,9 @@ class ValidationService
       ->rule('items.*.quantity', new Required('Quantity is required'))
       ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
       ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
-      ->rule('items.*.price', new Required('Price is required'))
-      ->rule('items.*.price', new IsNumeric('Price must be numeric'))
-      ->rule('items.*.price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
+      ->rule('items.*.unit_price', new Required('Price is required'))
+      ->rule('items.*.unit_price', new IsNumeric('Price must be numeric'))
+      ->rule('items.*.unit_price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
       ->rule('payment_method', new Required('Payment method is required'))
       ->rule('payment_method', new InArray(['cash', 'card'], 'Invalid payment method'));
     if (!$validator->validate()) {
@@ -358,11 +358,11 @@ class ValidationService
       ->rule('value', new Required('Value is required'))
       ->rule('value', new IsNumeric('Value must be numeric'))
       ->rule('value', new CompareWithValue('>', 0, 'numeric', 'Value must be greater than 0'))
-      ->rule('application_method', new Required('Application Method is required'))
-      ->rule('application_method', new InArray(['regular', 'coupon'], 'Invalid Application Method'))
       ->rule('start_date', new Required('Start Date is required'))
       ->rule('start_date', new IsDateTime('Y-m-d', 'Invalid Start Date'))
       ->rule('end_date', new IsDateTime('Y-m-d', 'Invalid End Date'))
+      ->rule('is_combinable', new Required('Is Combinable is required'))
+      ->rule('is_combinable', new IsBoolean(false, 'Is Combinable must be a boolean'))
       ->rule('conditions', new Required('Conditions are required'))
       ->rule('conditions', new IsArray(0, null, 'Conditions must be an array'))
       ->rule('conditions.*.condition_type', new Required('Condition Type is required'))
@@ -444,18 +444,6 @@ class ValidationService
       }
     }
 
-    $couponValidator = new Validator($data);
-    $couponValidator->rule('coupons', new Required('Coupons are required'))
-      ->rule('coupons', new IsArray(0, null, 'Coupons must be an array'))
-      ->rule('coupons.*.code', new Required('Coupon Code is required'))
-      ->rule('coupons.*.code', new IsString(0, 50, 'Coupon Code must be a string between 0 and 50 characters'))
-      ->rule('coupons.*.is_active', new Required('Is Active is required'))
-      ->rule('coupons.*.is_active', new IsBoolean(false, 'Is Active must be a boolean'));
-
-    if ($data['application_method'] === 'coupon' && !$couponValidator->validate()) {
-      $this->errors = $couponValidator->errors();
-      return false;
-    }
     return true;
   }
 

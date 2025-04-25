@@ -18,7 +18,7 @@ class DiscountModel extends Model
     return (bool)$result['count'];
   }
 
-  public function getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type): array
+  public function getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $type): array
   {
     try {
       self::$db->beginTransaction();
@@ -30,11 +30,11 @@ class DiscountModel extends Model
           name,
           description,
           discount_type,
-          application_method,
           value,
           start_date,
           end_date,
-          is_active
+          is_active,
+          is_combinable
         FROM discount
         WHERE branch_id = ?
           AND deleted_at IS NULL
@@ -53,18 +53,13 @@ class DiscountModel extends Model
       }
 
       if (!empty($from)) {
-        $sql .= ' AND start_date >= ?';
+        $sql .= ' AND start_date <= ?';
         $params[] = $from;
       }
 
       if (!empty($to)) {
-        $sql .= ' AND end_date <= ?';
+        $sql .= ' AND (end_date >= ? OR end_date IS NULL)';
         $params[] = $to;
-      }
-
-      if (!empty($applicationMethod)) {
-        $sql .= ' AND application_method = ?';
-        $params[] = $applicationMethod;
       }
 
       if (!empty($type)) {
@@ -81,14 +76,12 @@ class DiscountModel extends Model
         $params[] = $itemsPerPage;
         $params[] = $offset;
       }
-      error_log($sql);
-      error_log(print_r($params, true));
+      
       $stmt = self::$db->query($sql, $params);
       $discounts = $stmt->fetchAll();
 
       $sql = '
         SELECT
-          discount_id,
           condition_type,
           condition_value
         FROM discount_condition
@@ -104,27 +97,6 @@ class DiscountModel extends Model
         $discount['conditions'] = $conditions;
       }
 
-      $sql = '
-        SELECT
-          discount_id,
-          code,
-          is_active
-        FROM coupon
-        WHERE discount_id = ?
-      ';
-
-      foreach ($discounts as &$discount) {
-        if ($discount['application_method'] !== 'coupon') {
-          continue;
-        }
-        $stmt = self::$db->query($sql, [$discount['id']]);
-        $coupons = $stmt->fetchAll();
-        foreach ($coupons as &$coupon) {
-          $coupon['is_active'] = (bool)$coupon['is_active'];
-        }
-        $discount['coupons'] = $coupons;
-      }
-
       self::$db->commit();
       return $discounts ?: [];
     } catch (\Exception $e) {
@@ -133,7 +105,7 @@ class DiscountModel extends Model
     }
   }
 
-  public function getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type): int
+  public function getDiscountsCount($query, $status, $from, $to, $type): int
   {
     $params = [$_SESSION['user']['branch_id']];
 
@@ -166,11 +138,6 @@ class DiscountModel extends Model
       $params[] = $to;
     }
 
-    if (!empty($applicationMethod)) {
-      $sql .= ' AND application_method = ?';
-      $params[] = $applicationMethod;
-    }
-
     if (!empty($type)) {
       $sql .= ' AND discount_type = ?';
       $params[] = $type;
@@ -188,7 +155,7 @@ class DiscountModel extends Model
       self::$db->beginTransaction();
 
       $sql = '
-        INSERT INTO discount (branch_id, name, description, discount_type, application_method, value, start_date, end_date, is_active)
+        INSERT INTO discount (branch_id, name, description, discount_type, value, start_date, end_date, is_active, is_combinable)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       ';
 
@@ -197,11 +164,11 @@ class DiscountModel extends Model
         $data['name'],
         $data['description'],
         $data['discount_type'],
-        $data['application_method'],
         $data['value'],
         $data['start_date'],
         $data['end_date'],
-        1
+        1,
+        $data['is_combinable']
       ]);
 
       $discountId = self::$db->lastInsertId();
@@ -219,21 +186,6 @@ class DiscountModel extends Model
         ]);
       }
 
-      if ($data['application_method'] == 'coupon') {
-        $sql = '
-          INSERT INTO coupon (discount_id, code, is_active)
-          VALUES (?, ?, ?)
-        ';
-
-        foreach ($data['coupons'] as $coupon) {
-          $stmt = self::$db->query($sql, [
-            $discountId,
-            $coupon['code'],
-            $coupon['is_active']
-          ]);
-        }
-      }
-
       self::$db->commit();
     } catch (\Exception $e) {
       self::$db->rollBack();
@@ -248,7 +200,7 @@ class DiscountModel extends Model
 
       $sql = '
         UPDATE discount
-        SET name = ?, description = ?, discount_type = ?, application_method = ?, value = ?, start_date = ?, end_date = ?
+        SET name = ?, description = ?, discount_type = ?, value = ?, start_date = ?, end_date = ?, is_combinable = ?
         WHERE id = ? AND branch_id = ?
       ';
 
@@ -256,10 +208,10 @@ class DiscountModel extends Model
         $data['name'],
         $data['description'],
         $data['discount_type'],
-        $data['application_method'],
         $data['value'],
         $data['start_date'],
         $data['end_date'],
+        $data['is_combinable'],
         $discountId,
         $_SESSION['user']['branch_id']
       ]);
@@ -281,27 +233,6 @@ class DiscountModel extends Model
           $condition['condition_type'],
           $condition['condition_value']
         ]);
-      }
-
-      $sql = '
-          DELETE FROM coupon
-          WHERE discount_id = ?
-        ';
-      self::$db->query($sql, [$discountId]);
-
-      // Update coupons
-      if ($data['application_method'] == 'coupon') {
-        foreach ($data['coupons'] as $coupon) {
-          $sql = '
-            INSERT INTO coupon (discount_id, code, is_active)
-            VALUES (?, ?, ?)
-          ';
-          self::$db->query($sql, [
-            $discountId,
-            $coupon['code'],
-            $coupon['is_active']
-          ]);
-        }
       }
 
       self::$db->commit();

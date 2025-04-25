@@ -83,7 +83,7 @@ class ProductModel extends Model
     return $stmt->fetchAll();
   }
 
-  public function searchProduct(string $query, int $page, int $itemsPerPage): array
+  public function searchProducts(string $query, int $page, int $itemsPerPage): array
   {
     $offset = ($page - 1) * $itemsPerPage;
     $sql = '
@@ -93,22 +93,22 @@ class ProductModel extends Model
         u.unit_symbol
       FROM product p
       INNER JOIN unit u ON p.unit_id = u.id
-      WHERE p.deleted_at IS NULL AND (
-        p.product_name LIKE ? OR
-        p.product_code LIKE ?)
+      INNER JOIN branch_product bp ON p.id = bp.product_id
+      WHERE p.deleted_at IS NULL
+        AND bp.branch_id = ?
+        AND (
+          p.product_name LIKE ? OR
+          p.product_code LIKE ?)
       LIMIT ? OFFSET ?
     ';
-    $stmt = self::$db->query($sql, ["%$query%", "%$query%", $itemsPerPage, $offset,]);
-    $products = $stmt->fetchAll();
-
-    foreach ($products as $i => $product) {
-      $products[$i]['batches'] = $this->getBatchesByProductId($product['id']);
-      if (empty($products[$i]['batches'])) {
-        unset($products[$i]);
-      }
-    }
-
-    return array_values($products);
+    $stmt = self::$db->query($sql, [
+      $_SESSION['user']['branch_id'],
+      "%$query%",
+      "%$query%",
+      $itemsPerPage,
+      $offset,
+    ]);
+    return $stmt->fetchAll();
   }
 
   public function assignProduct(string $query, int $page, int $itemsPerPage): array
@@ -134,14 +134,17 @@ class ProductModel extends Model
 
   public function searchPOSProducts(string $query): array
   {
-    $sql = '
+    try {
+      $sql = '
       SELECT
         p.id,
         p.product_code,
         p.product_name,
-        GROUP_CONCAT(DISTINCT pb.unit_price) AS prices
+        u.unit_symbol,
+        u.is_int
       FROM product p
       INNER JOIN product_batch pb ON p.id = pb.product_id
+      INNER JOIN unit u ON p.unit_id = u.id
       WHERE p.deleted_at IS NULL
         AND pb.deleted_at IS NULL
         AND pb.is_active = 1
@@ -153,14 +156,48 @@ class ProductModel extends Model
       GROUP BY p.id
     ';
 
-    $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], "%$query%", "%$query%"]);
-    $products = $stmt->fetchAll();
+      $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], "%$query%", "%$query%"]);
+      $products = $stmt->fetchAll();
 
-    foreach ($products as &$product) {
-      $product['prices'] = array_map('floatval', explode(',', $product['prices']));
+      $sql = '
+        SELECT
+          pb.unit_price,
+          pb.current_quantity
+        FROM product_batch pb
+        WHERE pb.deleted_at IS NULL
+          AND pb.is_active = 1
+          AND pb.branch_id = ?
+          AND pb.product_id = ?
+      ';
+
+      $products = array_map(function ($product) {
+        $product['prices'] = [];
+        return $product;
+      }, $products);
+
+      foreach ($products as &$product) {
+        $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id'], $product['id']]);
+        $batches = $stmt->fetchAll();
+
+        foreach ($batches as $batch) {
+          $batch['unit_price'] = number_format($batch['unit_price'], 2, '.', '');
+          $batch['current_quantity'] = floatval($batch['current_quantity']);
+          if (isset($product['prices'][$batch['unit_price']])) {
+            $product['prices'][$batch['unit_price']] += $batch['current_quantity'];
+          } else {
+            $product['prices'][$batch['unit_price']] = $batch['current_quantity'];
+          }
+        }
+
+        // Sort prices in ascending order
+        ksort($product['prices']);
+      }
+
+      return $products;
+    } catch (\Exception $e) {
+      self::$db->rollBack();
+      throw $e;
     }
-
-    return $products;
   }
 
 

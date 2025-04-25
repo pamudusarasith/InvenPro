@@ -28,6 +28,20 @@ class CustomerModel extends Model
     return $stmt->fetch();
   }
 
+  public function getLoyaltyPoints(int $customerId): array | bool
+  {
+    $sql = '
+    SELECT
+      points
+    FROM customer
+    WHERE
+      id = ?
+      AND deleted_at IS NULL
+    ';
+    $stmt = self::$db->query($sql, [$customerId]);
+    return $stmt->fetch();
+  }
+
   public function getActiveCustomersCount(): int
   {
     $sql = 'SELECT COUNT(*) FROM customer WHERE deleted_at IS NULL';

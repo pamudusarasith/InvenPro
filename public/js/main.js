@@ -45,7 +45,9 @@ class Dropdown {
 
 function openPopup() {
   const popup = document.getElementById("messagePopup");
-  popup?.classList.add("show");
+  if (popup) {
+    popup.showModal();
+  }
 }
 
 function openPopupWithMessage(message, type) {
@@ -70,12 +72,17 @@ function openPopupWithMessage(message, type) {
   }
   messageElem.innerHTML = message;
 
-  popup?.classList.add("show");
+  popup?.showModal();
 }
 
 function closePopup() {
   const popup = document.getElementById("messagePopup");
-  popup?.classList.remove("show");
+  if (popup) {
+    // Wait for the animation to complete before closing the dialog
+    setTimeout(() => {
+      popup.close(); // Use native dialog close method
+    }, 300); // Match transition duration from CSS
+  }
 }
 
 function switchTab(tabId) {
@@ -148,6 +155,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (popup && popup.querySelector(".popup-message")?.innerText !== "") {
     openPopup();
   }
+
+  // Close dialog when clicking on the backdrop
+  popup?.addEventListener("click", (e) => {
+    if (e.target === popup) {
+      closePopup();
+    }
+  });
 
   Dropdown.init();
 });

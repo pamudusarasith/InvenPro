@@ -1,33 +1,14 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: localhost
--- Generation Time: Apr 23, 2025 at 08:06 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Database: `invenpro_new`
---
 CREATE DATABASE IF NOT EXISTS `invenpro_new` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `invenpro_new`;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `audit_log`
---
 
 CREATE TABLE `audit_log` (
   `id` bigint(20) NOT NULL,
@@ -41,12 +22,6 @@ CREATE TABLE `audit_log` (
   `created_at` timestamp(6) NOT NULL DEFAULT current_timestamp(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `branch`
---
-
 CREATE TABLE `branch` (
   `id` int(11) NOT NULL,
   `branch_code` varchar(20) NOT NULL,
@@ -58,12 +33,6 @@ CREATE TABLE `branch` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `branch_product`
---
-
 CREATE TABLE `branch_product` (
   `branch_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -71,12 +40,6 @@ CREATE TABLE `branch_product` (
   `reorder_quantity` decimal(10,3) NOT NULL DEFAULT 0.000,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `category`
---
 
 CREATE TABLE `category` (
   `id` int(11) NOT NULL,
@@ -87,12 +50,6 @@ CREATE TABLE `category` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `coupon`
---
-
 CREATE TABLE `coupon` (
   `id` int(11) NOT NULL,
   `discount_id` int(11) NOT NULL,
@@ -101,12 +58,6 @@ CREATE TABLE `coupon` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customer`
---
 
 CREATE TABLE `customer` (
   `id` int(11) NOT NULL,
@@ -120,12 +71,6 @@ CREATE TABLE `customer` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customer_return`
---
 
 CREATE TABLE `customer_return` (
   `id` int(11) NOT NULL,
@@ -141,12 +86,6 @@ CREATE TABLE `customer_return` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `customer_return_item`
---
-
 CREATE TABLE `customer_return_item` (
   `id` int(11) NOT NULL,
   `return_id` int(11) NOT NULL,
@@ -156,12 +95,6 @@ CREATE TABLE `customer_return_item` (
   `subtotal` decimal(12,2) NOT NULL,
   `reason` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `discount`
---
 
 CREATE TABLE `discount` (
   `id` int(11) NOT NULL,
@@ -173,16 +106,11 @@ CREATE TABLE `discount` (
   `value` decimal(12,2) NOT NULL,
   `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `end_date` timestamp NULL DEFAULT NULL,
+  `is_combinable` tinyint(1) NOT NULL DEFAULT 0,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `discount_condition`
---
 
 CREATE TABLE `discount_condition` (
   `id` int(11) NOT NULL,
@@ -191,12 +119,6 @@ CREATE TABLE `discount_condition` (
   `condition_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`condition_value`)),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `discount_usage`
---
 
 CREATE TABLE `discount_usage` (
   `id` int(11) NOT NULL,
@@ -207,12 +129,6 @@ CREATE TABLE `discount_usage` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `loyalty_transaction`
---
-
 CREATE TABLE `loyalty_transaction` (
   `id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
@@ -221,12 +137,6 @@ CREATE TABLE `loyalty_transaction` (
   `sale_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `notification`
---
 
 CREATE TABLE `notification` (
   `id` int(11) NOT NULL,
@@ -241,12 +151,6 @@ CREATE TABLE `notification` (
   `expires_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `notification_recipient`
---
-
 CREATE TABLE `notification_recipient` (
   `id` int(11) NOT NULL,
   `notification_id` int(11) NOT NULL,
@@ -255,12 +159,6 @@ CREATE TABLE `notification_recipient` (
   `read_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `notification_type`
---
 
 CREATE TABLE `notification_type` (
   `id` int(11) NOT NULL,
@@ -271,12 +169,6 @@ CREATE TABLE `notification_type` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `permission`
---
-
 CREATE TABLE `permission` (
   `id` int(11) NOT NULL,
   `permission_name` varchar(50) NOT NULL,
@@ -285,22 +177,12 @@ CREATE TABLE `permission` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `permission_category`
---
-
 CREATE TABLE `permission_category` (
   `id` int(11) NOT NULL,
-  `category_name` varchar(255) NOT NULL
+  `category_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product`
---
 
 CREATE TABLE `product` (
   `id` int(11) NOT NULL,
@@ -312,12 +194,6 @@ CREATE TABLE `product` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product_batch`
---
 
 CREATE TABLE `product_batch` (
   `id` int(11) NOT NULL,
@@ -336,23 +212,11 @@ CREATE TABLE `product_batch` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `product_category`
---
-
 CREATE TABLE `product_category` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `purchase_order`
---
 
 CREATE TABLE `purchase_order` (
   `id` int(11) NOT NULL,
@@ -368,10 +232,6 @@ CREATE TABLE `purchase_order` (
   `created_by` int(11) NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Triggers `purchase_order`
---
 DELIMITER $$
 CREATE TRIGGER `purchase_order_after_insert` AFTER INSERT ON `purchase_order` FOR EACH ROW BEGIN
     DECLARE meta_data JSON;
@@ -603,24 +463,12 @@ END
 $$
 DELIMITER ;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `purchase_order_item`
---
-
 CREATE TABLE `purchase_order_item` (
   `po_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `order_qty` decimal(10,3) NOT NULL,
   `received_qty` decimal(10,3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `role`
---
 
 CREATE TABLE `role` (
   `id` int(11) NOT NULL,
@@ -629,24 +477,12 @@ CREATE TABLE `role` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `role_permission`
---
-
 CREATE TABLE `role_permission` (
   `role_id` int(11) NOT NULL,
   `permission_id` int(11) NOT NULL,
   `granted_by` int(11) DEFAULT NULL,
   `granted_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `sale`
---
 
 CREATE TABLE `sale` (
   `id` int(11) NOT NULL,
@@ -664,12 +500,6 @@ CREATE TABLE `sale` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `sale_item`
---
-
 CREATE TABLE `sale_item` (
   `id` int(11) NOT NULL,
   `sale_id` int(11) NOT NULL,
@@ -679,12 +509,6 @@ CREATE TABLE `sale_item` (
   `unit_price` decimal(12,2) NOT NULL,
   `discount` decimal(12,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `supplier`
---
 
 CREATE TABLE `supplier` (
   `id` int(11) NOT NULL,
@@ -698,12 +522,6 @@ CREATE TABLE `supplier` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `supplier_product`
---
-
 CREATE TABLE `supplier_product` (
   `supplier_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -711,12 +529,6 @@ CREATE TABLE `supplier_product` (
   `is_preferred_supplier` tinyint(1) DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `supplier_return`
---
 
 CREATE TABLE `supplier_return` (
   `id` int(11) NOT NULL,
@@ -733,12 +545,6 @@ CREATE TABLE `supplier_return` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `supplier_return_item`
---
-
 CREATE TABLE `supplier_return_item` (
   `id` int(11) NOT NULL,
   `return_id` int(11) NOT NULL,
@@ -750,12 +556,6 @@ CREATE TABLE `supplier_return_item` (
   `reason` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `unit`
---
-
 CREATE TABLE `unit` (
   `id` int(11) NOT NULL,
   `unit_name` varchar(20) NOT NULL,
@@ -764,12 +564,6 @@ CREATE TABLE `unit` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `user`
---
 
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,
@@ -791,166 +585,101 @@ CREATE TABLE `user` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Indexes for dumped tables
---
 
---
--- Indexes for table `audit_log`
---
 ALTER TABLE `audit_log`
   ADD PRIMARY KEY (`id`),
   ADD KEY `changed_by` (`changed_by`),
   ADD KEY `branch_id` (`branch_id`);
 
---
--- Indexes for table `branch`
---
 ALTER TABLE `branch`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `branch_code` (`branch_code`);
 
---
--- Indexes for table `branch_product`
---
 ALTER TABLE `branch_product`
   ADD PRIMARY KEY (`branch_id`,`product_id`),
   ADD KEY `product_id` (`product_id`);
 
---
--- Indexes for table `category`
---
 ALTER TABLE `category`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `category_name` (`category_name`),
   ADD KEY `parent_category_id` (`parent_id`);
 
---
--- Indexes for table `coupon`
---
 ALTER TABLE `coupon`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`),
   ADD KEY `discount_id` (`discount_id`);
 
---
--- Indexes for table `customer`
---
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 
---
--- Indexes for table `customer_return`
---
 ALTER TABLE `customer_return`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `return_number` (`return_number`),
   ADD KEY `sale_id` (`sale_id`),
   ADD KEY `created_by` (`created_by`);
 
---
--- Indexes for table `customer_return_item`
---
 ALTER TABLE `customer_return_item`
   ADD PRIMARY KEY (`id`),
   ADD KEY `return_id` (`return_id`),
   ADD KEY `sale_item_id` (`sale_item_id`);
 
---
--- Indexes for table `discount`
---
 ALTER TABLE `discount`
   ADD PRIMARY KEY (`id`),
   ADD KEY `branch_id` (`branch_id`);
 
---
--- Indexes for table `discount_condition`
---
 ALTER TABLE `discount_condition`
   ADD PRIMARY KEY (`id`),
   ADD KEY `discount_id` (`discount_id`);
 
---
--- Indexes for table `discount_usage`
---
 ALTER TABLE `discount_usage`
   ADD PRIMARY KEY (`id`),
   ADD KEY `discount_id` (`discount_id`),
   ADD KEY `sale_id` (`sale_id`),
   ADD KEY `customer_id` (`customer_id`);
 
---
--- Indexes for table `loyalty_transaction`
---
 ALTER TABLE `loyalty_transaction`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_id` (`customer_id`);
 
---
--- Indexes for table `notification`
---
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`id`),
   ADD KEY `type_id` (`type_id`),
   ADD KEY `branch_id` (`branch_id`),
   ADD KEY `created_by` (`created_by`);
 
---
--- Indexes for table `notification_recipient`
---
 ALTER TABLE `notification_recipient`
   ADD PRIMARY KEY (`id`),
   ADD KEY `notification_id` (`notification_id`),
   ADD KEY `user_id` (`user_id`);
 
---
--- Indexes for table `notification_type`
---
 ALTER TABLE `notification_type`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `type_name` (`type_name`);
 
---
--- Indexes for table `permission`
---
 ALTER TABLE `permission`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `permission_name` (`permission_name`),
   ADD KEY `category_id` (`category_id`);
 
---
--- Indexes for table `permission_category`
---
 ALTER TABLE `permission_category`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `category_name` (`category_name`);
 
---
--- Indexes for table `product`
---
 ALTER TABLE `product`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `product_code` (`product_code`),
   ADD KEY `unit_id` (`unit_id`);
 
---
--- Indexes for table `product_batch`
---
 ALTER TABLE `product_batch`
   ADD PRIMARY KEY (`id`),
   ADD KEY `product_id` (`product_id`),
   ADD KEY `po_id` (`po_id`);
 
---
--- Indexes for table `product_category`
---
 ALTER TABLE `product_category`
   ADD PRIMARY KEY (`product_id`,`category_id`),
   ADD KEY `category_id` (`category_id`);
 
---
--- Indexes for table `purchase_order`
---
 ALTER TABLE `purchase_order`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `po_number` (`reference`),
@@ -958,64 +687,40 @@ ALTER TABLE `purchase_order`
   ADD KEY `supplier_id` (`supplier_id`),
   ADD KEY `created_by` (`created_by`);
 
---
--- Indexes for table `purchase_order_item`
---
 ALTER TABLE `purchase_order_item`
   ADD PRIMARY KEY (`po_id`,`product_id`),
   ADD KEY `product_id` (`product_id`);
 
---
--- Indexes for table `role`
---
 ALTER TABLE `role`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `role_name` (`role_name`);
 
---
--- Indexes for table `role_permission`
---
 ALTER TABLE `role_permission`
   ADD PRIMARY KEY (`role_id`,`permission_id`),
   ADD KEY `permission_id` (`permission_id`),
   ADD KEY `granted_by` (`granted_by`);
 
---
--- Indexes for table `sale`
---
 ALTER TABLE `sale`
   ADD PRIMARY KEY (`id`),
   ADD KEY `branch_id` (`branch_id`),
   ADD KEY `customer_id` (`customer_id`),
   ADD KEY `user_id` (`user_id`);
 
---
--- Indexes for table `sale_item`
---
 ALTER TABLE `sale_item`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sale_id` (`sale_id`),
   ADD KEY `product_id` (`product_id`),
   ADD KEY `batch_id` (`batch_id`);
 
---
--- Indexes for table `supplier`
---
 ALTER TABLE `supplier`
   ADD PRIMARY KEY (`id`),
   ADD KEY `branch_id` (`branch_id`);
 
---
--- Indexes for table `supplier_product`
---
 ALTER TABLE `supplier_product`
   ADD PRIMARY KEY (`supplier_id`,`product_id`,`branch_id`),
   ADD KEY `product_id` (`product_id`),
   ADD KEY `branch_id` (`branch_id`);
 
---
--- Indexes for table `supplier_return`
---
 ALTER TABLE `supplier_return`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `return_number` (`return_number`),
@@ -1023,382 +728,208 @@ ALTER TABLE `supplier_return`
   ADD KEY `supplier_id` (`supplier_id`),
   ADD KEY `created_by` (`created_by`);
 
---
--- Indexes for table `supplier_return_item`
---
 ALTER TABLE `supplier_return_item`
   ADD PRIMARY KEY (`id`),
   ADD KEY `return_id` (`return_id`),
   ADD KEY `product_id` (`product_id`),
   ADD KEY `batch_id` (`batch_id`);
 
---
--- Indexes for table `unit`
---
 ALTER TABLE `unit`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unit_name` (`unit_name`),
   ADD UNIQUE KEY `unit_symbol` (`unit_symbol`);
 
---
--- Indexes for table `user`
---
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD KEY `role_id` (`role_id`),
   ADD KEY `branch_id` (`branch_id`);
 
---
--- AUTO_INCREMENT for dumped tables
---
 
---
--- AUTO_INCREMENT for table `audit_log`
---
 ALTER TABLE `audit_log`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `branch`
---
 ALTER TABLE `branch`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `category`
---
 ALTER TABLE `category`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `coupon`
---
 ALTER TABLE `coupon`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `customer`
---
 ALTER TABLE `customer`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `customer_return`
---
 ALTER TABLE `customer_return`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `customer_return_item`
---
 ALTER TABLE `customer_return_item`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `discount`
---
 ALTER TABLE `discount`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `discount_condition`
---
 ALTER TABLE `discount_condition`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `discount_usage`
---
 ALTER TABLE `discount_usage`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `loyalty_transaction`
---
 ALTER TABLE `loyalty_transaction`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `notification`
---
 ALTER TABLE `notification`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `notification_recipient`
---
 ALTER TABLE `notification_recipient`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `notification_type`
---
 ALTER TABLE `notification_type`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `permission`
---
 ALTER TABLE `permission`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `permission_category`
---
 ALTER TABLE `permission_category`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `product`
---
 ALTER TABLE `product`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `product_batch`
---
 ALTER TABLE `product_batch`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `purchase_order`
---
 ALTER TABLE `purchase_order`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `role`
---
 ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `sale`
---
 ALTER TABLE `sale`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `sale_item`
---
 ALTER TABLE `sale_item`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `supplier`
---
 ALTER TABLE `supplier`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `supplier_return`
---
 ALTER TABLE `supplier_return`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `supplier_return_item`
---
 ALTER TABLE `supplier_return_item`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `unit`
---
 ALTER TABLE `unit`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `user`
---
 ALTER TABLE `user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- Constraints for dumped tables
---
 
---
--- Constraints for table `audit_log`
---
 ALTER TABLE `audit_log`
   ADD CONSTRAINT `audit_log_ibfk_1` FOREIGN KEY (`changed_by`) REFERENCES `user` (`id`),
   ADD CONSTRAINT `audit_log_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);
 
---
--- Constraints for table `branch_product`
---
 ALTER TABLE `branch_product`
   ADD CONSTRAINT `branch_product_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `branch_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`);
 
---
--- Constraints for table `category`
---
 ALTER TABLE `category`
   ADD CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`);
 
---
--- Constraints for table `coupon`
---
 ALTER TABLE `coupon`
   ADD CONSTRAINT `coupon_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`) ON DELETE CASCADE;
 
---
--- Constraints for table `customer_return`
---
 ALTER TABLE `customer_return`
   ADD CONSTRAINT `customer_return_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`id`),
   ADD CONSTRAINT `customer_return_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `customer_return_item`
---
 ALTER TABLE `customer_return_item`
   ADD CONSTRAINT `customer_return_item_ibfk_1` FOREIGN KEY (`return_id`) REFERENCES `customer_return` (`id`),
   ADD CONSTRAINT `customer_return_item_ibfk_2` FOREIGN KEY (`sale_item_id`) REFERENCES `sale_item` (`id`);
 
---
--- Constraints for table `discount`
---
 ALTER TABLE `discount`
   ADD CONSTRAINT `discount_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);
 
---
--- Constraints for table `discount_condition`
---
 ALTER TABLE `discount_condition`
   ADD CONSTRAINT `discount_condition_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`) ON DELETE CASCADE;
 
---
--- Constraints for table `discount_usage`
---
 ALTER TABLE `discount_usage`
   ADD CONSTRAINT `discount_usage_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`),
   ADD CONSTRAINT `discount_usage_ibfk_3` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`id`),
   ADD CONSTRAINT `discount_usage_ibfk_4` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`);
 
---
--- Constraints for table `loyalty_transaction`
---
 ALTER TABLE `loyalty_transaction`
   ADD CONSTRAINT `loyalty_transaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`);
 
---
--- Constraints for table `notification`
---
 ALTER TABLE `notification`
   ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `notification_type` (`id`),
   ADD CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `notification_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `notification_recipient`
---
 ALTER TABLE `notification_recipient`
   ADD CONSTRAINT `notification_recipient_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notification_recipient_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `permission`
---
 ALTER TABLE `permission`
   ADD CONSTRAINT `permission_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `permission_category` (`id`);
 
---
--- Constraints for table `product`
---
 ALTER TABLE `product`
   ADD CONSTRAINT `product_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`id`);
 
---
--- Constraints for table `product_batch`
---
 ALTER TABLE `product_batch`
   ADD CONSTRAINT `product_batch_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   ADD CONSTRAINT `product_batch_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `product_batch_ibfk_3` FOREIGN KEY (`po_id`) REFERENCES `purchase_order` (`id`);
 
---
--- Constraints for table `product_category`
---
 ALTER TABLE `product_category`
   ADD CONSTRAINT `product_category_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `product_category_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE;
 
---
--- Constraints for table `purchase_order`
---
 ALTER TABLE `purchase_order`
   ADD CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`),
   ADD CONSTRAINT `purchase_order_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `purchase_order_item`
---
 ALTER TABLE `purchase_order_item`
   ADD CONSTRAINT `purchase_order_item_ibfk_1` FOREIGN KEY (`po_id`) REFERENCES `purchase_order` (`id`),
   ADD CONSTRAINT `purchase_order_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`);
 
---
--- Constraints for table `role_permission`
---
 ALTER TABLE `role_permission`
   ADD CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permission` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `role_permission_ibfk_3` FOREIGN KEY (`granted_by`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `sale`
---
 ALTER TABLE `sale`
   ADD CONSTRAINT `sale_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `sale_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
   ADD CONSTRAINT `sale_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `sale_item`
---
 ALTER TABLE `sale_item`
   ADD CONSTRAINT `sale_item_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`id`),
   ADD CONSTRAINT `sale_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   ADD CONSTRAINT `sale_item_ibfk_3` FOREIGN KEY (`batch_id`) REFERENCES `product_batch` (`id`);
 
---
--- Constraints for table `supplier`
---
 ALTER TABLE `supplier`
   ADD CONSTRAINT `supplier_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);
 
---
--- Constraints for table `supplier_product`
---
 ALTER TABLE `supplier_product`
   ADD CONSTRAINT `supplier_product_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`),
   ADD CONSTRAINT `supplier_product_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   ADD CONSTRAINT `supplier_product_ibfk_3` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);
 
---
--- Constraints for table `supplier_return`
---
 ALTER TABLE `supplier_return`
   ADD CONSTRAINT `supplier_return_ibfk_1` FOREIGN KEY (`po_id`) REFERENCES `purchase_order` (`id`),
   ADD CONSTRAINT `supplier_return_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`),
   ADD CONSTRAINT `supplier_return_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
---
--- Constraints for table `supplier_return_item`
---
 ALTER TABLE `supplier_return_item`
   ADD CONSTRAINT `supplier_return_item_ibfk_1` FOREIGN KEY (`return_id`) REFERENCES `supplier_return` (`id`),
   ADD CONSTRAINT `supplier_return_item_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
   ADD CONSTRAINT `supplier_return_item_ibfk_3` FOREIGN KEY (`batch_id`) REFERENCES `product_batch` (`id`);
 
---
--- Constraints for table `user`
---
 ALTER TABLE `user`
   ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`),
   ADD CONSTRAINT `user_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`);

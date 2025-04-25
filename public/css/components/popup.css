@@ -12,10 +12,21 @@
   max-width: 360px;
   z-index: 9999;
   transition: right 0.3s ease-in-out;
+  border: none;
+  margin: 0;
+  inset-block-start: 5rem;
+  inset-inline-end: -400px;
+  inset-block-end: auto;
+  inset-inline-start: auto;
 }
 
-.popup.show {
-  right: 1.5rem;
+.popup::backdrop {
+  background: var(--overlay-light);
+  backdrop-filter: blur(4px);
+}
+
+.popup[open] {
+  inset-inline-end: 1.5rem;
 }
 
 .popup.success {
