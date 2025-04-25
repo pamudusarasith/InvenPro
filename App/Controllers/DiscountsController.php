@@ -31,11 +31,10 @@ class DiscountsController extends Controller
     $status = $_GET['status'] ?? '';
     $from = $_GET['from'] ?? '';
     $to = $_GET['to'] ?? '';
-    $applicationMethod = $_GET['application'] ?? '';
     $type = $_GET['type'] ?? '';
     $discountModel = new DiscountModel();
-    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type);
-    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type);
+    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $type);
+    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $type);
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
     View::renderTemplate("Discounts", [
@@ -56,9 +55,6 @@ class DiscountsController extends Controller
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
     $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
-    foreach ($_POST['coupons'] as &$coupon) {
-      $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
-    }
 
     if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
       $_SESSION['message'] = $this->validator->getError();
@@ -97,9 +93,6 @@ class DiscountsController extends Controller
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
     $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
-    foreach ($_POST['coupons'] as &$coupon) {
-      $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
-    }
 
     if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
       $_SESSION['message'] = $this->validator->getError();

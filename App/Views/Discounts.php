@@ -25,7 +25,6 @@ $itemsPerPage = $_GET['ipp'] ?? 10;
 $searchQuery = $_GET['q'] ?? '';
 $statusFilter = $_GET['status'] ?? '';
 $typeFilter = $_GET['type'] ?? '';
-$applicationFilter = $_GET['application'] ?? '';
 $fromDate = $_GET['from'] ?? '';
 $toDate = $_GET['to'] ?? '';
 
@@ -78,12 +77,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
           <option value="" <?= $typeFilter === '' ? 'selected' : '' ?>>All Types</option>
           <option value="percentage" <?= $typeFilter === 'percentage' ? 'selected' : '' ?>>Percentage</option>
           <option value="fixed" <?= $typeFilter === 'fixed' ? 'selected' : '' ?>>Fixed Amount</option>
-        </select>
-
-        <select id="applicationFilter" onchange="applyFilters()">
-          <option value="" <?= $applicationFilter === '' ? 'selected' : '' ?>>All Application Methods</option>
-          <option value="regular" <?= $applicationFilter === 'regular' ? 'selected' : '' ?>>Regular (Automatic)</option>
-          <option value="coupon" <?= $applicationFilter === 'coupon' ? 'selected' : '' ?>>Coupon</option>
         </select>
 
         <div class="date-filter">
@@ -211,16 +204,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
           </div>
 
           <div class="form-field">
-            <label for="applicationMethod">Application Method *</label>
-            <select id="applicationMethod" name="application_method" required onchange="toggleCouponSection(this)">
-              <option value="regular">Regular (Automatic)</option>
-              <option value="coupon">Coupon-based</option>
-            </select>
-          </div>
-
-          <div class="form-field"> </div>
-
-          <div class="form-field">
             <label for="startDate">Start Date *</label>
             <input type="date" id="startDate" name="start_date" value="<?= date('Y-m-d') ?>" required>
           </div>
@@ -236,21 +219,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
               <input type="checkbox" id="isCombinable" name="is_combinable">
               <label for="isCombinable"></label>
               <span class="toggle-label">Can be combined with other discounts</span>
-            </div>
-          </div>
-
-          <!-- Coupons Section - Only visible when coupon-based is selected -->
-          <div id="couponsSection" class="form-field span-2" style="display: none;">
-            <div class="section-title">
-              <h3>Coupons</h3>
-              <button type="button" class="btn" onclick="addCoupon()">
-                <span class="icon">add</span>
-                Add Coupon
-              </button>
-            </div>
-
-            <div id="couponsContainer" class="coupons-container">
-              <!-- Coupon items will be added dynamically -->
             </div>
           </div>
 
@@ -311,10 +279,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
           <span id="detail-value" class="value"></span>
         </div>
         <div class="detail-row">
-          <span class="label">Application:</span>
-          <span id="detail-application" class="value"></span>
-        </div>
-        <div class="detail-row">
           <span class="label">Start Date:</span>
           <span id="detail-start-date" class="value"></span>
         </div>
@@ -326,11 +290,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
           <span class="label">Combinable:</span>
           <span id="detail-combinable" class="value"></span>
         </div>
-      </div>
-
-      <div id="coupon-section" class="coupon-section">
-        <h4>Coupons</h4>
-        <div id="coupon-list" class="coupon-list"></div>
       </div>
 
       <div id="conditions-section" class="conditions-section details-section">
@@ -370,30 +329,6 @@ $canViewDiscounts = RBACService::hasPermission('view_discounts');
       </div>
       <div class="condition-body">
         <!-- Condition fields will be injected here based on selected type -->
-      </div>
-    </div>
-  </template>
-
-  <!-- Coupon Item Template -->
-  <template id="couponTemplate">
-    <div class="coupon-item">
-      <div class="coupon-field">
-        <div class="form-field">
-          <div class="coupon-code-field">
-            <input type="text" name="coupons[INDEX][code]" placeholder="Coupon code" required>
-            <button type="button" class="btn" onclick="generateCouponCode(this)">Generate</button>
-          </div>
-        </div>
-        <div class="form-field coupon-status">
-          <div class="toggle-switch">
-            <input type="checkbox" id="coupon_active_INDEX" name="coupons[INDEX][is_active]" checked>
-            <label for="coupon_active_INDEX"></label>
-            <span class="toggle-label">Active</span>
-          </div>
-        </div>
-        <button type="button" class="icon-btn danger" onclick="removeCoupon(this)" title="Remove coupon">
-          <span class="icon">delete</span>
-        </button>
       </div>
     </div>
   </template>
