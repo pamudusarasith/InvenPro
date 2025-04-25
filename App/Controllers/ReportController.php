@@ -1,18 +1,18 @@
 <?php
 
 namespace App\Controllers;
-
+ 
 use App\Core\{Controller, View};
 use App\Services\RBACService;
-use App\Models\{UserModel, AuditLogModel,CustomerModel , RoleModel, PermissionModel, SaleModel, SupplierModel, ProductModel, BranchModel, OrderModel};
+use App\Models\{UserModel, CustomerModel , ReportModel, SaleModel, SupplierModel, ProductModel, BranchModel, OrderModel};
 
-class DashboardController extends Controller
+ 
+class ReportController extends Controller
 {
-    public function index()
+    public function index(): void
     {
-        RBACService::requireAuthentication();
-        
-        $saleModel = new SaleModel();
+
+      $saleModel = new SaleModel();
         $supplierModel = new SupplierModel();
         $productModel = new ProductModel();
         $orderModel = new OrderModel();
@@ -43,8 +43,7 @@ class DashboardController extends Controller
 
         
         if ($_SESSION['user']['role_name'] === 'System Admin') {
-            $dashboardData = [
-                'greeting' => 'Welcome to Invenpro!',
+            $reportData = [
                 'sales' => [
                     'value' => 'LKR ' . number_format($salesToday['today_sales'], 2),
                     'trend' => ($salesToday['trendToday'] > 0 ? '+' : ($salesToday['trendToday'] < 0 ? '-' : '')) . number_format($salesToday['trendToday'], 2) . '%',
@@ -81,32 +80,28 @@ class DashboardController extends Controller
                     'value' => $activeSuppliers,
                 ],
             ];
+
         
-            View::renderTemplate(
-                'AdminDashboard',
-                [
-                    'title' => 'Dashboard',
-                    'dashboardData' => $dashboardData,
-                ]
-            );
-        } elseif ($_SESSION['user']['role_name'] === 'Inventory Manager') {
-            View::render('Template', [
-                'title' => 'Invenpro',
-                'view' => 'InventoryManagerDashboard',
-                'stylesheets' => [
-                    'dashboard'
-                ],
-            ]);
-        } elseif ($_SESSION['user']['role_name'] === 'Branch Manager') {
-            View::render('Template', [
-                'title' => 'Invenpro',
-                'view' => 'BranchManagerDashboard',
-                'stylesheets' => [
-                    'dashboard'
-                ],
-            ]);
-        } else {
-            View::renderError(403);
-        }
+
+        View::renderTemplate('Reports'
+            , [
+            'title' => 'Reports',
+            'reportData' => $reportData,
+        ]);
     }
+  }
+
+  public function filterTimePeriod(): void
+  {
+    $timePeriod = $_GET['time_period'];
+    $reportModel = new ReportModel();
+    $filteredSalesData = $reportModel->filterTimePeriod($timePeriod);
+    
+    $this->sendJSON([
+      'success' => true,
+      'data' => $filteredSalesData
+    ]);
+
+    error_log("Filtered sales data: " . json_encode($filteredSalesData));
+  }
 }

@@ -53,6 +53,7 @@ class SupplierModel extends Model
     return $stmt->fetch();
   }
 
+
   public function createSupplier(array $data): void
   {
     $sql = '
@@ -92,6 +93,8 @@ class SupplierModel extends Model
     $sql = 'UPDATE supplier SET deleted_at = NOW() WHERE id = ?';
     self::$db->query($sql, [$id]);
   }
+
+
 
   public function searchSuppliers(string $query, int $page, int $itemsPerPage): array
   {
@@ -150,4 +153,97 @@ class SupplierModel extends Model
     ]);
     return $stmt->fetchAll();
   }
+
+ public function assignProduct(int $supplierId, array $data): void
+{
+  $sql = '
+    INSERT INTO supplier_product (supplier_id, product_id, branch_id, is_preferred_supplier)
+    VALUES (?, ?, ?, ?)
+  ';
+
+  self::$db->query($sql, [
+    $supplierId,
+    $data['product_id'],
+    $_SESSION['user']['branch_id'] ?? null,
+    1 // Hardcoded as preferred; adjust as needed
+  ]);
 }
+
+  public function getActiveSuppliersCount(): int
+  {
+    if ($_SESSION['user']['branch_id'] == 1) {
+      $sql = 'SELECT COUNT(*) FROM supplier WHERE deleted_at IS NULL';
+      $stmt = self::$db->query($sql);
+      return $stmt->fetchColumn();
+    } else {
+      $sql = 'SELECT COUNT(*) FROM supplier WHERE deleted_at IS NULL AND branch_id = ?';
+      $stmt = self::$db->query($sql, [$_SESSION['user']['branch_id']]);
+      return $stmt->fetchColumn();
+    }
+  }
+  
+
+
+public function getSupplierProducts(int $supplierId): array
+{
+    $sql = '
+        SELECT
+            sp.product_id,
+            p.product_code,
+            p.product_name,
+            sp.is_preferred_supplier
+        FROM product p
+        INNER JOIN supplier_product sp ON sp.product_id = p.id
+        WHERE sp.supplier_id = ? AND sp.branch_id = ?
+    ';
+    $stmt = self::$db->query($sql, [$supplierId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll(); 
+}
+
+public function getOrderDetails(int $supplireID): array
+  {
+    try {
+      self::$db->beginTransaction();
+
+      // Fetch order details
+      $sql = '
+        SELECT
+          po.id,
+          po.reference,
+          po.order_date,
+          po.status,
+          po.total_amount,
+          COUNT(DISTINCT poi.product_id) AS total_items
+        FROM purchase_order po
+        INNER JOIN supplier s ON po.supplier_id = s.id
+        INNER JOIN purchase_order_item poi ON po.id = poi.po_id
+        WHERE s.id = ?
+          AND po.deleted_at IS NULL
+          AND po.branch_id = ?
+      ';
+      $stmt = self::$db->query($sql, [$supplireID, $_SESSION['user']['branch_id']]);
+      $orders = $stmt->fetchAll();
+
+      self::$db->commit();
+      return $orders ?: [];
+    } catch (\Exception $e) {
+      self::$db->rollBack();
+      // Log the exception or handle it as needed
+      throw $e;
+    }
+  }
+
+public function deleteAssignedProduct(int $productId, int $supplierId): void
+{
+    error_log("Deleting assigned product ID: " . $productId);
+
+    $sql = '
+    DELETE FROM supplier_product
+    WHERE product_id = ? AND supplier_id = ? AND branch_id = ?
+';
+    self::$db->query($sql, [$productId, $supplierId, $_SESSION['user']['branch_id']]);
+}
+
+
+}
+

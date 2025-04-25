@@ -23,7 +23,7 @@ class RoleModel extends Model
                 LEFT JOIN role_permission rp ON r.id = rp.role_id
                 LEFT JOIN permission p ON rp.permission_id = p.id
                 LEFT JOIN permission_category pc ON p.category_id = pc.id
-                WHERE r.id = ?
+                WHERE r.id = ? AND r.deleted_at IS NULL
                 GROUP BY r.id';
         $stmt = self::$db->query($sql, [$roleId]);
         $role = $stmt->fetch();
@@ -55,6 +55,7 @@ class RoleModel extends Model
                 LEFT JOIN role_permission rp ON r.id = rp.role_id
                 LEFT JOIN permission p ON rp.permission_id = p.id
                 LEFT JOIN permission_category pc ON p.category_id = pc.id
+                WHERE r.deleted_at IS NULL
                 GROUP BY r.id
                 ORDER BY r.role_name';
         $stmt = self::$db->query($sql);
@@ -80,6 +81,7 @@ class RoleModel extends Model
         LEFT JOIN role_permission rp ON r.id = rp.role_id
         LEFT JOIN permission p ON rp.permission_id = p.id
         LEFT JOIN permission_category pc ON p.category_id = pc.id
+        WHERE r.deleted_at IS NULL
         ORDER BY r.id, pc.category_name, p.permission_name';
         $stmt = self::$db->query($sql);
         $roles = $stmt->fetchAll();
@@ -128,7 +130,7 @@ class RoleModel extends Model
      */
     public function getUserCountByRole($roleId): int
     {
-        $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ?';
+        $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ? AND deleted_at IS NULL';
         $stmt = self::$db->query($sql, [$roleId]);
         $result = $stmt->fetch();
         return (int)$result['user_count'];
@@ -142,7 +144,7 @@ class RoleModel extends Model
      */
     public function getRoleByName(string $roleName): array
     {
-        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ?';
+        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ? AND deleted_at IS NULL';
         $stmt = self::$db->query($sql, [$roleName]);
         $result = $stmt ? $stmt->fetch() : null;
         return $result ?: [];
@@ -191,13 +193,13 @@ class RoleModel extends Model
 
         $auditLogModel = new AuditLogModel();
         $auditLogModel->logAction(
-        tableName: 'role',
-        recordId: $roleId,
-        actionType: 'CREATE',
-        changes: json_encode(['id' => $roleId , $data]),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null  
+        'role',
+        $roleId,
+        'CREATE',
+        json_encode(['id' => $roleId , $data]),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($data['branch_id']) ? $data['branch_id'] : null  
         );
 
 
@@ -317,7 +319,7 @@ class RoleModel extends Model
             }
 
             // Delete the role
-            $deleteRoleSql = 'DELETE FROM role WHERE id = ?';
+            $deleteRoleSql = 'UPDATE role SET deleted_at = NOW() WHERE id = ?';
             $deleteRoleResult = self::$db->query($deleteRoleSql, [$roleId]);
 
             if (!$deleteRoleResult) {

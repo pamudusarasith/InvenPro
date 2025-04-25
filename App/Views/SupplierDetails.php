@@ -7,6 +7,22 @@ $messageType = $_SESSION['message_type'] ?? 'error';
 unset($_SESSION['message'], $_SESSION['message_type']);
 
 $branches = $branches ?? [];
+
+function getStatusBadgeClass($status)
+{
+  switch ($status) {
+    case 'pending':
+      return 'warning';
+    case 'open':
+      return 'accent';
+    case 'completed':
+      return 'success';
+    case 'canceled':
+      return 'danger';
+    default:
+      return 'secondary';
+  }
+}
 ?>
 
 <div class="body">
@@ -173,43 +189,87 @@ $branches = $branches ?? [];
         <div class="card">
           <h3>Assigned Products</h3>
           <div class="content">
-            <table class="data-table">
+            <table class="data-table" id="AssignedProductsTable">
               <thead>
                 <tr>
                   <th>Product Code</th>
                   <th>Product Name</th>
                   <th>Preferred</th>
-                  <th>Last Order</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($supplier_products as $product): ?>
+                <?php if (!empty($supplier_products)): ?>
+                  <?php foreach ($supplier_products as $product): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($product['product_code']) ?></td>
+                      <td><?= htmlspecialchars($product['product_name']) ?></td>
+                      <td>
+                        <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
+                          <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
+                        </span>
+                      </td>
+                      <td>
+                        <button type="button" class="icon-btn danger" title="Delete"
+                          onclick="deleteAssignedProduct(<?= $product['product_id']; ?>)">
+                          <span class="icon">delete</span>
+                        </button>
+
+
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php else: ?>
                   <tr>
-                    <td><?= htmlspecialchars($product['product_code']) ?></td>
-                    <td><?= htmlspecialchars($product['product_name']) ?></td>
-                  
-                    <td>
-                      <span class="badge <?= $product['is_preferred_supplier'] ? 'success' : '' ?>">
-                        <?= $product['is_preferred_supplier'] ? 'Yes' : 'No' ?>
-                      </span>
-                    </td>
-                    <td><?= $product['last_order'] ? date('M d, Y', strtotime($product['last_order'])) : '-' ?></td>
-                    <td>
-                      <button type="button" class="icon-btn" onclick="editProduct(<?= $product['id'] ?>)">
-                        <span class="icon">edit</span>
-                      </button>
-                    </td>
+                    <td colspan="4">No assigned products found.</td>
                   </tr>
-                <?php endforeach; ?>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
+
       <div id="orders" class="tab-content">
         <!-- Similar structure for purchase orders -->
+        <div class="card">
+          <h3>Purchase Orders</h3>
+          <div class="content">
+            <table class="data-table clickable">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Order Date</th>
+                  <th>Status</th>
+                  <th>Total Amount</th>
+                  <th>Items</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($orders)): ?>
+                  <tr>
+                    <td colspan="7" style="text-align: center;">No purchase orders found</td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach ($orders as $order): ?>
+                    <tr onclick="window.location.href='/orders/<?= $order['id'] ?>'">
+                      <td><?= htmlspecialchars($order['reference']) ?></td>
+                      <td><?= date('M d, Y', strtotime($order['order_date'])) ?></td>
+                      <td>
+                        <span class="badge <?= getStatusBadgeClass($order['status']) ?>">
+                          <?= ucfirst($order['status']) ?>
+                        </span>
+                      </td>
+                      <td><?= $order['total_amount'] ? "Rs." . number_format($order['total_amount'], 2) : "N/A" ?></td>
+                      <td><?= $order['total_items'] ?></td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div id="returns" class="tab-content">
@@ -239,21 +299,22 @@ $branches = $branches ?? [];
             </div>
           </div>
 
-        <div class="form-field span-2" style="display: none;" id="product_details">
-          <p><strong>Product Code:</strong> <span id="product_code"></span></p>
-          <p><strong>Product Name:</strong> <span id="product_name"></span></p>
+          <div class="form-field span-2" style="display: none;" id="product_details">
+            <p><strong>Product Code:</strong> <span id="product_code"></span></p>
+            <p><strong>Product Name:</strong> <span id="product_name"></span></p>
+            <input type="hidden" name="product_id" id="product_id">
+          </div>
         </div>
-  </div>
-</form>
 
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAssignDialog()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary">Add Product</button>
         </div>
       </form>
     </div>
   </dialog>
+
 <?php endif; ?>
 
 <!-- Include message popup from existing code -->
@@ -276,26 +337,26 @@ if ($messageType === 'success') {
 
 <script src="/js/search.js"></script>
 <script>
+  function selectproduct(product) {
+    document.querySelector("#product_details").style.display = "flex";
+    document.querySelector("#product_code").textContent = product.product_code;
+    document.querySelector("#product_name").textContent = product.product_name;
+    document.querySelector("#product_id").value = product.id;
+  }
 
-function selectproduct(product) {
-  document.querySelector("#product_details").style.display = "flex";
-  document.querySelector("#product_code").textContent = product.product_code;
-  document.querySelector("#product_name").textContent = product.product_name;
-}
-
-new SearchHandler({
-  apiEndpoint: '/api/products/search',
-  inputElement: document.querySelector("#assign-product input"),
-  resultsContainer: document.querySelector("#assign-product .search-results"),
-  itemsPerPage: 5,
-  renderResultItem: (product) => {
-    const element = document.createElement("div");
-    element.classList.add("search-result");
-    element.textContent = product.product_name;
-    element.addEventListener("click", () => selectproduct(product)); // bind click handler
-    return element;
-  },
-});
+  new SearchHandler({
+    apiEndpoint: '/api/products/search',
+    inputElement: document.querySelector("#assign-product input"),
+    resultsContainer: document.querySelector("#assign-product .search-results"),
+    itemsPerPage: 5,
+    renderResultItem: (product) => {
+      const element = document.createElement("div");
+      element.classList.add("search-result");
+      element.textContent = product.product_name;
+      element.addEventListener("click", () => selectproduct(product)); // bind click handler
+      return element;
+    },
+  });
 
 
   // Reuse existing tab switching functionality
@@ -308,19 +369,19 @@ new SearchHandler({
   }
 
   function enableEditing() {
-        // Add edit mode class to header
-        document.querySelector('.details-header').classList.add('edit-mode');
+    // Add edit mode class to header
+    document.querySelector('.details-header').classList.add('edit-mode');
 
-        // Enable all form inputs
-        document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
-            input.disabled = false;
-        });
+    // Enable all form inputs
+    document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
+      input.disabled = false;
+    });
 
-        // Scroll to form
-        document.querySelector('.tab-content.active').scrollIntoView({
-            behavior: 'smooth'
-        });
-    }
+    // Scroll to form
+    document.querySelector('.tab-content.active').scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
 
   function cancelEdit() {
     if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
@@ -376,8 +437,23 @@ new SearchHandler({
     dialog.close();
   }
 
-  function editProduct(productId) {
-    // Implement product editing logic
+
+
+  function deleteAssignedProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/suppliers/<?= $supplier['id'] ?>/products/delete`;
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'product_id';
+    input.value = productId;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
   }
 
   <?php if ($message): ?>

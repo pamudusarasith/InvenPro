@@ -12,6 +12,11 @@ class SupplierController extends Controller
   {
     $page = $_GET['p'] ?? 1;
     $itemsPerPage = $_GET['ipp'] ?? 10;
+    $page = max(1, (int) ($_GET['p'] ?? 1));
+    $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
+    $search = $_GET['search'] ?? '';
+    $branchId = $_GET['branch'] ?? '';
+    $status = $_GET['status'] ?? '';
 
     $supplierModel = new SupplierModel();
     $suppliers = $supplierModel->getSuppliers($page, $itemsPerPage);
@@ -44,11 +49,14 @@ class SupplierController extends Controller
       $_SESSION['message_type'] = 'error';
       View::redirect('/suppliers');
     }
-
+    $product = $supplierModel->getSupplierProducts($params['id']);
+    $order = $supplierModel->getOrderDetails($params['id']);
     View::renderTemplate('SupplierDetails', [
       'title' => 'Supplier Details',
       'supplier' => $supplier,
       'branches' => $branches,
+      'supplier_products' => $product,
+      'orders' => $order,
     ]);
   }
 
@@ -121,4 +129,40 @@ class SupplierController extends Controller
       'data' => $products,
     ]);
   }
+
+  public function assignProduct(array $params): void
+  {
+    $supplierId = $params['id'];
+    $supplierModel = new SupplierModel();
+    $supplierModel->assignProduct($supplierId, $_POST); // Send post data to model
+
+    $_SESSION['message'] = 'Product added successfully';
+    $_SESSION['message_type'] = 'success';
+
+    $supplierId = $_POST['supplier_id'];
+    View::redirect('/suppliers/' . $params['id']);
+  }
+
+  public function deleteAssignedProduct(array $params): void
+  {
+    error_log("POST data: " . print_r($_POST, true));
+
+      $productId = $_POST['product_id'] ?? null;
+      if (!$productId) {
+          $_SESSION['message'] = 'Invalid product';
+          $_SESSION['message_type'] = 'error';
+          View::redirect('/suppliers/' . $params['id']);
+          return;
+      }
+  
+      $supplierModel = new SupplierModel();
+      $supplierModel->deleteAssignedProduct($productId, $params['id']);
+;
+  
+      $_SESSION['message'] = 'Assigned product deleted successfully';
+      $_SESSION['message_type'] = 'success';
+      View::redirect('/suppliers/' . $params['id']);
+  }
+  
+
 }

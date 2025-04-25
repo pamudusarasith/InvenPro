@@ -1,0 +1,239 @@
+/* General Styles */
+.reports {
+    padding: 2rem;
+    background-color: var(--surface-light);
+    border-radius: 12px;
+    font-family: 'Ubuntu', sans-serif;
+}
+  
+.reports h1 {
+    color: var(--primary-600);
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+  
+  /* Filters Section */
+  .report-filters {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .report-filters select,
+  .report-filters button {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--surface-white);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .report-filters button:hover {
+    background: var(--primary-500);
+    color: var(--surface-white);
+  }
+  
+  /* Stats Section */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    background: var(--surface-white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .stat-card h3 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-card .amount {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--primary-600);
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-card .trend {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .trend.positive {
+    color: var(--success-500);
+  }
+  
+  .trend.negative {
+    color: var(--danger-500);
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 1;
+}
+
+.chart-container canvas {
+    width: 100%;
+    height: 100%;
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    pointer-events: none;
+    display: none;
+}
+  
+  
+  /* Table Section */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface-white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .report-table th,
+  .report-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .report-table th {
+    background: var(--primary-50);
+    color: var(--primary-600);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  
+  .report-table tr:hover {
+    background: var(--surface-mild);
+  }
+  
+  .status {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .status.good {
+    background: var(--success-50);
+    color: var(--success-600);
+  }
+  
+  .status.warning {
+    background: var(--warning-50);
+    color: var(--warning-600);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .report-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+
+    /* Charts Section */
+    .report-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        width: 100%; /* Full width of the parent */
+        height: auto; /* Allow height to adjust dynamically */
+        aspect-ratio: 4 / 3; /* Maintain a 4:3 aspect ratio */
+    }
+    
+
+    .chart-container canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+
+    canvas { 
+        display: block; 
+        width: 100%; 
+        height: 100%; 
+    }
+            
+    .tooltip {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+        font-size: 12px;
+        pointer-events: none;
+        display: none;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+            
+    .legend-item {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+            
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-right: 5px;
+    }
+    
+    @media (max-width: 480px) {
+        .report-filters {
+        flex-direction: column;
+        gap: 0.5rem;
+        }
+    
+        .report-filters select,
+        .report-filters button {
+        width: 100%;
+        }
+    }

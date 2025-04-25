@@ -6,6 +6,25 @@ use App\Core\Model;
 
 class SaleModel extends Model
 {
+  /**
+   * Get sales on today
+   * @return array
+   */
+  public function getSalesToday(): array
+  {
+    $branchCondition = ($_SESSION['user']['branch_id'] == 1) ? '' : 'AND branch_id = ?';
+    $sql = "
+      SELECT
+        SUM(CASE WHEN DATE(sale_date) = CURDATE() THEN total ELSE 0 END) AS today_sales,
+        SUM(CASE WHEN DATE(sale_date) = CURDATE() - INTERVAL 1 DAY THEN total ELSE 0 END) AS yesterday_sales
+      FROM sale
+      WHERE deleted_at IS NULL $branchCondition
+    ";
+
+    $params = ($_SESSION['user']['branch_id'] == 1) ? [] : [$_SESSION['user']['branch_id']];
+    return self::$db->query($sql, $params)->fetch();
+  }
+
   public function createSale(array $data): void
   {
     try {
@@ -71,5 +90,24 @@ class SaleModel extends Model
       self::$db->rollBack();
       throw $e;
     }
+  }
+
+  /**
+   * Get total revenue for the past month from today
+   * @return int
+   */
+  public function getMonthlyRevenue(): int
+  {
+    $branchCondition = ($_SESSION['user']['branch_id'] == 1) ? '' : 'AND branch_id = ?';
+    $sql = "
+      SELECT SUM(total) AS total_revenue
+      FROM sale
+      WHERE DATE(sale_date) >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+        AND deleted_at IS NULL $branchCondition AND created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+    ";
+
+    $params = ($_SESSION['user']['branch_id'] == 1) ? [] : [$_SESSION['user']['branch_id']];
+    return self::$db->query($sql, $params)->fetchColumn() ?: 0;
+
   }
 }

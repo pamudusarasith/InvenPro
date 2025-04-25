@@ -417,4 +417,61 @@ class ProductModel extends Model
     $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
     return $stmt->fetchAll();
   }
+
+  /**
+   * Get the count of low stock products and out of stock products, grouped by product IDs.
+   */
+  public function getStockProductsCounts()
+  {
+    $branchCondition = '';
+    $params = [];
+
+    if ($_SESSION['user']['branch_id'] != 1) {
+      $branchCondition = 'AND pb.branch_id = ? AND bp.branch_id = ?';
+      $params = [$_SESSION['user']['branch_id'], $_SESSION['user']['branch_id']];
+    }
+
+    $sql = "
+      SELECT
+        p.id AS product_id,
+        SUM(CASE WHEN current_quantity > bp.reorder_level THEN 1 ELSE 0 END) AS in_stock,
+        SUM(CASE WHEN current_quantity <= bp.reorder_level AND current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+        SUM(CASE WHEN current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock
+      FROM product as p
+      INNER JOIN product_batch as pb ON p.id = pb.product_id
+      INNER JOIN branch_product as bp ON p.id = bp.product_id
+      WHERE p.deleted_at IS NULL AND pb.deleted_at IS NULL
+        AND pb.is_active = 1
+        $branchCondition
+      GROUP BY p.id
+    ";
+
+    $result = self::$db->query($sql, $params)->fetchAll();
+    $counts = [
+      'in_stock' => 0,
+      'low_stock' => 0,
+      'out_of_stock' => 0,
+    ];
+    foreach ($result as $row) {
+      ($row['in_stock'] > 0) ? $counts['in_stock']++ : null;
+      ($row['low_stock'] > 0) ? $counts['low_stock']++ : null;
+      ($row['out_of_stock'] > 0) ? $counts['out_of_stock']++ : null;
+    }
+
+    return $counts;
+
+  }
+
+  
+  public function getPendingReturnsCount(): int
+  {
+    if ($_SESSION['user']['branch_id'] == 1) {
+      $sql = 'SELECT COUNT(*) FROM customer_return WHERE status = "Pending" AND deleted_at IS NULL';
+      return self::$db->query($sql)->fetchColumn();
+    } else {
+      $sql = 'SELECT COUNT(*) FROM customer_return WHERE status = "Pending" AND branch_id = ? AND deleted_at IS NULL';
+      return self::$db->query($sql, [$_SESSION['user']['branch_id']])->fetchColumn();
+    }
+  }
+
 }
