@@ -214,11 +214,6 @@ class PointOfSaleManager {
     });
   }
 
-  clearCart() {
-    this.cartItems.clear();
-    this.renderCart();
-  }
-
   openCartItemEdit(product) {
     const form = this.elements.cartItemEditForm;
     const dialog = this.elements.cartItemEditDialog;
@@ -408,7 +403,7 @@ class PointOfSaleManager {
       this.hideLoader();
 
       if (result.success) {
-        this.clearCart();
+        this.clearCartState();
         this.closeCheckoutDialog();
         openPopupWithMessage(result.message, "success");
       } else {

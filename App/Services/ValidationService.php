@@ -176,9 +176,9 @@ class ValidationService
       ->rule('items.*.quantity', new Required('Quantity is required'))
       ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
       ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
-      ->rule('items.*.price', new Required('Price is required'))
-      ->rule('items.*.price', new IsNumeric('Price must be numeric'))
-      ->rule('items.*.price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
+      ->rule('items.*.unit_price', new Required('Price is required'))
+      ->rule('items.*.unit_price', new IsNumeric('Price must be numeric'))
+      ->rule('items.*.unit_price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
       ->rule('payment_method', new Required('Payment method is required'))
       ->rule('payment_method', new InArray(['cash', 'card'], 'Invalid payment method'));
     if (!$validator->validate()) {
