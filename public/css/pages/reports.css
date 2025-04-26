@@ -32,8 +32,13 @@
 }
 
 /* Report Cards */
-.report-sections {
+.chart-sections {
   display: grid;
+  grid-template-columns: repeat(auto-fit, 30%);
+  gap: 2rem;
+}
+
+.table-sections {
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
 }
@@ -48,6 +53,7 @@
   display: flex;
   flex-direction: column;
 }
+
 
 .report-card:hover {
   transform: translateY(-5px);
@@ -121,7 +127,7 @@
 
 /* Chart container */
 .chart-container {
-  height: 250px;
+  height: 270px;
   display: flex;
   align-items: center;
   justify-content: center;
