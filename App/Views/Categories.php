@@ -2,6 +2,9 @@
 
 use App\Services\RBACService;
 
+$canEditCategory = RBACService::hasPermission('edit_category_Details');
+$canDeleteCategory = RBACService::hasPermission('delete_category');
+$canAddCategory = RBACService::hasPermission('add_category');
 ?>
 
 <div class="body">
@@ -15,7 +18,7 @@ use App\Services\RBACService;
                 <h1>Category Management</h1>
                 <p class="subtitle">Manage product categories and organize inventory efficiently</p>
             </div>
-            <?php if (RBACService::hasPermission('add_category')): ?>
+            <?php if ($canAddCategory): ?>
                 <button class="btn btn-primary" onclick="openAddCategoryDialog()">
                     <span class="icon">add</span>
                     Add Category
@@ -41,7 +44,9 @@ use App\Services\RBACService;
                         <th>Category Name</th>
                         <th>Description</th>
                         <th>Parent Category</th>
-                        <th>Actions</th>
+                        <?php if ($canEditCategory || $canDeleteCategory): ?>
+                            <th>Actions</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,12 +61,16 @@ use App\Services\RBACService;
                                 <td><?= htmlspecialchars($category['description']) ?></td>
                                 <td data-id="<?= $category['parent_id'] ?>"><?= $category['parent_category_name'] ? htmlspecialchars($category['parent_category_name']) : "N/A" ?></td>
                                 <td>
-                                    <button class="icon-btn mr-md" title="Edit" onclick="openEditCategoryDialog(event, <?= $category['id']; ?>)">
-                                        <span class="icon">edit</span>
-                                    </button>
-                                    <button class="icon-btn danger" title="Delete" onclick="deleteCategory(<?= $category['id']; ?>)">
-                                        <span class="icon">delete</span>
-                                    </button>
+                                    <?php if ($canEditCategory): ?>
+                                        <button class="icon-btn mr-md" title="Edit" onclick="openEditCategoryDialog(event, <?= $category['id']; ?>)">
+                                            <span class="icon">edit</span>
+                                        </button>
+                                    <?php endif; ?>
+                                    <?php if ($canDeleteCategory): ?>
+                                        <button class="icon-btn danger" title="Delete" onclick="deleteCategory(<?= $category['id']; ?>)">
+                                            <span class="icon">delete</span>
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                     <?php endforeach;

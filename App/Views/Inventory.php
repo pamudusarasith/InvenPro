@@ -1,6 +1,10 @@
 <?php
 
-use App\Services\RBACService; ?>
+use App\Services\RBACService;
+
+$canAddProduct = RBACService::hasPermission('add_product');
+
+?>
 
 <div class="body">
     <?php App\Core\View::render("Navbar") ?>
@@ -13,7 +17,7 @@ use App\Services\RBACService; ?>
                 <h1>Inventory Management</h1>
                 <p class="subtitle">Manage your products and stock levels</p>
             </div>
-            <?php if (RBACService::hasPermission('add_inventory')): ?>
+            <?php if ($canAddProduct): ?>
                 <button class="btn btn-primary" onclick="openAddProductModal()">
                     <span class="icon">add</span>
                     Add Product
@@ -158,7 +162,9 @@ use App\Services\RBACService; ?>
                                             <tr data-id="<?= $product['id'] ?>">
                                                 <td><?php echo $product['product_code']; ?></td>
                                                 <td><?php echo $product['product_name']; ?></td>
-                                                <td><?php echo $product['quantity'] ?? "0"; ?></td>
+                                                <td> <?= $product['is_int']
+                                                            ? number_format($product['quantity'] ?? 0, 0)
+                                                            : ($product['quantity'] ?? "0"); ?> <?= htmlspecialchars($product['unit_symbol']) ?></td>
                                                 <td><?php echo $product['price'] ?? "N/A"; ?></td>
                                                 <td>
                                                     <span class="badge <?php echo $product['status'] === 'In Stock' ? 'success' : ($product['status'] === 'Low Stock' ? 'warning' : 'danger'); ?>">
@@ -250,8 +256,10 @@ use App\Services\RBACService; ?>
                                 <tr data-id="<?= $product['id'] ?>">
                                     <td><?php echo $product['product_code']; ?></td>
                                     <td><?php echo $product['product_name']; ?></td>
-                                    <td><?php echo $product['quantity'] ?? "0"; ?></td>
-                                    <td><?php echo $product['price'] ?? "N/A"; ?></td>
+                                    <td><?php echo $product['quantity'] ?? "0"; ?> <?= htmlspecialchars($product['unit_symbol']) ?></td>
+                                    <td><?= $product['is_int']
+                                            ? number_format($product['quantity'] ?? 0, 0)
+                                            : ($product['quantity'] ?? "0"); ?> <?= htmlspecialchars($product['unit_symbol']) ?></td>
                                     <td>
                                         <span class="badge <?php echo $product['status'] === 'In Stock' ? 'success' : ($product['status'] === 'Low Stock' ? 'warning' : 'danger'); ?>">
                                             <?php echo $product['status']; ?>
@@ -356,10 +364,6 @@ use App\Services\RBACService; ?>
                                 <option value="<?= $unit['id'] ?>"><?= $unit['unit_name'] ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
-                    <div class="form-field">
-                        <label for="product-image">Image</label>
-                        <input type="file" id="product-image" name="image">
                     </div>
                     <div class="form-field span-2">
                         <label for="product-categories">Categories *</label>

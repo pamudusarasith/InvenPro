@@ -182,7 +182,7 @@ class OrderModel extends Model
     }
   }
 
-  public function createOrder(array $data): void
+  public function createOrder(array $data): int
   {
     try {
       self::$db->beginTransaction();
@@ -217,6 +217,7 @@ class OrderModel extends Model
       }
 
       self::$db->commit();
+      return $orderId;
     } catch (\Exception $e) {
       self::$db->rollBack();
       // Log the exception or handle it as needed

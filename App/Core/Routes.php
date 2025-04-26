@@ -40,6 +40,8 @@ return [
     '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
+    '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
+
   ],
 
   'POST' => [

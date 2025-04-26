@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Core\Model;
+use PhpParser\Node\Stmt;
 
 class ProductModel extends Model
 {
@@ -179,10 +180,13 @@ class ProductModel extends Model
           WHEN SUM(pb.current_quantity) > bp.reorder_level THEN "In Stock"
           WHEN SUM(pb.current_quantity) > 0 THEN "Low Stock"
           ELSE "Out of Stock"
-        END) AS status
+        END) AS status,
+        u.is_int,
+        u.unit_symbol
     FROM product p
     INNER JOIN branch_product bp ON p.id = bp.product_id
     LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+    INNER JOIN unit u ON u.id = p.unit_id
     WHERE p.deleted_at IS NULL
       AND pb.deleted_at IS NULL
       AND bp.branch_id = ?
@@ -244,12 +248,15 @@ class ProductModel extends Model
           WHEN SUM(pb.current_quantity) > bp.reorder_level THEN "In Stock"
           WHEN SUM(pb.current_quantity) > 0 THEN "Low Stock"
           ELSE "Out of Stock"
-        END) AS status
+        END) AS status,
+      u.is_int,
+      u.unit_symbol
       FROM product p
       INNER JOIN product_category pc ON p.id = pc.product_id
       INNER JOIN category c ON pc.category_id = c.id
       INNER JOIN branch_product bp ON p.id = bp.product_id
       LEFT JOIN product_batch pb ON p.id = pb.product_id AND pb.branch_id = bp.branch_id
+      INNER JOIN unit u ON u.id = p.unit_id
       WHERE p.deleted_at IS NULL
         AND bp.branch_id = ?
         AND (pc.category_id = ? OR c.parent_id = ?)
@@ -287,15 +294,14 @@ class ProductModel extends Model
   {
     self::$db->beginTransaction();
     $sql = '
-      INSERT INTO product (product_code, product_name, description, unit_id, image_path)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO product (product_code, product_name, description, unit_id)
+      VALUES (?, ?, ?, ?)
     ';
     self::$db->query($sql, [
       $data['product_code'],
       $data['product_name'],
       $data['description'],
       $data['unit_id'],
-      $data['image_path']
     ]);
 
     $productId = self::$db->lastInsertId();
@@ -370,6 +376,7 @@ class ProductModel extends Model
   {
     $sql = '
       SELECT
+        s.id,
         s.supplier_name,
         s.contact_person,
         sp.is_preferred_supplier
@@ -422,10 +429,9 @@ class ProductModel extends Model
     }
 
     return $counts;
-
   }
 
-  
+
   public function getPendingReturnsCount(): int
   {
     if ($_SESSION['user']['branch_id'] == 1) {
@@ -437,4 +443,31 @@ class ProductModel extends Model
     }
   }
 
+  public function getReorderQuantity(int $productId)
+  {
+    $sql = '
+       SELECT 
+         reorder_quantity
+       FROM branch_product 
+       WHERE product_id = ? AND branch_id = ?
+    ';
+
+    $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetch();
+  }
+
+
+  public function getSalesOfMonth(int $productId)
+  {
+    $sql = '
+     SELECT
+       SUM(si.quantity * si.unit_price) AS monthly_sales
+     FROM sale_item si
+     INNER JOIN sale s ON s.id = si.sale_id
+     where product_id = ? AND branch_id = ?
+    ';
+
+    $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetch();
+  }
 }
