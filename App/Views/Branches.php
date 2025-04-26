@@ -61,14 +61,13 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
-        <input type="text" id="searchInput" placeholder="Search branches..." oninput="filterBranches()">
+        <input type="text" id="searchInput" name="search" placeholder="Search Branches..." value="<?= htmlspecialchars($search ?? '') ?>">
       </div>
-
       <div class="filters">
-        <select id="filterStatus" onchange="filterByStatus()">
+        <select id="filterStatus" name="status">
           <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active" <?= isset($status) && $status === 'active' ? 'selected' : '' ?>>Active</option>
+          <option value="inactive" <?= isset($status) && $status === 'inactive' ? 'selected' : '' ?>>Inactive</option>
         </select>
       </div>
     </div>
