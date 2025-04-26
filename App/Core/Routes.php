@@ -40,7 +40,8 @@ return [
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
     '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
-
+    '/sales' => 'App\Controllers\SalesController::index',
+    '/sales/list' => 'App\Controllers\SalesController::salesList',
     '/branches' => 'App\Controllers\BranchController::index',
 
   ],
@@ -55,7 +56,7 @@ return [
     '/profile/reset-password' => 'App\Controllers\UserController::updateProfilePassword',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
-    '/suppliers/{id}/products'=>'App\Controllers\SupplierController::assignProduct',
+    '/suppliers/{id}/products' => 'App\Controllers\SupplierController::assignProduct',
     '/suppliers/{id}/products/delete' => 'App\Controllers\SupplierController::deleteAssignedProduct',
     '/products/new' => 'App\Controllers\ProductsController::createProduct',
     '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
@@ -77,7 +78,6 @@ return [
     '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
     '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
     '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
-    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
+    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',
   ],
 ];
-
