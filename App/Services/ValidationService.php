@@ -119,20 +119,9 @@ class ValidationService
     return true;
   }
 
-  public function validateCreateRole(array $data): bool
-  {
-    $validator = new Validator($data);
-    $validator->rule('role_name', new Required('Role Name is required'))
-      ->rule('role_name', new IsString(0, 50, 'Role Name must be a string between 0 and 50 characters'))
-      ->rule('description', new IsString(0, 255, 'Description must be a string between 0 and 255 characters'));
-    if (!$validator->validate()) {
-      $this->errors = $validator->errors();
-      return false;
-    }
-    return true;
-  }
 
-  public function validateUpdateRole(array $data): bool
+
+  public function validateRole(array $data): bool
   {
     $validator = new Validator($data);
     $validator->rule('role_name', new Required('Role Name is required'))
@@ -158,6 +147,44 @@ class ValidationService
       ->rule('branch_id', new Required('Branch ID is required'))
       ->rule('branch_id', new IsNumeric('Invalid Branch ID'))
       ->rule('address', new Required('Address is required'));
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateCreateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateUpdateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;

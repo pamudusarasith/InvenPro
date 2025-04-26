@@ -8,6 +8,7 @@
             ['url' => '/dashboard', 'icon' => 'dashboard', 'label' => 'Dashboard', 'permission' => 'view_dashboard'],
             ['url' => '/users', 'icon' => 'people', 'label' => 'Users', 'permission' => 'manage_users'],
             ['url' => '/roles', 'icon' => 'admin_panel_settings', 'label' => 'Roles', 'permission' => 'manage_roles'],
+            ['url' => '/branches', 'icon' => 'business', 'label' => 'Branches', 'permission' => 'manage_branches'],
             ['url' => '/categories', 'icon' => 'category', 'label' => 'Categories', 'permission' => 'manage_categories'],
             ['url' => '/inventory', 'icon' => 'inventory_2', 'label' => 'Inventory', 'permission' => 'manage_inventory'],
             ['url' => '/customers', 'icon' => 'people_alt', 'label' => 'Customers', 'permission' => 'manage_customers'],

@@ -39,6 +39,8 @@ return [
     '/api/products/search' => 'App\Controllers\ProductsController::searchProducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
+    '/branches' => 'App\Controllers\BranchController::index',
+
   ],
 
   'POST' => [
@@ -69,5 +71,10 @@ return [
     '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
     '/discounts/new' => 'App\Controllers\DiscountsController::createDiscount',
     '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
+    '/branches/new' => 'App\Controllers\BranchController::createBranch',
+    '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
+    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
+    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
+    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
   ],
 ];
