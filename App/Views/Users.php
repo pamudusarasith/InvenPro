@@ -56,7 +56,7 @@ $branches = $branches ?? [];
       </div>
     </div>
 
-    
+
     <!-- Users Table -->
     <div class="table-container">
       <table class="data-table clickable" id="users-table">
@@ -158,7 +158,7 @@ $branches = $branches ?? [];
 <!--add user modal-->
 <?php if (RBACService::hasPermission('add_user')): ?>
 
-  <dialog id="addUserModal">
+  <dialog id="addUserModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Add New User</h2>
@@ -224,7 +224,7 @@ $branches = $branches ?? [];
 
 <?php if (RBACService::hasPermission('delete_user')): ?>
 
-  <dialog id="deleteConfirmModal" class="delete-confirm-modal">
+  <dialog id="deleteConfirmModal" class="delete-confirm-modal" class="modal">
     <div class="modal-content">
       <span class="icon warning-icon">warning</span>
       <div class="dialog-message">
@@ -251,7 +251,6 @@ $branches = $branches ?? [];
 <?php endif; ?>
 
 <script>
-
   document.getElementById('searchInput').addEventListener('input', applyFilters);
   document.getElementById('filterRole').addEventListener('change', applyFilters);
   document.getElementById('filterBranch').addEventListener('change', applyFilters);
@@ -259,6 +258,7 @@ $branches = $branches ?? [];
 
 
   <?php if (RBACService::hasPermission('add_user')): ?>
+
     function openAddUserDialog() {
       const dialog = document.getElementById('addUserModal');
       dialog.showModal();
@@ -349,6 +349,7 @@ $branches = $branches ?? [];
   <?php endif; ?>
 
   <?php if (RBACService::hasPermission('edit_user')): ?>
+
     function editUser(userId) {
       event.stopPropagation();
       location.href = `/users/${userId}/edit`;
@@ -382,7 +383,7 @@ $branches = $branches ?? [];
   // Debounce function to limit URL updates
   function debounce(func, wait) {
     let timeout;
-    return function (...args) {
+    return function(...args) {
       clearTimeout(timeout);
       timeout = setTimeout(() => func.apply(this, args), wait);
     };
@@ -405,7 +406,7 @@ $branches = $branches ?? [];
     const role = document.getElementById('filterRole').value;
     const branch = document.getElementById('filterBranch').value;
     const status = document.getElementById('filterStatus').value;
-    
+
     const url = new URL(location.href);
     url.pathname = '/users';
     url.searchParams.set('search', search);
@@ -422,7 +423,7 @@ $branches = $branches ?? [];
     updateSearchParams();
     applyFilters();
   });
-  document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));  
+  document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
 
   // Existing Pagination Functions
   function changePage(pageNo) {
@@ -437,6 +438,4 @@ $branches = $branches ?? [];
     url.searchParams.delete('p');
     location.href = url.toString();
   }
-
-
 </script>

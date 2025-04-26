@@ -54,7 +54,7 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
               </button>
               <div class="dropdown-menu">
                 <?php if ($canCreateReturn): ?>
-                  <button class="dropdown-item">
+                  <button class="dropdown-item" onclick="openReturnDetailsDialog()">
                     <span class="icon">undo</span>
                     Returns
                   </button>
@@ -300,37 +300,40 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
   </div>
 </div>
 
-<!-- Return Batch Details dialog-->
-<dialog id="returnbatchDetailsDialog" class="modal">
+<!-- Return Details dialog-->
+<dialog id="returnDetailsDialog" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>Return Batch Details</h2>
-      <button type="button" class="close-btn" onclick="closeReturnBatchDetailsDialog()">
+      <h2>Product Return Details</h2>
+      <button type="button" class="close-btn" onclick="closeReturnDetailsDialog()">
         <span class="icon">close</span>
       </button>
     </div>
-    <form id="returnbatchDetailsForm" class="modal-body" method="post">
+    <form id="returnDetailsForm" class="modal-body" method="post" onsubmit="validateForm(event);">
       <div class="form-grid">
-        <input type="text" name="product_id" value="<?= $product['id'] ?>" hidden>
-        <div class="form-field">
-          <label for="po_number">Purchase Order Number</label>
-          <input type="text" name="po_number">
+        <h3><?= $product['product_code'] ?> - <?= $product['product_name'] ?></h3>
+        <div class="form-field span-2">
+          <label for="reason">Reason</label>
+          <textarea id="reason" name="reason"></textarea>
         </div>
         <div class="form-field">
-          <label for="batch_code">Batch Code</label>
-          <input type="text" name="batch_code">
+          <label for="price">Product Price *</label>
+          <select id="price" name="price" required>
+            <option value="" disabled selected>Select a price</option>
+            <?php foreach ($prices as $price): ?>
+              <option value="<?= htmlspecialchars($price['id']) ?>">
+                <?= htmlspecialchars($price['unit_price']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
         </div>
         <div class="form-field">
-          <label for="manufactured_date">Manufacturing Date</label>
-          <input type="date" name="manufactured_date">
-        </div>
-        <div class="form-field">
-          <label for="expiry_date">Expiry Date</label>
-          <input type="date" name="expiry_date">
+          <label for="quantity">Quantity *</label>
+          <input type="text" id="quantity" name="quantity">
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeReturnBatchDetailsDialog()">
+        <button type="button" class="btn btn-secondary" onclick="closeReturnDetailsDialog()">
           Cancel
         </button>
         <button type="submit" class="btn btn-primary">
@@ -341,15 +344,6 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
   </div>
 </dialog>
 
-
-
-
-
-<?php if (RBACService::hasPermission('edit_product')): ?>
-  <dialog id="addBatchModal" class="modal">
-    <!-- Add batch form dialog content -->
-  </dialog>
-<?php endif; ?>
 
 <!-- Message popup and script section similar to SupplierDetails.php -->
 <script>
@@ -476,5 +470,14 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
     }
 
     renderCategorySearchResults(data.data);
+  }
+
+
+  function openReturnDetailsDialog() {
+    document.getElementById("returnDetailsDialog").showModal();
+  }
+
+  function closeReturnDetailsDialog() {
+    document.getElementById("returnDetailsDialog").close();
   }
 </script>

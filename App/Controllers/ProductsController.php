@@ -16,15 +16,19 @@ class ProductsController extends Controller
     $units = $productModel->getMeasuringUnits();
     $suppliers = $productModel->getSuppliersByProductId($params['id']);
     $sales = $productModel->getSalesOfMonth($params['id']);
+    $prices = $productModel->getMultiplePrices($params['id']);
+
 
     View::renderTemplate('ProductDetails', [
       'title' => 'Product Details',
       'product' => $product,
       'units' => $units,
       'suppliers' => $suppliers,
-      'sales' => $sales
+      'sales' => $sales,
+      'prices' => $prices,
     ]);
   }
+
 
   public function createProduct()
   {

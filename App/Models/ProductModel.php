@@ -273,6 +273,21 @@ class ProductModel extends Model
     return $stmt->fetchAll();
   }
 
+
+  public function getMultiplePrices(int $productId): array
+  {
+    $sql = '
+    SELECT
+      DISTINCT unit_price
+    FROM product_batch pb
+    WHERE deleted_at IS NULL AND 
+    product_id = ? and branch_id = ?
+    ';
+
+    $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll();
+  }
+
   public function getCountByCategoryId(int $categoryId): int
   {
     $sql = '
@@ -322,12 +337,21 @@ class ProductModel extends Model
     self::$db->commit();
   }
 
+
+  // public function createReturn(array $data): void
+  // {
+  //   self::$db->beginTransaction();
+  //   $sql = '
+
+  //   '
+  // }
+
   public function updateProduct(int $id, array $data): void
   {
     self::$db->beginTransaction();
     $sql = '
       UPDATE product
-      SET product_code = ?, product_name = ?, description = ?, unit_id = ?, image_path = ?
+      SET product_code = ?, product_name = ?, description = ?, unit_id = ?
       WHERE id = ?
     ';
     self::$db->query($sql, [
@@ -335,7 +359,6 @@ class ProductModel extends Model
       $data['product_name'],
       $data['description'],
       $data['unit_id'],
-      $data['image_path'],
       $id
     ]);
 
@@ -468,6 +491,6 @@ class ProductModel extends Model
     ';
 
     $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
-    return $stmt->fetch();
+    return $stmt->fetchAll();
   }
 }

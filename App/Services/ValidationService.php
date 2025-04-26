@@ -41,7 +41,7 @@ class ValidationService
     return true;
   }
 
-  
+
 
   public function validateUpdatePassword(array $data): bool
   {
@@ -68,8 +68,10 @@ class ValidationService
       ->rule('last_name', new Required('Last Name is required'))
       ->rule('last_name', new IsString(0, 50, 'Last Name must be a string between 0 and 50 characters'))
       ->rule('email', new Required('Email is required'))
-      ->rule('email', new Email()
-    );
+      ->rule(
+        'email',
+        new Email()
+      );
 
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
@@ -145,7 +147,7 @@ class ValidationService
     }
     return true;
   }
-  
+
 
   public function validateCreateSupplier(array $data): bool
   {
@@ -271,6 +273,8 @@ class ValidationService
     }
     return true;
   }
+
+
 
   public function validateCreateOrder(array $data): bool
   {

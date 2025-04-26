@@ -138,7 +138,7 @@ $canAddCategory = RBACService::hasPermission('add_category');
 </div>
 
 <?php if (RBACService::hasPermission('add_category')): ?>
-    <dialog id="addCategoryDialog">
+    <dialog id="addCategoryDialog" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Add New Category</h2>
