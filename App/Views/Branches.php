@@ -3,13 +3,7 @@
 use App\Services\RBACService;
 
 // Simulate data from controller
-$branches = $branches ?? [
-  ['id' => 1, 'branch_code' => 'HQ001', 'branch_name' => 'Headquarters', 'address' => '123 Main Street, Colombo', 'phone' => '+94 11 234 5678', 'email' => 'hq@invenpro.com', 'deleted_at' => null],
-  ['id' => 2, 'branch_code' => 'BR002', 'branch_name' => 'Kandy Branch', 'address' => '456 Hill Street, Kandy', 'phone' => '+94 81 234 5678', 'email' => 'kandy@invenpro.com', 'deleted_at' => null],
-  ['id' => 3, 'branch_code' => 'BR003', 'branch_name' => 'Galle Branch', 'address' => '789 Beach Road, Galle', 'phone' => '+94 91 234 5678', 'email' => 'galle@invenpro.com', 'deleted_at' => null],
-  ['id' => 4, 'branch_code' => 'BR004', 'branch_name' => 'Jaffna Branch', 'address' => '101 North Road, Jaffna', 'phone' => '+94 21 234 5678', 'email' => 'jaffna@invenpro.com', 'deleted_at' => null],
-  ['id' => 5, 'branch_code' => 'BR005', 'branch_name' => 'Batticaloa Branch', 'address' => '202 East Avenue, Batticaloa', 'phone' => '+94 65 234 5678', 'email' => 'batti@invenpro.com', 'deleted_at' => '2024-03-15 00:00:00']
-];
+$branches = $branches ?? [];
 
 $page = $_GET['p'] ?? 1;
 $itemsPerPage = $_GET['ipp'] ?? 10;
@@ -116,7 +110,7 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
                 <?php if ($canEditBranch || $canDeleteBranch): ?>
                   <td class="row gap-xs">
                     <?php if ($canEditBranch): ?>
-                      <button class="icon-btn" title="Edit" onclick="openEditBranchDialog(<?= $branch['id']; ?>)">
+                      <button class="icon-btn" title="Edit" onclick="openEditBranchDialog(event, <?= $branch['id']; ?>)">
                         <span class="icon">edit</span>
                       </button>
                     <?php endif; ?>
@@ -199,8 +193,8 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
   </div>
 </div>
 
-<?php if ($canAddBranch): ?>
-  <dialog id="addBranchModal" class="modal">
+<?php if (RBACService::hasPermission('add_branch')): ?>
+  <dialog id="addBranchDialog" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Add New Branch</h2>
@@ -213,87 +207,41 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
         <div class="form-grid">
           <div class="form-field">
             <label for="branchCode">Branch Code *</label>
-            <input type="text" id="branchCode" name="branch_code" required placeholder="e.g. BR001">
+            <input type="text" id="branchCode" name="branch_code" required>
           </div>
 
           <div class="form-field">
             <label for="branchName">Branch Name *</label>
-            <input type="text" id="branchName" name="branch_name" required placeholder="e.g. Main Branch">
+            <input type="text" id="branchName" name="branch_name" required>
           </div>
 
           <div class="form-field">
             <label for="phone">Phone *</label>
-            <input type="tel" id="phone" name="phone" required placeholder="e.g. +94 11 234 5678">
+            <input type="tel" id="phone" name="phone" required>
           </div>
 
           <div class="form-field">
             <label for="email">Email *</label>
-            <input type="email" id="email" name="email" required placeholder="e.g. branch@invenpro.com">
+            <input type="email" id="email" name="email" required>
           </div>
 
           <div class="form-field span-2">
             <label for="address">Address *</label>
-            <textarea id="address" name="address" rows="3" required placeholder="e.g. 123 Main Street, Colombo"></textarea>
+            <textarea id="address" name="address" rows="3" required></textarea>
           </div>
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn btn-secondary" onclick="closeAddBranchDialog()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create Branch</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
     </div>
   </dialog>
 <?php endif; ?>
 
-<?php if ($canEditBranch): ?>
-  <dialog id="editBranchModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Edit Branch</h2>
-        <button class="close-btn" onclick="closeEditBranchDialog()">
-          <span class="icon">close</span>
-        </button>
-      </div>
 
-      <form id="editBranchForm" method="POST" action="/branches/update" onsubmit="validateEditForm(event);">
-        <input type="hidden" id="editBranchId" name="id">
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="editBranchCode">Branch Code *</label>
-            <input type="text" id="editBranchCode" name="branch_code" required>
-          </div>
-
-          <div class="form-field">
-            <label for="editBranchName">Branch Name *</label>
-            <input type="text" id="editBranchName" name="branch_name" required>
-          </div>
-
-          <div class="form-field">
-            <label for="editPhone">Phone *</label>
-            <input type="tel" id="editPhone" name="phone" required>
-          </div>
-
-          <div class="form-field">
-            <label for="editEmail">Email *</label>
-            <input type="email" id="editEmail" name="email" required>
-          </div>
-
-          <div class="form-field span-2">
-            <label for="editAddress">Address *</label>
-            <textarea id="editAddress" name="address" rows="3" required></textarea>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeEditBranchDialog()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Branch</button>
-        </div>
-      </form>
-    </div>
-  </dialog>
-<?php endif; ?>
-
+<script src="/js/search.js"></script>
 <script>
   // Navigation and pagination functions
   function changePage(pageNo) {
@@ -309,11 +257,6 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     location.href = url.toString();
   }
 
-  function viewBranchDetails(branchId) {
-    // In a real implementation, this would navigate to a branch details page
-    console.log('View branch details for ID:', branchId);
-    // location.href = '/branches/' + branchId;
-  }
 
   // Filtering functions
   function filterBranches() {
@@ -348,69 +291,24 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     });
   }
 
-  <?php if ($canAddBranch): ?>
-    // Add branch dialog functions
+  <?php if (RBACService::hasPermission('add_branch')): ?>
+
     function openAddBranchDialog() {
-      const dialog = document.getElementById('addBranchModal');
-      dialog.showModal();
+        document.querySelector('#addBranchDialog .modal-header h2').innerHTML = "Add New Branch";
+        const dialog = document.getElementById('addBranchDialog');
+
+        const form = document.getElementById('addBranchForm');
+        form.action = '/branches/new';
+        form.reset();
+        dialog.showModal();
     }
 
     function closeAddBranchDialog() {
-      const dialog = document.getElementById('addBranchModal');
-      dialog.close();
+        const dialog = document.getElementById('addBranchDialog');
+        dialog.close();
     }
 
-    function validateForm(event) {
-      const form = event.target;
-      const branchCode = form.querySelector('#branchCode');
-      const branchName = form.querySelector('#branchName');
-      const phone = form.querySelector('#phone');
-      const email = form.querySelector('#email');
-      const address = form.querySelector('#address');
-
-      // Clear previous error messages
-      const errorFields = form.querySelectorAll('.error');
-      errorFields.forEach(field => {
-        field.classList.remove('error');
-        field.querySelector('.error-message')?.remove();
-      });
-
-      let hasError = false;
-
-      // Validate required fields
-      if (!branchCode.value.trim()) {
-        addErrorMessage(branchCode.parentElement, 'Branch code is required');
-        hasError = true;
-      }
-
-      if (!branchName.value.trim()) {
-        addErrorMessage(branchName.parentElement, 'Branch name is required');
-        hasError = true;
-      }
-
-      if (!phone.value.trim()) {
-        addErrorMessage(phone.parentElement, 'Phone number is required');
-        hasError = true;
-      }
-
-      if (!email.value.trim()) {
-        addErrorMessage(email.parentElement, 'Email is required');
-        hasError = true;
-      } else if (!isValidEmail(email.value)) {
-        addErrorMessage(email.parentElement, 'Please enter a valid email address');
-        hasError = true;
-      }
-
-      if (!address.value.trim()) {
-        addErrorMessage(address.parentElement, 'Address is required');
-        hasError = true;
-      }
-
-      if (hasError) {
-        event.preventDefault();
-      }
-    }
-
+  
     function addErrorMessage(field, message) {
       field.classList.add('error');
       let errorMessage = document.createElement('span');
@@ -425,84 +323,34 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     }
   <?php endif; ?>
 
-  <?php if ($canEditBranch): ?>
+  <?php if (RBACService::hasPermission('edit_branch')): ?>
     // Edit branch dialog functions
-    function openEditBranchDialog(branchId) {
-      event.stopPropagation();
-      const dialog = document.getElementById('editBranchModal');
+    function openEditBranchDialog(e, branchID) {
+    document.querySelector('#addBranchDialog .modal-header h2').innerHTML = "Edit Branch";
+    const tr = e.target.closest('tr');
+    const branchCode = tr.querySelector('td:nth-child(1)').innerText; 
+    const branchName = tr.querySelector('td:nth-child(2)').innerText;
+    const phone = tr.querySelector('td:nth-child(4)').innerText;      
+    const email = tr.querySelector('td:nth-child(5)').innerText;     
+    const address = tr.querySelector('td:nth-child(3)').innerText;
 
-      // In a real implementation, this would fetch branch data from the server
-      // For demo, we'll use the hardcoded data
-      const branch = getBranchById(branchId);
+    const form = document.getElementById('addBranchForm');
+    form.action = `/branches/${branchID}/update`;
+    form.querySelector('input[name="branch_code"]').value = branchCode;
+    form.querySelector('input[name="branch_name"]').value = branchName;
+    form.querySelector('input[name="phone"]').value = phone;
+    form.querySelector('input[name="email"]').value = email;
+    form.querySelector('textarea[name="address"]').value = address;
 
-      if (branch) {
-        document.getElementById('editBranchId').value = branch.id;
-        document.getElementById('editBranchCode').value = branch.branch_code;
-        document.getElementById('editBranchName').value = branch.branch_name;
-        document.getElementById('editPhone').value = branch.phone;
-        document.getElementById('editEmail').value = branch.email;
-        document.getElementById('editAddress').value = branch.address;
-
-        dialog.showModal();
-      }
-    }
+    document.getElementById('addBranchDialog').showModal();
+}
 
     function closeEditBranchDialog() {
       const dialog = document.getElementById('editBranchModal');
       dialog.close();
     }
 
-    function validateEditForm(event) {
-      // Similar validation as add form
-      const form = event.target;
-      const branchCode = form.querySelector('#editBranchCode');
-      const branchName = form.querySelector('#editBranchName');
-      const phone = form.querySelector('#editPhone');
-      const email = form.querySelector('#editEmail');
-      const address = form.querySelector('#editAddress');
-
-      // Clear previous error messages
-      const errorFields = form.querySelectorAll('.error');
-      errorFields.forEach(field => {
-        field.classList.remove('error');
-        field.querySelector('.error-message')?.remove();
-      });
-
-      let hasError = false;
-
-      // Validate required fields (same validation as add form)
-      if (!branchCode.value.trim()) {
-        addErrorMessage(branchCode.parentElement, 'Branch code is required');
-        hasError = true;
-      }
-
-      if (!branchName.value.trim()) {
-        addErrorMessage(branchName.parentElement, 'Branch name is required');
-        hasError = true;
-      }
-
-      if (!phone.value.trim()) {
-        addErrorMessage(phone.parentElement, 'Phone number is required');
-        hasError = true;
-      }
-
-      if (!email.value.trim()) {
-        addErrorMessage(email.parentElement, 'Email is required');
-        hasError = true;
-      } else if (!isValidEmail(email.value)) {
-        addErrorMessage(email.parentElement, 'Please enter a valid email address');
-        hasError = true;
-      }
-
-      if (!address.value.trim()) {
-        addErrorMessage(address.parentElement, 'Address is required');
-        hasError = true;
-      }
-
-      if (hasError) {
-        event.preventDefault();
-      }
-    }
+   
 
     // Helper function to get branch by ID (simulating data access)
     function getBranchById(id) {
@@ -512,7 +360,7 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     }
   <?php endif; ?>
 
-  <?php if ($canDeleteBranch): ?>
+  <?php if ($RBACService::hasPermission('delete_branch')): ?>
     // Deactivate and restore branch functions
     function deactivateBranch(branchId) {
       event.stopPropagation();
