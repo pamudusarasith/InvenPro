@@ -73,5 +73,8 @@ return [
     '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
     '/branches/new' => 'App\Controllers\BranchController::createBranch',
     '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
+    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
+    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
+    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
   ],
 ];
