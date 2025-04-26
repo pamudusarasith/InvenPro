@@ -74,16 +74,16 @@ class ReportController extends Controller
             'endDate' => $endDate,
             'kpiMetrics' => $data['kpiMetrics'],
             'topSellingProducts' => $data['topSellingProducts'],
-            'dailySalesData' => $data['dailySalesData'],
+            'salesData' => $data['salesData'],
             'stockStatus' => $data['stockStatus'],
             'recentPurchaseOrders' => $data['recentPurchaseOrders'],
             'categoryData' => $data['categoryData'],
             'supplierPerformance' => $data['supplierPerformance'],
             'categoryRevenueData' => $data['categoryRevenueData'],
             'expiringBatches' => $data['expiringBatches'],
-            'customerAnalytics' => $data['customerAnalytics'],
             'lowStockItems' => $data['lowStockItems'],
-            'monthlySalesData' => $data['monthlySalesData']
+            'monthlySalesData' => $data['monthlySalesData'],
+            'countAndRevenue' => $data['countAndRevenue']
         ]);
     }
 
@@ -95,44 +95,7 @@ class ReportController extends Controller
 
         $reportModel = new ReportModel();
 
-        // Sample data from the view
-        $kpiMetrics = [
-            [
-                'label' => 'Total Sales',
-                'value' => 'LKR 427,350.00',
-                'trend' => '+12.5%',
-                'trend_type' => 'positive',
-                'icon' => 'payments',
-                'type' => 'primary'
-            ],
-            [
-                'label' => 'Total Orders',
-                'value' => '142',
-                'trend' => '+8.3%',
-                'trend_type' => 'positive',
-                'icon' => 'shopping_cart',
-                'type' => 'success'
-            ],
-            [
-                'label' => 'Average Order Value',
-                'value' => 'LKR 3,009.51',
-                'trend' => '+4.2%',
-                'trend_type' => 'positive',
-                'icon' => 'inventory',
-                'type' => 'accent'
-            ],
-            [
-                'label' => 'Profit Margin',
-                'value' => '24.6%',
-                'trend' => '-1.8%',
-                'trend_type' => 'negative',
-                'icon' => 'trending_up',
-                'type' => 'warning'
-            ]
-        ];
-
         $topSellingProducts = $reportModel->getTopSellingProducts($startDate, $endDate);
-
         //error_log('Top Selling Products: ' . print_r($topSellingProducts, true)); // Log the data for debugging
 
 
@@ -144,14 +107,20 @@ class ReportController extends Controller
         //     ['product_name' => 'Basmati Rice 5kg', 'quantity' => 89, 'revenue' => 'LKR 44,500.00']
         // ];
 
-        $dailySalesData = [
-            ['date' => 'Apr 01', 'sales' => 12500],
-            ['date' => 'Apr 05', 'sales' => 17800],
-            ['date' => 'Apr 10', 'sales' => 14300],
-            ['date' => 'Apr 15', 'sales' => 21000],
-            ['date' => 'Apr 20', 'sales' => 15600],
-            ['date' => 'Apr 25', 'sales' => 19200],
-        ];
+        $salesData = $reportModel->getSalesData($startDate, $endDate);
+        $countAndRevenue = $reportModel->getCountAndRevenue($startDate, $endDate);
+        error_log('Count and Revenue: ' . print_r($countAndRevenue, true)); // Log the data for debugging
+
+        // error_log('Sales Data: ' . print_r($salesData, true)); // Log the data for debugging
+
+        // $dailySalesData = [
+        //     ['date' => 'Apr 01', 'sales' => 12500],
+        //     ['date' => 'Apr 05', 'sales' => 17800],
+        //     ['date' => 'Apr 10', 'sales' => 14300],
+        //     ['date' => 'Apr 15', 'sales' => 21000],
+        //     ['date' => 'Apr 20', 'sales' => 15600],
+        //     ['date' => 'Apr 25', 'sales' => 19200],
+        //];
 
         $stockStatus = [
             'in_stock' => 268,
@@ -169,6 +138,7 @@ class ReportController extends Controller
         ];
 
         $categoryData = $reportModel->getCategoryData();
+        //error_log('Category Data: ' . print_r($categoryData, true)); // Log the data for debugging
 
         //$categoryData = [
         //    ['name' => 'Beverages', 'count' => 42],
@@ -201,7 +171,7 @@ class ReportController extends Controller
         // ];
 
         $expiringBatches = $reportModel->getExpiringBatches($startDate, $endDate);
-        error_log('Expiring Batches: ' . print_r($expiringBatches, true)); // Log the data for debugging
+        //error_log('Expiring Batches: ' . print_r($expiringBatches, true)); // Log the data for debugging
 
         //$expiringBatches = [
         //   ['product_name' => 'Fresh Milk 1L', 'batch_code' => 'FM2504001', 'expiry_date' => '2025-05-15', 'quantity' => 45, 'days_left' => 20],
@@ -211,23 +181,8 @@ class ReportController extends Controller
         //    ['product_name' => 'Organic Butter 200g', 'batch_code' => 'OB2504001', 'expiry_date' => '2025-05-08', 'quantity' => 12, 'days_left' => 13]
         //];
 
-
-        $customerAnalytics = [
-            'loyal_customers' => 87,
-            'new_customers' => 34,
-            'avg_purchase_frequency' => 2.4,
-            'avg_order_value' => 'LKR 3,010',
-            'top_customers' => [
-                ['name' => 'Hotel Seaside', 'total_purchases' => 'LKR 52,350', 'total_orders' => 12],
-                ['name' => 'Green Leaf Restaurant', 'total_purchases' => 'LKR 48,750', 'total_orders' => 15],
-                ['name' => 'City Supermarket', 'total_purchases' => 'LKR 43,200', 'total_orders' => 8],
-                ['name' => 'Royal Bakery', 'total_purchases' => 'LKR 36,500', 'total_orders' => 10],
-                ['name' => 'Wellness Cafe', 'total_purchases' => 'LKR 29,800', 'total_orders' => 9]
-            ]
-        ];
-
         $lowStockItems = $reportModel->getLowStock();
-        error_log('Low Stock Items: ' . print_r($lowStockItems, true)); // Log the data for debugging
+        //error_log('Low Stock Items: ' . print_r($lowStockItems, true)); // Log the data for debugging
 
         //$lowStockItems = [
         //    ['product_name' => 'Basmati Rice 5kg', 'current_stock' => 8, 'reorder_level' => 15, 'days_to_out' => 6],
@@ -244,20 +199,56 @@ class ReportController extends Controller
             $monthlySalesData[] = ['date' => $date, 'sales' => $sales];
         }
 
+        // Sample data from the view
+        $kpiMetrics = [
+            [
+                'label' => 'Total Sales',
+                'value' => 'LKR '.number_format($countAndRevenue['revenue'], 2),
+                'trend' => '+12.5%',
+                'trend_type' => 'positive',
+                'icon' => 'payments',
+                'type' => 'primary'
+            ],
+            [
+                'label' => 'Total Orders',
+                'value' => '142',
+                'trend' => '+8.3%',
+                'trend_type' => 'positive',
+                'icon' => 'shopping_cart',
+                'type' => 'success'
+            ],
+            [
+                'label' => 'Average Order Value',
+                'value' => 'LKR 3,009.51',
+                'trend' => '+4.2%',
+                'trend_type' => 'positive',
+                'icon' => 'inventory',
+                'type' => 'accent'
+            ],
+            [
+                'label' => 'Profit Margin',
+                'value' => '24.6%',
+                'trend' => '-1.8%',
+                'trend_type' => 'negative',
+                'icon' => 'trending_up',
+                'type' => 'warning'
+            ]
+        ];
+
         // Return all data
         return [
             'kpiMetrics' => $kpiMetrics,
             'topSellingProducts' => $topSellingProducts,
-            'dailySalesData' => $dailySalesData,
+            'salesData' => $salesData,
             'stockStatus' => $stockStatus,
             'recentPurchaseOrders' => $recentPurchaseOrders,
             'categoryData' => $categoryData,
             'supplierPerformance' => $supplierPerformance,
             'categoryRevenueData' => $categoryRevenueData,
             'expiringBatches' => $expiringBatches,
-            'customerAnalytics' => $customerAnalytics,
             'lowStockItems' => $lowStockItems,
-            'monthlySalesData' => $monthlySalesData
+            'monthlySalesData' => $monthlySalesData,
+            'countAndRevenue' => $countAndRevenue
         ];
     }
 

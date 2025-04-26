@@ -77,6 +77,7 @@ class ReportModel extends Model
 
     public function getCategoryRevenueData($startDate, $endDate): array
     {
+
         $query = "
             SELECT 
                 c.category_name AS name,
@@ -89,7 +90,7 @@ class ReportModel extends Model
             AND s.sale_date BETWEEN :startDate AND :endDate
             GROUP BY c.id, c.category_name
             ORDER BY revenue DESC
-            LIMIT 5
+            LIMIT 10
         ";
 
         $params = [
@@ -103,12 +104,83 @@ class ReportModel extends Model
         foreach ($results as $row) {
             $formattedResults[] = [
                 'name' => $row['name'],
-                'revenue' => 'LKR ' . number_format($row['revenue'], 2)
+                'revenue' => (float)$row['revenue']
             ];
         }
 
         return $formattedResults;
     }
+
+    public function getSalesData($startDate, $endDate): array
+    {
+        $query = "
+            SELECT 
+                s.sale_date AS date,
+                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
+            FROM sale s
+            LEFT JOIN sale_item si ON s.id = si.sale_id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            GROUP BY s.sale_date
+            HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
+            ORDER BY s.sale_date ASC
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        $formattedResults = [];
+        foreach ($results as $row) {
+            $formattedResults[] = [
+                'date' => (new DateTime($row['date']))->format('M d'),
+                'sales' => (float)$row['revenue']
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    public function getCountAndRevenue($startDate, $endDate): array
+    {
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $query = "
+            SELECT 
+                COUNT(*) AS count,
+                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
+            FROM sale s
+            LEFT JOIN sale_item si ON s.id = si.sale_id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
+        ";
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+
+        $formattedResults = [];
+        if (!empty($results)) {
+            $row = $results[0]; // Fetch the first row
+            $formattedResults = [
+                'count' => (int)$row['count'],
+                'revenue' => (float)$row['revenue']
+            ];
+        }
+        else {
+            $formattedResults = [
+                'count' => 0,
+                'revenue' => 0.00
+            ];
+        }
+
+        return $formattedResults;
+    }
+
 
     public function getCategoryData(): array
     {
