@@ -135,7 +135,7 @@ $branches = $branches ?? [];
 </div>
 
 <?php if (RBACService::hasPermission('add_supplier')): ?>
-  <dialog id="addSupplierModal" class="modal" >
+  <dialog id="addSupplierModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Add New Supplier</h2>
