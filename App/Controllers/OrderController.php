@@ -96,11 +96,17 @@ class OrderController extends Controller
     }
 
     $orderModel = new OrderModel();
-    $orderModel->createOrder($_POST);
-
-    $_SESSION['message'] = 'Order created successfully';
-    $_SESSION['message_type'] = 'success';
-    View::redirect('/orders');
+    $orderId = $orderModel->createOrder($_POST);
+    if ($orderId) {
+      $orderModel->saveOrderAction($orderId, 'create');
+      $_SESSION['message'] = 'Order created successfully';
+      $_SESSION['message_type'] = 'success';
+      View::redirect('/orders');
+    } else {
+      $_SESSION['message'] = 'Order creation failed';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/orders');
+    }
   }
 
   public function updateOrder(array $params)
@@ -154,7 +160,7 @@ class OrderController extends Controller
     }
 
     $orderModel->updateOrder($orderId, $order);
-
+    $orderModel->saveOrderAction($orderId, 'update');
     $_SESSION['message'] = 'Order updated successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -194,7 +200,7 @@ class OrderController extends Controller
     }
 
     $orderModel->deleteOrder($orderId);
-
+    $orderModel->saveOrderAction($orderId, 'delete');
     $_SESSION['message'] = 'Order deleted successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders');
@@ -241,7 +247,7 @@ class OrderController extends Controller
     }
 
     $orderModel->approveOrder($orderId);
-
+    $orderModel->saveOrderAction($orderId, 'approve');
     $_SESSION['message'] = 'Order approved successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -281,7 +287,7 @@ class OrderController extends Controller
     }
 
     $orderModel->completeOrder($orderId);
-
+    $orderModel->saveOrderAction($orderId, 'complete');
     $_SESSION['message'] = 'Order completed successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -321,7 +327,7 @@ class OrderController extends Controller
     }
 
     $orderModel->changeOrderStatus($orderId, 'canceled');
-
+    $orderModel->saveOrderAction($orderId, 'cancel');
     $_SESSION['message'] = 'Order canceled successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -373,7 +379,7 @@ class OrderController extends Controller
     }
 
     $orderModel->receiveOrderItems($orderId, $_POST);
-
+    $orderModel->saveOrderAction($orderId, 'receive');
     $_SESSION['message'] = 'Received items added successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
