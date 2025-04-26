@@ -154,6 +154,44 @@ class ValidationService
     return true;
   }
 
+  public function validateCreateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateUpdateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
   public function validateCheckout(array $data): bool
   {
     $validator = new Validator($data);
