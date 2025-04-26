@@ -39,6 +39,7 @@ return [
     '/api/products/search' => 'App\Controllers\ProductsController::searchProducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
+    '/branches' => 'App\Controllers\BranchController::index',
   ],
 
   'POST' => [
