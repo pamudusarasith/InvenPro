@@ -47,7 +47,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
           <h3><?= htmlspecialchars($role['role_name'] ?? 'Unnamed Role') ?></h3>
         </div>
         <div class="role-card-body">
-          <p><?= htmlspecialchars($role['description'] ?? 'No description') ?></p>
+          <p class=""><?= htmlspecialchars($role['description'] ?? 'No description') ?></p>
           <div class="role-permission-count">
             <span class="icon">verified_user</span>
             <?php if ($roleId === 1): ?>
@@ -62,18 +62,22 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
             <?php endforeach; ?>
           </div>
         </div>
-        <div class="role-card-actions">
-          <button class="btn btn-sm btn-secondary" onclick="viewRoleDetails(<?= $roleId ?>)">
-            <span class="icon">visibility</span>
-            View
-          </button>
-          <?php if (RBACService::hasPermission('manage_roles')): ?>
-            <button class="btn btn-sm btn-primary" onclick="openEditRoleDialog(<?= $roleId ?>)">
-              <span class="icon">edit</span>
-              Edit
+          
+          <div class="card-actions">
+            <button class="icon-btn secondary" onclick="viewRoleDetails(<?= $roleId ?>)" title="">
+              <span class="icon">visibility</span>
             </button>
-          <?php endif; ?>
-        </div>
+            <?php if (RBACService::hasPermission('manage_roles')): ?>
+              <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
+                <span class="icon">edit</span>
+              </button>
+            <?php endif; ?>
+            <?php if (RBACService::hasPermission('manage_roles')): ?>
+              <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
+                <span class="icon">delete</span>
+              </button>
+            <?php endif; ?>
+          </div>
       </div>
       <?php endforeach; ?>
     </div>
@@ -86,7 +90,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
     <div class="modal-content wide-modal">
       <div class="modal-header">
         <h2 id="roleDialogTitle">Add New Role</h2>
-        <button class="btn btn-secondary" onclick="cancelEdit()">
+        <button class="icon-btn secondary" onclick="cancelEdit()">
         <button class="close-btn" onclick="closeRoleDialog()">
           <span class="icon">close</span>
         </button>
@@ -144,13 +148,10 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeRoleDialog()">
-            <span class="icon">close</span>
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">
+        
+          <button type="submit" class="icon-btn primary" title="Save Role">
             <span class="icon">save</span>
-            Save</button>
+            </button>
         </div>
       </form>
     </div>
@@ -204,17 +205,15 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
 
     <div class="modal-footer">
       <?php if (RBACService::hasPermission('manage_roles')): ?>
-        <button class="btn btn-danger" onclick="deleteRole(<?= htmlspecialchars($roleId ?? 'null') ?>)">
-          <span class="icon">delete</span>
-          Delete Role
-        </button>
-      <?php endif; ?>
-      <?php if (RBACService::hasPermission('manage_roles')): ?>
-        <button type="button" class="btn btn-primary" id="editRoleBtn">
-          <span class="icon">edit</span>
-          Edit Role
-        </button>
-      <?php endif; ?>
+          <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
+            <span class="icon">edit</span>
+          </button>
+          <?php endif; ?>
+          <?php if (RBACService::hasPermission('manage_roles')): ?>
+            <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
+              <span class="icon">delete</span>
+            </button>
+          <?php endif; ?>
     </div>
   </dialog>
 </div>

@@ -119,20 +119,9 @@ class ValidationService
     return true;
   }
 
-  public function validateCreateRole(array $data): bool
-  {
-    $validator = new Validator($data);
-    $validator->rule('role_name', new Required('Role Name is required'))
-      ->rule('role_name', new IsString(0, 50, 'Role Name must be a string between 0 and 50 characters'))
-      ->rule('description', new IsString(0, 255, 'Description must be a string between 0 and 255 characters'));
-    if (!$validator->validate()) {
-      $this->errors = $validator->errors();
-      return false;
-    }
-    return true;
-  }
 
-  public function validateUpdateRole(array $data): bool
+
+  public function validateRole(array $data): bool
   {
     $validator = new Validator($data);
     $validator->rule('role_name', new Required('Role Name is required'))
