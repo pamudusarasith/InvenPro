@@ -1,141 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>Login - InvenPro</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <?php if (isset($stylesheets)) {
+        foreach ($stylesheets as $filename): ?>
+            <link rel="stylesheet" href="/css/<?= htmlspecialchars($filename) ?>.css">
+        <?php endforeach;
+    } ?>
+  </head>
 
-<head>
-  <title>Login - InvenPro</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
+  <?php
+    $message = $_SESSION['message'] ?? null;
+    $messageType = $_SESSION['message_type'] ?? 'error';
+    switch ($messageType) {
+        case 'success':
+            $popupIcon = 'check_circle';
+            break;
+        case 'warning':
+            $popupIcon = 'warning';
+            break;
+        default:
+            $popupIcon = 'error';
     }
-
-    .login-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-    }
-
-    .logo {
-      width: 200px;
-      margin-bottom: 2rem;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    input {
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-
-    input[type="submit"] {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-
-    input[type="submit"]:hover {
-      background: #1557b0;
-    }
-
-    .error-popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #fff;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
-    }
-
-    .error-popup.show {
-      transform: translateX(0);
-    }
-
-    .message-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: #d32f2f;
-    }
-
-    .icon {
-      font-family: 'Material Symbols Rounded';
-      font-size: 24px;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  </style>
-</head>
-
-<body>
-<?php
-  //var_dump($_SESSION)
+unset($_SESSION['message'], $_SESSION['message_type']);
   ?>
-  <div class="login-container">
-    <img src="/images/logo-light.png" alt="InvenPro Logo" class="logo">
-    <form action="/" method="POST">
-      <input type="email" name="email" placeholder="Email" required>
-      <input type="password" name="password" placeholder="Password" required>
-      <input type="submit" value="Login">
-    </form>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const errorPopup = document.querySelector('.error-popup');
-      const overlay = document.querySelector('.overlay');
+  <body class="login-body">
+    <div class="login-wrapper">
+      <div class="login-form-container">
+        <div class="login-header">
+          <img src="/images/logo-light.png" alt="InvenPro Logo" class="logo">
+          <p class="login-subtitle">Sales & Inventory Management System</p>
+        </div>
+        
+        <form action="/" method="POST">
+          <div class="form-field">
+            <input type="email" name="email" placeholder="Email" required>
+          </div>
+          
+          <div class="form-field">
+            <input type="password" name="password" placeholder="Password" required>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-login">
+            <span class="icon">login</span>
+            Login
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <dialog id="messagePopup" class="popup <?= $messageType ?>">
+        <span class="icon"><?= $popupIcon ?></span>
+        <span class="popup-message"><?= htmlspecialchars($message ?? "") ?></span>
+        <button class="popup-close" onclick="closePopup()">
+            <span class="icon">close</span>
+        </button>
+    </dialog>
+        
+    <?php if (isset($scripts)) {
+        foreach ($scripts as $filename): ?>
+            <script src="/js/<?= $filename ?>.js"></script>
+    <?php endforeach;
+    } ?>
+    <script src="/js/main.js"></script>
 
-      if (errorPopup && errorPopup.classList.contains('show')) {
-        setTimeout(() => {
-          errorPopup.classList.remove('show');
-          overlay.classList.remove('show');
-        }, 3000);
-      }
-
-      if (overlay) {
-        overlay.addEventListener('click', () => {
-          errorPopup.classList.remove('show');
-          overlay.classList.remove('show');
-        });
-      }
-    });
-  </script>
-</body>
-
+  </body>
 </html>
