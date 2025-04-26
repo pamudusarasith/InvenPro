@@ -6,7 +6,8 @@ class SearchHandler {
    * @param {HTMLElement} config.inputElement - Input element for search queries
    * @param {HTMLElement} config.resultsContainer - Container for search results
    * @param {Function} config.renderResultItem - Function to render a single result item
-   * @param {Function} config.onSelect - Callback when a result is selected
+   * @param {Function} config.onSelect - Callback when a result is selected, can receive additional arguments
+   * @param {Object} [config.selectionContext={}] - Additional context data to pass to onSelect callback
    * @param {Object} [config.extraParams={}] - Extra parameters to include in API requests
    * @param {number} [config.itemsPerPage=5] - Number of items per page
    */
@@ -17,6 +18,7 @@ class SearchHandler {
     this.renderResultItem = config.renderResultItem;
     this.onSelect = config.onSelect;
     this.extraParams = config.extraParams || {};
+    this.selectionContext = config.selectionContext || {};
     this.itemsPerPage = config.itemsPerPage || 5;
 
     this.state = {
@@ -135,7 +137,9 @@ class SearchHandler {
 
     this.state.results.forEach((item) => {
       const element = this.renderResultItem(item);
-      element.addEventListener("click", () => this.handleSelect(item));
+      element.addEventListener("click", (event) => {
+        this.handleSelect(item, event);
+      });
       this.resultsContainer.appendChild(element);
     });
   }
@@ -143,11 +147,12 @@ class SearchHandler {
   /**
    * Handle selection of a result
    * @param {Object} item - Selected item
+   * @param {Event} [event] - The original click event
    */
-  handleSelect(item) {
+  handleSelect(item, event) {
     this.clear();
     if (this.onSelect) {
-      this.onSelect(item);
+      this.onSelect(item, this.selectionContext, event);
     }
   }
 
@@ -169,6 +174,17 @@ class SearchHandler {
     this.extraParams = {
       ...this.extraParams,
       ...params,
+    };
+  }
+
+  /**
+   * Update the selection context for the onSelect callback
+   * @param {Object} context - New context data
+   */
+  updateSelectionContext(context) {
+    this.selectionContext = {
+      ...this.selectionContext,
+      ...context,
     };
   }
 }

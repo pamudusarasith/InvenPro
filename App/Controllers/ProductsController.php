@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\View;
 use App\Models\ProductModel;
+use Exception;
 
 class ProductsController extends Controller
 {
@@ -74,18 +75,25 @@ class ProductsController extends Controller
     ]);
   }
 
-  public function assignProducts(): void
+  public function searchProducts()
   {
     $productModel = new ProductModel();
     $query = $_GET['q'] ?? '';
     $page = $_GET['p'] ?? 1;
     $itemsPerPage = $_GET['ipp'] ?? 10;
 
-    $products = $productModel->assignProduct($query, $page, $itemsPerPage);
+    try {
+      $products = $productModel->searchProducts($query, $page, $itemsPerPage);
 
-    self::sendJSON([
-      "success" => true,
-      "data" => $products,
-    ]);
+      self::sendJSON([
+        "success" => true,
+        "data" => $products,
+      ]);
+    } catch (Exception $e) {
+      self::sendJSON([
+        "success" => false,
+        "message" => "Failed searching products"
+      ]);
+    }
   }
 }

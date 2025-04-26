@@ -38,13 +38,13 @@ unset($_SESSION['message'], $_SESSION['message_type']);
         App\Core\View::render($view, $data ?? []);
     } ?>
 
-    <div id="messagePopup" class="popup <?= $messageType ?>">
+    <dialog id="messagePopup" class="popup <?= $messageType ?>">
         <span class="icon"><?= $popupIcon ?></span>
         <span class="popup-message"><?= htmlspecialchars($message ?? "") ?></span>
         <button class="popup-close" onclick="closePopup()">
             <span class="icon">close</span>
         </button>
-    </div>
+    </dialog>
 
     <?php if (isset($scripts)) {
         foreach ($scripts as $filename): ?>

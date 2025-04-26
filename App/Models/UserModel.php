@@ -209,6 +209,7 @@ class UserModel extends Model
       $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
       self::$db->query($sql, [$id]);
 
+
       $_SESSION['message'] = 'User deleted successfully';
       $_SESSION['message_type'] = 'success';
   }
@@ -218,6 +219,7 @@ class UserModel extends Model
     $ip = $_SERVER['REMOTE_ADDR'];
     $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
     self::$db->query($sql, [$ip, $id]);
+
   }
 
   public function getFailedLoginAttempts(string $email): int

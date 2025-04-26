@@ -23,7 +23,7 @@ class RoleModel extends Model
                 LEFT JOIN role_permission rp ON r.id = rp.role_id
                 LEFT JOIN permission p ON rp.permission_id = p.id
                 LEFT JOIN permission_category pc ON p.category_id = pc.id
-                WHERE r.id = ?
+                WHERE r.id = ? AND r.deleted_at IS NULL
                 GROUP BY r.id';
         $stmt = self::$db->query($sql, [$roleId]);
         $role = $stmt->fetch();
@@ -55,6 +55,7 @@ class RoleModel extends Model
                 LEFT JOIN role_permission rp ON r.id = rp.role_id
                 LEFT JOIN permission p ON rp.permission_id = p.id
                 LEFT JOIN permission_category pc ON p.category_id = pc.id
+                WHERE r.deleted_at IS NULL
                 GROUP BY r.id
                 ORDER BY r.role_name';
         $stmt = self::$db->query($sql);
@@ -317,8 +318,7 @@ class RoleModel extends Model
             }
 
             // Delete the role
-            // Check if assigned users are soft deleted
-            
+            // Check if assigned users are soft delete
             $activeUserCount= RoleModel::getUserCountByRole($roleId);
 
             if ($activeUserCount > 0) {
@@ -326,8 +326,9 @@ class RoleModel extends Model
                 return false;
             }
 
-            $deleteRoleSql = 'UPDATE role SET deleted_at = ? WHERE id = ?';
-            $deleteRoleResult = self::$db->query($deleteRoleSql, [date('Y-m-d H:i:s'), $roleId]);
+           
+            $deleteRoleSql = 'UPDATE role SET deleted_at = NOW() WHERE id = ?';
+            $deleteRoleResult = self::$db->query($deleteRoleSql, [$roleId]);
 
             if (!$deleteRoleResult) {
                 self::$db->rollBack();

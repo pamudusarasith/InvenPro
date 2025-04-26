@@ -62,6 +62,7 @@ class OrderModel extends Model
     $stmt = self::$db->query($sql, $params);
     return $stmt->fetchAll();
   }
+
   public function getOrdersCount($query, $status, $from, $to): int
   {
     $whereClauses = [];
@@ -181,21 +182,20 @@ class OrderModel extends Model
     }
   }
 
-  public function createOrder(array $data): void
+  public function createOrder(array $data): int
   {
     try {
       self::$db->beginTransaction();
 
       // Insert order details
       $sql = '
-        INSERT INTO purchase_order (reference, branch_id, supplier_id, order_date, expected_date, notes, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO purchase_order (reference, branch_id, supplier_id, expected_date, notes, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
       ';
       self::$db->query($sql, [
         $data['reference'] ?? null,
         $_SESSION['user']['branch_id'] ?? null,
         $data['supplier_id'] ?? null,
-        $data['order_date'] ?? null,
         $data['expected_date'] ?? null,
         $data['notes'] ?? null,
         $_SESSION['user']['id'] ?? null,
@@ -216,6 +216,7 @@ class OrderModel extends Model
       }
 
       self::$db->commit();
+      return $orderId;
     } catch (\Exception $e) {
       self::$db->rollBack();
       // Log the exception or handle it as needed
@@ -395,5 +396,38 @@ class OrderModel extends Model
       // Log the exception or handle it as needed
       throw $e;
     }
+  }
+
+  public function getPendingAndOpenOrdersCount(): array
+  {
+    $params = ['pending', 'open'];
+    $branchCondition = '';
+
+    if ($_SESSION['user']['branch_id'] != 1) {
+      $branchCondition = ' AND branch_id = ?';
+      $params[] = $_SESSION['user']['branch_id'];
+    }
+
+    $sql = '
+      SELECT 
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS pending_count,
+        SUM(CASE WHEN status = ? THEN 1 ELSE 0 END) AS open_count
+      FROM purchase_order
+      WHERE deleted_at IS NULL' . $branchCondition;
+
+    $result = self::$db->query($sql, $params)->fetch();
+    return [
+      'pending' => (int) $result['pending_count'],
+      'open' => (int) $result['open_count']
+    ];
+  }
+
+  public function saveOrderAction(int $orderId, string $action): void
+  {
+    $sql = '
+      INSERT INTO purchase_order_action (po_id, action, created_by)
+      VALUES (?, ?, ?)
+    ';
+    self::$db->query($sql, [$orderId, $action, $_SESSION['user']['id']]);
   }
 }
