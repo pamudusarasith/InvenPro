@@ -16,16 +16,16 @@ class BranchController extends Controller
     $itemsPerPage = $_GET['ipp'] ?? 10;
     $page = max(1, (int) ($_GET['p'] ?? 1));
     $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
-    $search = $_GET['search'] ?? '';
-    $status = $_GET['status'] ?? '';
-
     $branchModel = new BranchModel();
     $branches = $branchModel->getBranches($page, $itemsPerPage);
+    
     
 
     View::renderTemplate('Branches', [
       'title' => 'Manage Branches',
       'branches' => $branches,
+      'page' => $page,
+      'itemsPerPage' => $itemsPerPage,
     ]);
       
   }
@@ -60,4 +60,5 @@ class BranchController extends Controller
       $_SESSION['message_type'] = 'success';
       View::redirect('/branches');
   }
+  
 }
