@@ -189,14 +189,13 @@ class OrderModel extends Model
 
       // Insert order details
       $sql = '
-        INSERT INTO purchase_order (reference, branch_id, supplier_id, order_date, expected_date, notes, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO purchase_order (reference, branch_id, supplier_id, expected_date, notes, created_by)
+        VALUES (?, ?, ?, ?, ?, ?)
       ';
       self::$db->query($sql, [
         $data['reference'] ?? null,
         $_SESSION['user']['branch_id'] ?? null,
         $data['supplier_id'] ?? null,
-        $data['order_date'] ?? null,
         $data['expected_date'] ?? null,
         $data['notes'] ?? null,
         $_SESSION['user']['id'] ?? null,
@@ -421,5 +420,14 @@ class OrderModel extends Model
       'pending' => (int) $result['pending_count'],
       'open' => (int) $result['open_count']
     ];
+  }
+
+  public function saveOrderAction(int $orderId, string $action): void
+  {
+    $sql = '
+      INSERT INTO purchase_order_action (po_id, action, created_by)
+      VALUES (?, ?, ?)
+    ';
+    self::$db->query($sql, [$orderId, $action, $_SESSION['user']['id']]);
   }
 }

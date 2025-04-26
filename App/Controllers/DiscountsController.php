@@ -3,7 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
+use App\Models\CustomerModel;
 use App\Models\DiscountModel;
+use App\Services\DiscountService;
 use App\Services\RBACService;
 
 class DiscountsController extends Controller
@@ -29,11 +31,10 @@ class DiscountsController extends Controller
     $status = $_GET['status'] ?? '';
     $from = $_GET['from'] ?? '';
     $to = $_GET['to'] ?? '';
-    $applicationMethod = $_GET['application'] ?? '';
     $type = $_GET['type'] ?? '';
     $discountModel = new DiscountModel();
-    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $applicationMethod, $type);
-    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $applicationMethod, $type);
+    $discounts = $discountModel->getDiscounts($page, $itemsPerPage, $query, $status, $from, $to, $type);
+    $totalRecords = $discountModel->getDiscountsCount($query, $status, $from, $to, $type);
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
     View::renderTemplate("Discounts", [
@@ -53,9 +54,7 @@ class DiscountsController extends Controller
     }
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
-    foreach ($_POST['coupons'] as &$coupon) {
-      $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
-    }
+    $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
 
     if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
       $_SESSION['message'] = $this->validator->getError();
@@ -93,9 +92,7 @@ class DiscountsController extends Controller
     }
 
     $_POST['end_date'] = $_POST['end_date'] ?: null;
-    foreach ($_POST['coupons'] as &$coupon) {
-      $coupon['is_active'] = isset($coupon['is_active']) ? 1 : 0;
-    }
+    $_POST['is_combinable'] = isset($_POST['is_combinable']) ? 1 : 0;
 
     if (!$this->validator->validateCreateOrUpdateDiscount($_POST)) {
       $_SESSION['message'] = $this->validator->getError();
@@ -181,5 +178,36 @@ class DiscountsController extends Controller
     $_SESSION['message'] = 'Discount deactivated successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/discounts');
+  }
+
+  public function getDiscounts()
+  {
+    if (!RBACService::hasPermission('view_discounts')) {
+      self::sendJSON([
+        "success" => false,
+        "message" => "You do not have permission to view discounts"
+      ]);
+      return;
+    }
+    $data = self::recvJSON();
+
+    if (isset($data['customer_id'])) {
+      $customerModel = new CustomerModel();
+      $points = $customerModel->getLoyaltyPoints($data['customer_id']);
+    }
+
+    $discountModel = new DiscountModel();
+    $discounts = $discountModel->getDiscounts(null, null, null, 1, date('Y-m-d'), date('Y-m-d'), null);
+
+    $selectedDiscounts = DiscountService::calculateOptimalDiscounts(
+      $data['items'],
+      $discounts,
+      isset($points) ? $points : null
+    );
+
+    self::sendJSON([
+      "success" => true,
+      "data" => $selectedDiscounts,
+    ]);
   }
 }

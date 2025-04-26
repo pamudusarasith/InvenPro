@@ -68,10 +68,7 @@ class ValidationService
       ->rule('last_name', new Required('Last Name is required'))
       ->rule('last_name', new IsString(0, 50, 'Last Name must be a string between 0 and 50 characters'))
       ->rule('email', new Required('Email is required'))
-      ->rule(
-        'email',
-        new Email()
-      );
+      ->rule('email', new Email());
 
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
@@ -122,20 +119,9 @@ class ValidationService
     return true;
   }
 
-  public function validateCreateRole(array $data): bool
-  {
-    $validator = new Validator($data);
-    $validator->rule('role_name', new Required('Role Name is required'))
-      ->rule('role_name', new IsString(0, 50, 'Role Name must be a string between 0 and 50 characters'))
-      ->rule('description', new IsString(0, 255, 'Description must be a string between 0 and 255 characters'));
-    if (!$validator->validate()) {
-      $this->errors = $validator->errors();
-      return false;
-    }
-    return true;
-  }
 
-  public function validateUpdateRole(array $data): bool
+
+  public function validateRole(array $data): bool
   {
     $validator = new Validator($data);
     $validator->rule('role_name', new Required('Role Name is required'))
@@ -168,6 +154,44 @@ class ValidationService
     return true;
   }
 
+  public function validateCreateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
+  public function validateUpdateBranch(array $data): bool
+  {
+    $validator = new Validator($data);
+    $validator->rule('branch_code', new Required('Branch Code is required'))
+      ->rule('branch_code', new IsString(0, 50, 'Branch Code must be a string between 0 and 50 characters'))
+      ->rule('branch_name', new Required('Branch Name is required'))
+      ->rule('branch_name', new IsString(0, 50, 'Branch Name must be a string between 0 and 50 characters'))
+      ->rule('address', new Required('Address is required'))
+      ->rule('phone', new Required('Phone is required'))
+      ->rule('phone', new Matches('/^\+?[0-9]{10,15}$/', 'Phone number must be valid'))
+      ->rule('email', new Required('Email is required'))
+      ->rule('email', new Email());
+    if (!$validator->validate()) {
+      $this->errors = $validator->errors();
+      return false;
+    }
+    return true;
+  }
+
   public function validateCheckout(array $data): bool
   {
     $validator = new Validator($data);
@@ -178,9 +202,9 @@ class ValidationService
       ->rule('items.*.quantity', new Required('Quantity is required'))
       ->rule('items.*.quantity', new IsNumeric('Quantity must be numeric'))
       ->rule('items.*.quantity', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
-      ->rule('items.*.price', new Required('Price is required'))
-      ->rule('items.*.price', new IsNumeric('Price must be numeric'))
-      ->rule('items.*.price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
+      ->rule('items.*.unit_price', new Required('Price is required'))
+      ->rule('items.*.unit_price', new IsNumeric('Price must be numeric'))
+      ->rule('items.*.unit_price', new CompareWithValue('>', 0, 'numeric', 'Price must be greater than 0'))
       ->rule('payment_method', new Required('Payment method is required'))
       ->rule('payment_method', new InArray(['cash', 'card'], 'Invalid payment method'));
     if (!$validator->validate()) {
@@ -282,11 +306,8 @@ class ValidationService
     $validator->rule('reference', new Required('Reference is required'))
       ->rule('supplier_id', new Required('Supplier ID is required'))
       ->rule('supplier_id', new IsNumeric('Invalid Supplier ID'))
-      ->rule('order_date', new Required('Order Date is required'))
-      ->rule('order_date', new IsDateTime('Y-m-d', 'Invalid Order Date'))
-      ->rule('order_date', new CompareWithValue('>=', date('Y-m-d'), 'date', 'Order Date must be today or in the future'))
       ->rule('expected_date', new IsDateTime('Y-m-d', 'Invalid Expected Date'))
-      ->rule('expected_date', new CompareWithField('>=', 'order_date', 'date', 'Expected Date must be today or in the future'))
+      ->rule('expected_date', new CompareWithValue('>=', date('Y-m-d'), 'date', 'Expected Date must be today or in the future'))
       ->rule('items', new Required('Items are required'))
       ->rule('items', new IsArray(1, null, 'Items must be an array'))
       ->rule('items.*.id', new Required('Product ID is required'))
@@ -327,26 +348,37 @@ class ValidationService
   {
     $validator = new Validator($data);
     $validator->rule('batches', new Required('Batches are required'))
-      ->rule('batches', new IsArray(0, null, 'Batches must be an array'))
-      ->rule('batches.*.product_id', new Required('Product ID is required'))
-      ->rule('batches.*.product_id', new IsNumeric('Invalid Product ID'))
-      ->rule('batches.*.batch_code', new Required('Batch Code is required'))
-      ->rule('batches.*.batch_code', new IsString(0, 50, 'Batch Code must be a string between 0 and 50 characters'))
-      ->rule('batches.*.received_qty', new Required('Quantity is required'))
-      ->rule('batches.*.received_qty', new IsNumeric('Quantity must be numeric'))
-      ->rule('batches.*.received_qty', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
-      ->rule('batches.*.unit_cost', new Required('Unit Cost is required'))
-      ->rule('batches.*.unit_cost', new IsNumeric('Unit Cost must be numeric'))
-      ->rule('batches.*.unit_cost', new CompareWithValue('>', 0, 'numeric', 'Unit Cost must be greater than 0'))
-      ->rule('batches.*.unit_price', new Required('Unit Price is required'))
-      ->rule('batches.*.unit_price', new IsNumeric('Unit Price must be numeric'))
-      ->rule('batches.*.unit_price', new CompareWithValue('>', 0, 'numeric', 'Unit Price must be greater than 0'))
-      ->rule('batches.*.manufactured_date', new IsDateTime('Y-m-d', 'Invalid Manufactured Date'))
-      ->rule('batches.*.expiry_date', new IsDateTime('Y-m-d', 'Invalid Expiry Date'))
-      ->rule('batches.*.expiry_date', new CompareWithField('>', 'manufactured_date', 'date', 'Expiry Date must be later than Manufactured Date'));
+      ->rule('batches', new IsArray(0, null, 'Batches must be an array'));
+
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;
+    }
+
+    $batchValidator = new Validator();
+    $batchValidator->rule('product_id', new Required('Product ID is required'))
+      ->rule('product_id', new IsNumeric('Invalid Product ID'))
+      ->rule('batch_code', new Required('Batch Code is required'))
+      ->rule('batch_code', new IsString(0, 50, 'Batch Code must be a string between 0 and 50 characters'))
+      ->rule('received_qty', new Required('Quantity is required'))
+      ->rule('received_qty', new IsNumeric('Quantity must be numeric'))
+      ->rule('received_qty', new CompareWithValue('>', 0, 'numeric', 'Quantity must be greater than 0'))
+      ->rule('unit_cost', new Required('Unit Cost is required'))
+      ->rule('unit_cost', new IsNumeric('Unit Cost must be numeric'))
+      ->rule('unit_cost', new CompareWithValue('>', 0, 'numeric', 'Unit Cost must be greater than 0'))
+      ->rule('unit_price', new Required('Unit Price is required'))
+      ->rule('unit_price', new IsNumeric('Unit Price must be numeric'))
+      ->rule('unit_price', new CompareWithValue('>', 0, 'numeric', 'Unit Price must be greater than 0'))
+      ->rule('manufactured_date', new IsDateTime('Y-m-d', 'Invalid Manufactured Date'))
+      ->rule('expiry_date', new IsDateTime('Y-m-d', 'Invalid Expiry Date'))
+      ->rule('expiry_date', new CompareWithField('>', 'manufactured_date', 'date', 'Expiry Date must be later than Manufactured Date'));
+
+    foreach ($data['batches'] as $batch) {
+      $batchValidator->setData($batch);
+      if (!$batchValidator->validate()) {
+        $this->errors = $batchValidator->errors();
+        return false;
+      }
     }
     return true;
   }
@@ -362,11 +394,11 @@ class ValidationService
       ->rule('value', new Required('Value is required'))
       ->rule('value', new IsNumeric('Value must be numeric'))
       ->rule('value', new CompareWithValue('>', 0, 'numeric', 'Value must be greater than 0'))
-      ->rule('application_method', new Required('Application Method is required'))
-      ->rule('application_method', new InArray(['regular', 'coupon'], 'Invalid Application Method'))
       ->rule('start_date', new Required('Start Date is required'))
       ->rule('start_date', new IsDateTime('Y-m-d', 'Invalid Start Date'))
       ->rule('end_date', new IsDateTime('Y-m-d', 'Invalid End Date'))
+      ->rule('is_combinable', new Required('Is Combinable is required'))
+      ->rule('is_combinable', new IsBoolean(false, 'Is Combinable must be a boolean'))
       ->rule('conditions', new Required('Conditions are required'))
       ->rule('conditions', new IsArray(0, null, 'Conditions must be an array'))
       ->rule('conditions.*.condition_type', new Required('Condition Type is required'))
@@ -448,18 +480,6 @@ class ValidationService
       }
     }
 
-    $couponValidator = new Validator($data);
-    $couponValidator->rule('coupons', new Required('Coupons are required'))
-      ->rule('coupons', new IsArray(0, null, 'Coupons must be an array'))
-      ->rule('coupons.*.code', new Required('Coupon Code is required'))
-      ->rule('coupons.*.code', new IsString(0, 50, 'Coupon Code must be a string between 0 and 50 characters'))
-      ->rule('coupons.*.is_active', new Required('Is Active is required'))
-      ->rule('coupons.*.is_active', new IsBoolean(false, 'Is Active must be a boolean'));
-
-    if ($data['application_method'] === 'coupon' && !$couponValidator->validate()) {
-      $this->errors = $couponValidator->errors();
-      return false;
-    }
     return true;
   }
 

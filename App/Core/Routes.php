@@ -36,11 +36,12 @@ return [
     '/api/pos/customer/search' => 'App\Controllers\CustomerController::search',
     '/api/suppliers/search' => 'App\Controllers\SupplierController::search',
     '/api/suppliers/{id}/products/search' => 'App\Controllers\SupplierController::searchProducts',
-    '/api/products/search' => 'App\Controllers\ProductsController::assignProducts',
-    '/api/inventory/search' => 'App\Controllers\InventoryController::searchproducts',
+    '/api/products/search' => 'App\Controllers\ProductsController::searchProducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
     '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
+
+    '/branches' => 'App\Controllers\BranchController::index',
 
   ],
 
@@ -54,9 +55,12 @@ return [
     '/profile/reset-password' => 'App\Controllers\UserController::updateProfilePassword',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
+    '/suppliers/{id}/products'=>'App\Controllers\SupplierController::assignProduct',
+    '/suppliers/{id}/products/delete' => 'App\Controllers\SupplierController::deleteAssignedProduct',
     '/products/new' => 'App\Controllers\ProductsController::createProduct',
     '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
     '/api/pos/checkout' => 'App\Controllers\POSController::checkout',
+    '/api/pos/discounts/get' => 'App\Controllers\DiscountsController::getDiscounts',
     '/batch/new' => 'App\Controllers\BatchController::createBatch',
     '/batch/{id}/update' => 'App\Controllers\BatchController::updateBatch',
     '/roles/new' => 'App\Controllers\RoleController::addRole',
@@ -69,5 +73,11 @@ return [
     '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
     '/discounts/new' => 'App\Controllers\DiscountsController::createDiscount',
     '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
+    '/branches/new' => 'App\Controllers\BranchController::createBranch',
+    '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
+    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
+    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
+    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
   ],
 ];
+

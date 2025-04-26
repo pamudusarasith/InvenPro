@@ -1,0 +1,296 @@
+/* Reports Page Styles */
+.reports-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Filters Section */
+.report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  align-items: center;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-range span {
+  color: var(--text-secondary);
+}
+
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-light);
+  margin: 0 0.5rem;
+}
+
+/* Report Cards */
+.chart-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 30%);
+  gap: 2rem;
+}
+
+.table-sections {
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.report-card {
+  background: var(--surface-white);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.report-card-header {
+  padding: 1.5rem;
+  background: var(--surface-light);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.report-card-header .icon-btn {
+  background: var(--surface-white);
+}
+
+.report-card-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.report-summary {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-item {
+  flex: 1;
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--primary-600);
+  margin-bottom: 0.5rem;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.summary-trend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.summary-trend.positive {
+  color: var(--success-600);
+}
+
+.summary-trend.negative {
+  color: var(--danger-600);
+}
+
+/* Chart container */
+.chart-container {
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--surface-mild);
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.chart-placeholder .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-200);
+}
+
+/* Table report styles */
+.report-table-container {
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.export-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* KPI Card styles */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--surface-white);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border-left: 4px solid var(--primary-500);
+}
+
+.kpi-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.kpi-card.success {
+  border-left-color: var(--success-500);
+}
+
+.kpi-card.warning {
+  border-left-color: var(--warning-500);
+}
+
+.kpi-card.danger {
+  border-left-color: var(--danger-500);
+}
+
+.kpi-card.accent {
+  border-left-color: var(--accent-500);
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.kpi-header .icon {
+  font-size: 1.5rem;
+  color: var(--primary-500);
+}
+
+.kpi-card.success .kpi-header .icon {
+  color: var(--success-500);
+}
+
+.kpi-card.warning .kpi-header .icon {
+  color: var(--warning-500);
+}
+
+.kpi-card.danger .kpi-header .icon {
+  color: var(--danger-500);
+}
+
+.kpi-card.accent .kpi-header .icon {
+  color: var(--accent-500);
+}
+
+.kpi-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0.5rem 0;
+}
+
+.kpi-meta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.kpi-trend.positive {
+  color: var(--success-600);
+}
+
+.kpi-trend.negative {
+  color: var(--danger-600);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .report-sections {
+    grid-template-columns: 1fr;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .report-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .date-range {
+    width: 100%;
+  }
+  
+  .filter-divider {
+    display: none;
+  }
+}
