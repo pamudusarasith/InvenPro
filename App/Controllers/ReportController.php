@@ -83,7 +83,8 @@ class ReportController extends Controller
             'expiringBatches' => $data['expiringBatches'],
             'lowStockItems' => $data['lowStockItems'],
             'monthlySalesData' => $data['monthlySalesData'],
-            'countAndRevenue' => $data['countAndRevenue']
+            'countAndRevenue' => $data['countAndRevenue'],
+            'categoryStats' => $data['categoryStats']
         ]);
     }
 
@@ -109,6 +110,7 @@ class ReportController extends Controller
 
         $salesData = $reportModel->getSalesData($startDate, $endDate);
         $countAndRevenue = $reportModel->getCountAndRevenue($startDate, $endDate);
+        $countAndRevenue['avg'] = $countAndRevenue['count'] > 0 ? number_format($countAndRevenue['revenue'] / $countAndRevenue['count'], 2) : '0.00';
         error_log('Count and Revenue: ' . print_r($countAndRevenue, true)); // Log the data for debugging
 
         // error_log('Sales Data: ' . print_r($salesData, true)); // Log the data for debugging
@@ -122,12 +124,14 @@ class ReportController extends Controller
         //     ['date' => 'Apr 25', 'sales' => 19200],
         //];
 
-        $stockStatus = [
-            'in_stock' => 268,
-            'low_stock' => 43,
-            'out_of_stock' => 17,
-            'total_value' => 'LKR 2,432,750.00'
-        ];
+        $stockStatus = $reportModel->getstockStatus($startDate, $endDate);
+
+        //$stockStatus = [
+        //    'in_stock' => 268,
+        //    'low_stock' => 43,
+        //    'out_of_stock' => 17,
+        //    'total_value' => 'LKR 'number_format(); 
+        //];
 
         $recentPurchaseOrders = [
             ['reference' => 'PO-20250420-12345', 'supplier' => 'Ceylon Tea Suppliers', 'date' => '2025-04-20', 'status' => 'completed', 'total' => 'LKR 125,000.00'],
@@ -160,6 +164,12 @@ class ReportController extends Controller
         ];
 
         $categoryRevenueData = $reportModel->getCategoryRevenueData($startDate, $endDate);
+        $totalRevenueByCategory = array_sum(array_column($categoryRevenueData, 'revenue'));
+        $categoryStats['avgRevByCat'] = $totalRevenueByCategory / (count($categoryRevenueData) > 0 ? count($categoryRevenueData) : 1);
+        $categoryStats['catCount'] = count($categoryData);
+        $categoryStats['catTotalProducts'] = array_sum(array_column($categoryData, 'count'));
+        $categoryStats['catAvgProducts'] = (float)$categoryStats['catTotalProducts'] / ((int)$categoryStats['catCount'] > 0 ? (int)$categoryStats['catCount'] : 1);
+
         error_log('Category Revenue Data: ' . print_r($categoryRevenueData, true)); // Log the data for debugging
 
         // $categoryRevenueData = [
@@ -248,7 +258,8 @@ class ReportController extends Controller
             'expiringBatches' => $expiringBatches,
             'lowStockItems' => $lowStockItems,
             'monthlySalesData' => $monthlySalesData,
-            'countAndRevenue' => $countAndRevenue
+            'countAndRevenue' => $countAndRevenue,
+            'categoryStats' => $categoryStats
         ];
     }
 

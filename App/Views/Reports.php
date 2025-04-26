@@ -329,7 +329,7 @@ use App\Services\RBACService;
                                 <div class="summary-label">Total Revenue</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">LKR <?= $countAndRevenue['count'] > 0 ? number_format($countAndRevenue['revenue'] / $countAndRevenue['count']) : '0.00' ?></div>
+                                <div class="summary-value">LKR <?= number_format($countAndRevenue['avg']) ?></div>
                                 <div class="summary-label">Avg. Order Value</div>
                             </div>
                         </div>
@@ -395,15 +395,15 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value">5</div>
+                                <div class="summary-value"><?= number_format($categoryStats['catCount'])?></div>
                                 <div class="summary-label">Categories</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">154</div>
+                                <div class="summary-value"><?= number_format($categoryStats['catTotalProducts'])?></div>
                                 <div class="summary-label">Total Products</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">30.8</div>
+                                <div class="summary-value"><?= number_format($categoryStats['catAvgProducts'])?></div>
                                 <div class="summary-label">Avg Products/Category</div>
                             </div>
                         </div>
@@ -449,7 +449,7 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value">LKR <?= count($categoryRevenueData) > 0 ? number_format(array_sum(array_column($categoryRevenueData, 'revenue')) / count($categoryRevenueData)) : '0.00' ?></div>
+                                <div class="summary-value">LKR <?= number_format($categoryStats['avgRevByCat']) ?></div>
                                 <div class="summary-label">Avg Revenue/Category</div>
                             </div>
                         </div>

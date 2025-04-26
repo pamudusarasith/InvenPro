@@ -77,7 +77,6 @@ class ReportModel extends Model
 
     public function getCategoryRevenueData($startDate, $endDate): array
     {
-
         $query = "
             SELECT 
                 c.category_name AS name,
@@ -87,10 +86,9 @@ class ReportModel extends Model
             LEFT JOIN product p ON pc.product_id = p.id
             LEFT JOIN sale_item si ON p.id = si.product_id
             LEFT JOIN sale s ON si.sale_id = s.id
-            AND s.sale_date BETWEEN :startDate AND :endDate
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
             GROUP BY c.id, c.category_name
             ORDER BY revenue DESC
-            LIMIT 10
         ";
 
         $params = [
@@ -263,6 +261,7 @@ class ReportModel extends Model
             ORDER BY current_stock ASC
         ";
 
+
         $results = self::$db->query($query)->fetchAll();
 
         $formattedResults = [];
@@ -279,5 +278,37 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
+    public function getstockStatus($startDate, $endDate): array
+    {
+        $query = "
+            SELECT 
+                SUM(CASE WHEN pb.current_quantity > 0 THEN 1 ELSE 0 END) AS in_stock,
+                SUM(CASE WHEN pb.current_quantity <= bp.reorder_quantity AND pb.current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+                SUM(CASE WHEN pb.current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock,
+                COALESCE(SUM(pb.unit_price * pb.current_quantity), 0) AS total_value
+            FROM product_batch pb
+            LEFT JOIN product p ON pb.product_id = p.id
+            LEFT JOIN branch_product bp ON p.id = bp.product_id
+            WHERE pb.is_active = 1 AND pb.deleted_at IS NULL AND pb.expiry_date BETWEEN :startDate AND :endDate
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $result = self::$db->query($query, $params)->fetch();
+
+        error_log(print_r($result, true));
+
+        $formattedResult = [
+            'in_stock' => (int)$result['in_stock'],
+            'low_stock' => (int)$result['low_stock'],
+            'out_of_stock' => (int)$result['out_of_stock'],
+            'total_value' => 'LKR ' . number_format($result['total_value'], 2)
+        ];
+
+        return $formattedResult;
+    }
 
 }
