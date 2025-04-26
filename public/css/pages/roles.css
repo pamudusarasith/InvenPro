@@ -2,19 +2,20 @@
 .role-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-top: 1rem;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
 }
 
 .role-card {
-  border-radius: 0.5rem;
-  background: var(--surface-white);
+  background-color: var(--surface-white);
+  border-radius: 0.75rem;
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .role-card:hover {
@@ -23,18 +24,20 @@
 }
 
 .role-card-header {
-  padding: 1rem;
-  background: var(--primary-600);
-  color: var(--text-inverse);
+  background-color: var(--surface-mild);
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  padding: 1.25rem 1.25rem 0.75rem;
 }
 
 .role-card-header h3 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
 }
 
 .role-card-body {
@@ -57,6 +60,16 @@
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border-light);
+  background-color: var(--surface-white);
 }
 
 .role-permission-count .icon {

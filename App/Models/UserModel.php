@@ -156,16 +156,6 @@ class UserModel extends Model
 
     $id = self::$db->lastInsertId();
 
-    $auditLogModel = new AuditLogModel();
-    $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'CREATE',
-        changes: json_encode($data),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
-    );
 
     return $id;
   }
@@ -174,18 +164,6 @@ class UserModel extends Model
   {
     $sql = 'UPDATE user SET password = ?,  WHERE id = ?';
     self::$db->query($sql, [password_hash($password, PASSWORD_BCRYPT), $id]);
-
-    // Log the action
-    $auditLogModel = new AuditLogModel();
-    $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'UPDATE_PASSWORD',
-        changes: json_encode(['id' => $id, 'password' => 'updated']),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
-    );
 
     $_SESSION['message'] = 'Password updated successfully';
     $_SESSION['message_type'] = 'success';
@@ -214,18 +192,6 @@ class UserModel extends Model
       $id
     ]);
 
-    // Log the action
-    $auditLogModel = new AuditLogModel();
-    $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'UPDATE',
-        changes: json_encode(['id' => $id, $data]),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null
-    );
-
     $_SESSION['message'] = 'User updated successfully';
     $_SESSION['message_type'] = 'success';
 
@@ -243,18 +209,6 @@ class UserModel extends Model
       $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
       self::$db->query($sql, [$id]);
 
-      // Log the action
-      $auditLogModel = new AuditLogModel();
-      $auditLogModel->logAction(
-          tableName: 'user',
-          recordId: $id,
-          actionType: 'DELETE',
-          changes: json_encode($user),
-          metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-          changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-          branchId: isset($user['branch_id']) ? $user['branch_id'] : null
-      );
-
       $_SESSION['message'] = 'User deleted successfully';
       $_SESSION['message_type'] = 'success';
   }
@@ -264,17 +218,6 @@ class UserModel extends Model
     $ip = $_SERVER['REMOTE_ADDR'];
     $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
     self::$db->query($sql, [$ip, $id]);
-
-    $auditLogModel = new AuditLogModel();
-    $auditLogModel->logAction(
-        tableName: 'user',
-        recordId: $id,
-        actionType: 'LOGIN',
-        changes: json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
-        metadata: json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
-    );
   }
 
   public function getFailedLoginAttempts(string $email): int

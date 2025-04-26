@@ -80,6 +80,7 @@ class RoleModel extends Model
         LEFT JOIN role_permission rp ON r.id = rp.role_id
         LEFT JOIN permission p ON rp.permission_id = p.id
         LEFT JOIN permission_category pc ON p.category_id = pc.id
+        WHERE r.deleted_at IS NULL
         ORDER BY r.id, pc.category_name, p.permission_name';
         $stmt = self::$db->query($sql);
         $roles = $stmt->fetchAll();
@@ -128,7 +129,7 @@ class RoleModel extends Model
      */
     public function getUserCountByRole($roleId): int
     {
-        $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ?';
+        $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ? AND deleted_at IS NULL';
         $stmt = self::$db->query($sql, [$roleId]);
         $result = $stmt->fetch();
         return (int)$result['user_count'];
@@ -142,7 +143,7 @@ class RoleModel extends Model
      */
     public function getRoleByName(string $roleName): array
     {
-        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ?';
+        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ? AND deleted_at IS NULL';
         $stmt = self::$db->query($sql, [$roleName]);
         $result = $stmt ? $stmt->fetch() : null;
         return $result ?: [];
@@ -159,49 +160,48 @@ class RoleModel extends Model
             return false;
         }
 
-        $sql = 'INSERT INTO role (role_name, description, created_at) VALUES (?, ?, ?)';
-        $result = self::$db->query($sql, [
-            $data['role_name'],
-            $data['description'] ?? '',
-            date('Y-m-d H:i:s')
-        ]);
+        self::$db->beginTransaction();
 
-        if (!$result) {
-            return false;
-        }
+        try {
+            $sql = 'INSERT INTO role (role_name, description, created_at) VALUES (?, ?, ?)';
+            $result = self::$db->query($sql, [
+                $data['role_name'],
+                $data['description'] ?? '',
+                date('Y-m-d H:i:s')
+            ]);
 
-        $roleId = self::$db->lastInsertId();
-
-        if (!empty($data['permissions'])) {
-            $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
-            $insertParts = [];
-            $params = [];
-            foreach ($data['permissions'] as $permId) {
-                $insertParts[] = '(?, ?, ?)';
-                $params[] = $roleId;
-                $params[] = $permId;
-                $params[] = date('Y-m-d H:i:s');
-            }
-
-            $insertSql .= implode(', ', $insertParts);
-            if (!self::$db->query($insertSql, $params)) {
+            if (!$result) {
+                self::$db->rollBack();
                 return false;
             }
+
+            $roleId = self::$db->lastInsertId();
+
+            if (!empty($data['permissions'])) {
+                $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
+                $insertParts = [];
+                $params = [];
+                foreach ($data['permissions'] as $permId) {
+                    $insertParts[] = '(?, ?, ?)';
+                    $params[] = $roleId;
+                    $params[] = $permId;
+                    $params[] = date('Y-m-d H:i:s');
+                }
+
+                $insertSql .= implode(', ', $insertParts);
+                if (!self::$db->query($insertSql, $params)) {
+                    self::$db->rollBack();
+                    return false;
+                }
+            }
+
+            self::$db->commit();
+            return $roleId;
+        } catch (\Exception $e) {
+            self::$db->rollBack();
+            error_log("Error adding role: " . $e->getMessage());
+            return false;
         }
-
-        $auditLogModel = new AuditLogModel();
-        $auditLogModel->logAction(
-        tableName: 'role',
-        recordId: $roleId,
-        actionType: 'CREATE',
-        changes: json_encode(['id' => $roleId , $data]),
-        metadata: json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
-        changedBy: isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
-        branchId: isset($data['branch_id']) ? $data['branch_id'] : null  
-        );
-
-
-        return $roleId;
     }
 
     /**
@@ -317,8 +317,17 @@ class RoleModel extends Model
             }
 
             // Delete the role
-            $deleteRoleSql = 'DELETE FROM role WHERE id = ?';
-            $deleteRoleResult = self::$db->query($deleteRoleSql, [$roleId]);
+            // Check if assigned users are soft deleted
+            
+            $activeUserCount= RoleModel::getUserCountByRole($roleId);
+
+            if ($activeUserCount > 0) {
+                self::$db->rollBack();
+                return false;
+            }
+
+            $deleteRoleSql = 'UPDATE role SET deleted_at = ? WHERE id = ?';
+            $deleteRoleResult = self::$db->query($deleteRoleSql, [date('Y-m-d H:i:s'), $roleId]);
 
             if (!$deleteRoleResult) {
                 self::$db->rollBack();
