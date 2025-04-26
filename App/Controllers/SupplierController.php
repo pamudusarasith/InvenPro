@@ -19,7 +19,7 @@ class SupplierController extends Controller
     $status = $_GET['status'] ?? '';
 
     $supplierModel = new SupplierModel();
-    $suppliers = $supplierModel->getSuppliers($page, $itemsPerPage);
+    $suppliers = $supplierModel->getSuppliers($page, $itemsPerPage, $search, $branchId, $status);
     $totalRecords = $supplierModel->getSuppliersCount();
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
@@ -33,6 +33,10 @@ class SupplierController extends Controller
       'page' => $page,
       'itemsPerPage' => $itemsPerPage,
       'totalPages' => $totalPages,
+      'totalRecords' => $totalRecords,
+      'search' => $search,
+      'branchId' => $branchId,
+      'status' => $status
     ]);
   }
 
@@ -62,17 +66,17 @@ class SupplierController extends Controller
 
   public function search(): void
   {
-    $query = $_GET['q'] ?? '';
-    $page = $_GET['p'] ?? 1;
-    $itemsPerPage = $_GET['ipp'] ?? 10;
+      $query = $_GET['q'] ?? ''; // Search query
+      $page = max(1, (int) ($_GET['p'] ?? 1)); // Current page
+      $itemsPerPage = (int) ($_GET['ipp'] ?? 10); // Items per page
 
-    $supplierModel = new SupplierModel();
-    $suppliers = $supplierModel->searchSuppliers($query, $page, $itemsPerPage);
+      $supplierModel = new SupplierModel();
+      $suppliers = $supplierModel->searchSuppliers($query, $page, $itemsPerPage); // Fetch filtered suppliers
 
-    self::sendJSON([
-      'success' => true,
-      'data' => $suppliers,
-    ]);
+      self::sendJSON([
+          'success' => true,
+          'data' => $suppliers,
+      ]);
   }
 
   public function createSupplier(): void

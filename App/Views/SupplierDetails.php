@@ -39,9 +39,6 @@ function getStatusBadgeClass($status)
           <div class="profile-info">
             <div class="details-title">
               <h1 class="title-name"><?= htmlspecialchars($supplier['supplier_name']) ?></h1>
-              <span class="badge <?= $supplier['deleted_at'] ? 'danger' : 'success' ?>">
-                <?= $supplier['deleted_at'] ? 'Inactive' : 'Active' ?>
-              </span>
             </div>
             <div class="details-meta">
               <div class="meta-item">
