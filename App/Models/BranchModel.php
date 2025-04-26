@@ -53,7 +53,9 @@ class BranchModel extends Model
 public function getBranchesCount(?string $search = '', ?string $status = ''): int
 {
     $sql = 'SELECT COUNT(*) FROM branch WHERE 1 = 1';
+    $stmt = self::$db->query($sql);
     $params = [];
+    return $stmt->fetchColumn();
 
     // Add search filter
     if ($search) {

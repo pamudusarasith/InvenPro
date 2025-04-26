@@ -12,18 +12,18 @@ class BranchController extends Controller
 
   public function index(): void
   {
-      $page = $_GET['p'] ?? 1;
-      $itemsPerPage = $_GET['ipp'] ?? 10;
-      $page = max(1, (int) ($_GET['p'] ?? 1));
-      $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
-      $search = $_GET['search'] ?? '';
-      $status = $_GET['status'] ?? '';
-  
+      $page = $_GET['p'] ?? 1; // Current page number
+      $itemsPerPage = $_GET['ipp'] ?? 10; // Items per page
+      $page = max(1, (int) ($_GET['p'] ?? 1)); // Ensure the page is at least 1
+      $itemsPerPage = (int) ($_GET['ipp'] ?? 10); // Convert items per page to an integer
+      $search = $_GET['search'] ?? ''; // Search query
+      $status = $_GET['status'] ?? ''; // Status filter (active/inactive)
+
       $branchModel = new BranchModel();
-      $branches = $branchModel->getBranches($page, $itemsPerPage, $search, $status);
-      $totalRecords = $branchModel->getBranchesCount($search, $status);
-      $totalPages = ceil($totalRecords / $itemsPerPage);
-  
+      $branches = $branchModel->getBranches($page, $itemsPerPage, $search, $status); // Fetch paginated branches
+      $totalRecords = $branchModel->getBranchesCount($search, $status); // Get total branch count
+      $totalPages = ceil($totalRecords / $itemsPerPage); // Calculate total pages
+
       View::renderTemplate('Branches', [
           'title' => 'Branches',
           'branches' => $branches,
@@ -35,7 +35,6 @@ class BranchController extends Controller
           'status' => $status
       ]);
   }
-
   public function createBranch(): void
   {
       $validator = new ValidationService();
@@ -100,5 +99,7 @@ class BranchController extends Controller
           'data' => $branches,
       ]);
   }
+
+  
   
 }
