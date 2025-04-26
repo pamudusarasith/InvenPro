@@ -199,11 +199,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
           </div>
 
           <div class="form-field">
-            <label for="order_date">Order Date*</label>
-            <input type="date" id="order_date" name="order_date" value="<?= date('Y-m-d') ?>" required>
-          </div>
-
-          <div class="form-field">
             <label for="expected_date">Expected Delivery Date</label>
             <input type="date" id="expected_date" name="expected_date">
           </div>

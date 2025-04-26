@@ -37,12 +37,11 @@ class CompareWithField extends Rule
 
   public function apply($value, string $field, array $data): bool
   {
-    if (in_array($value, [null, '', []]) || in_array($this->compareField, [null, '', []])) {
+    $compareValue = DataAccessor::getValue($data, $this->compareField);
+
+    if (in_array($value, [null, '', []]) || in_array($compareValue, [null, '', []])) {
       return true;
     }
-
-    // Get the value of the field to compare with
-    $compareValue = DataAccessor::getValue($data, $this->compareField);
 
     // Handle specific type conversions based on the specified type
     switch ($this->type) {
