@@ -113,8 +113,8 @@ class RoleController extends Controller
                 } else {
                     $result = $this->roleModel->addRole($data);
                     $_SESSION['message'] = $result === false
-                        ? 'Failed to add role'
-                        : 'Role added successfully';
+                        ? 'Failed to create role'
+                        : 'Role created successfully';
                     $_SESSION['message_type'] = $result === false ? 'error' : 'success';
                 }
             }

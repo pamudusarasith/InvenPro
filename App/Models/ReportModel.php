@@ -103,9 +103,9 @@ class ReportModel extends Model
             AND c.deleted_at IS NULL
             AND s.status = 'completed'
             AND s.deleted_at IS NULL
+
             GROUP BY c.id, c.category_name
             ORDER BY revenue DESC
-            LIMIT 10
         ";
 
         $params = [
@@ -303,6 +303,7 @@ class ReportModel extends Model
             ORDER BY current_stock ASC
             LIMIT 10
         ";
+
 
         $results = self::$db->query($query)->fetchAll();
 

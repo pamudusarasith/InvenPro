@@ -95,6 +95,7 @@ class ReportController extends Controller
             'inventoryStats' => $data['inventoryStats'],
             'categoryStats' => $data['categoryStats'],
             'basketAnalysisResults' => $data['basketAnalysisResults']
+
         ]);
     }
 
