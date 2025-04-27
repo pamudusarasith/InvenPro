@@ -3,9 +3,9 @@
 use App\Services\RBACService;
 
 // Validate data from controller to prevent undefined variable errors
-$roles = isset($roles) && is_array($roles) ? $roles : [];
-$permissionCategories = isset($permissionCategories) && is_array($permissionCategories) ? $permissionCategories : [];
-$allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPermissionsByCategory) ? $allPermissionsByCategory : [];
+//$roles = isset($roles) && is_array($roles) ? $roles : [];
+//$permissionCategories = isset($permissionCategories) && is_array($permissionCategories) ? $permissionCategories : [];
+//$allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPermissionsByCategory) ? $allPermissionsByCategory : [];
 
 // Log data for debugging
 //error_log("View: allPermissionsByCategory: " . print_r($allPermissionsByCategory, true));
@@ -348,7 +348,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
       });
 
       // Add the role_id as a hidden input field if it doesn't already exist
-      let roleIdInput = document.getElementById('roleIdInput');
+      let roleIdInput = document.getElementById('role_id');
       if (!roleIdInput) {
         roleIdInput = document.createElement('input');
         roleIdInput.type = 'hidden';
@@ -357,6 +357,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
         form.appendChild(roleIdInput);
       }
       roleIdInput.value = roleId;
+      console.log(roleIdInput);
 
       // Populate permissions and store initial permissions
       initialPermissions = []; // Reset initial permissions
@@ -386,20 +387,17 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
     }
   }
 
-  // Add event listener to the form to handle submission
+  // event listener to the form to handle submission
   document.getElementById('roleForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent default form submission
+    event.preventDefault();
 
-    // Get the current state of permissions
     const currentPermissions = Array.from(document.querySelectorAll('input[name="permissions[]"]:checked')).map(cb => cb.value);
 
-    // Determine added and removed permissions
     const addedPermissions = currentPermissions.filter(id => !initialPermissions.includes(id));
     const removedPermissions = initialPermissions.filter(id => !currentPermissions.includes(id));
 
-    // Log the arrays for debugging
-    console.log('Added Permissions:', addedPermissions);
-    console.log('Removed Permissions:', removedPermissions);
+    // console.log('Added Permissions:', addedPermissions);
+    // console.log('Removed Permissions:', removedPermissions);
 
     // Create a hidden input to send the added and removed permissions
     let addedInput = document.getElementById('addedPermissionsInput');

@@ -108,22 +108,101 @@ function getBranchById(id) {
     
     return branches.find(branch => branch.id === id);
 }
-// Deactivate and restore branch functions
-function deactivateBranch(branchId) {
-    event.stopPropagation();
+
+
+function deactivateBranch(event, branchId) {
+    // event.stopPropagation();
     if (confirm('Are you sure you want to deactivate this branch?')) {
-        // In real implementation, this would submit a form or make an API call
-        console.log('Deactivating branch ID:', branchId);
-        // window.location.href = `/branches/${branchId}/delete`;
+        window.location.href = `/branches/${branchId}/deactivate`;
+        // fetch(`/branches/${branchId}/deactivate`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        // })
+        //     .then(response => {
+        //         if (response.ok) {
+        //             console.log(`Branch ID ${branchId} deactivated successfully.`);
+        //             const row = document.querySelector(`#branches-table tr[data-id="${branchId}"]`);
+        //             if (row && row.querySelector('.badge')) {
+        //                 row.querySelector('.badge').classList.remove('success');
+        //                 row.querySelector('.badge').classList.add('danger');
+        //                 row.querySelector('.badge').textContent = 'Inactive';
+        //                 const deactivateButton = row.querySelector('.icon-btn.danger');
+        //                 deactivateButton.classList.remove('danger');
+        //                 deactivateButton.classList.add('success');
+        //                 deactivateButton.title = 'Restore';
+        //                 deactivateButton.innerHTML = '<span class="icon">restore</span>';
+        //                 deactivateButton.setAttribute('onclick', `restoreBranch(event, ${branchId})`);
+        //             }
+        //         } else {
+        //             alert('Failed to deactivate the branch. Please try again.');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         alert('An error occurred while deactivating the branch.');
+        //     });
     }
 }
 
-function restoreBranch(branchId) {
+function restoreBranch(event, branchId) {
     event.stopPropagation();
-
     if (confirm('Are you sure you want to restore this branch?')) {
-        // In real implementation, this would submit a form or make an API call
-        console.log('Restoring branch ID:', branchId);
-        // window.location.href = `/branches/${branchId}/restore`;
+        window.location.href = `/branches/${branchId}/restore`;
+        // fetch(`/branches/${branchId}/restore`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        // })
+        //     .then(response => {
+        //         if (response.ok) {
+        //             console.log(`Branch ID ${branchId} restored successfully.`);
+        //             const row = document.querySelector(`#branches-table tr[data-id="${branchId}"]`);
+        //             if (row && row.querySelector('.badge')) {
+        //                 row.querySelector('.badge').classList.remove('danger');
+        //                 row.querySelector('.badge').classList.add('success');
+        //                 row.querySelector('.badge').textContent = 'Active';
+        //                 const restoreButton = row.querySelector('.icon-btn.success');
+        //                 restoreButton.classList.remove('success');
+        //                 restoreButton.classList.add('danger');
+        //                 restoreButton.title = 'Deactivate';
+        //                 restoreButton.innerHTML = '<span class="icon">delete</span>';
+        //                 restoreButton.setAttribute('onclick', `deactivateBranch(event, ${branchId})`);
+        //             }
+        //         } else {
+        //             alert('Failed to restore the branch. Please try again.');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         alert('An error occurred while restoring the branch.');
+        //     });
     }
 }
+
+    // Update URL with search and filter parameters
+    function updateSearchParams() {
+        const search = document.getElementById('searchInput').value;
+        const status = document.getElementById('filterStatus').value;
+    
+        const url = new URL(location.href);
+        url.pathname = '/branches';
+        url.searchParams.set('search', search);
+        url.searchParams.set('status', status);
+        location.href = url.toString();
+    }
+    
+    // Event listeners for search and filter
+    document.getElementById('filterStatus').addEventListener('change', updateSearchParams);
+    document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
+    
+    // Debounce function to limit URL updates
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }

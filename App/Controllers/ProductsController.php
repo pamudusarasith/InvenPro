@@ -40,6 +40,11 @@ class ProductsController extends Controller
     }
 
     $productModel = new ProductModel();
+    if ($productModel->productCodeExists($_POST['product_code']) === true) {
+      $_SESSION['message'] = 'Product code already exists';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/inventory');
+    }
     $productModel->createProduct($_POST);
 
     $_SESSION['message'] = 'Product created successfully';
@@ -56,6 +61,11 @@ class ProductsController extends Controller
     }
 
     $productModel = new ProductModel();
+    if ($productModel->productCodeExists($_POST['product_code'], $params['id']) === true) {
+      $_SESSION['message'] = 'Product code already exists';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/products/' . $params['id']);
+    }
     $productModel->updateProduct($params['id'], $_POST);
 
     $_SESSION['message'] = 'Product updated successfully';

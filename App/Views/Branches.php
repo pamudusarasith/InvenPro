@@ -5,10 +5,6 @@ use App\Services\RBACService;
 // Simulate data from controller
 $branches = $branches ?? [];
 
-$page = $_GET['p'] ?? 1;
-$itemsPerPage = $_GET['ipp'] ?? 10;
-$totalPages = 1;
-
 $canManageBranches = RBACService::hasPermission('manage_branches');
 $canAddBranch = RBACService::hasPermission('add_branch');
 $canEditBranch = RBACService::hasPermission('edit_branch');
@@ -61,14 +57,13 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
-        <input type="text" id="searchInput" placeholder="Search branches..." oninput="filterBranches()">
+        <input type="text" id="searchInput" name="search" placeholder="Search Branches..." value="<?= htmlspecialchars($search ?? '') ?>">
       </div>
-
       <div class="filters">
-        <select id="filterStatus" onchange="filterByStatus()">
+        <select id="filterStatus" name="status">
           <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active" <?= isset($status) && $status === 'active' ? 'selected' : '' ?>>Active</option>
+          <option value="inactive" <?= isset($status) && $status === 'inactive' ? 'selected' : '' ?>>Inactive</option>
         </select>
       </div>
     </div>
@@ -116,11 +111,11 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
                     <?php endif; ?>
                     <?php if ($canDeleteBranch): ?>
                       <?php if ($branch['deleted_at']): ?>
-                        <button class="icon-btn success" title="Restore" onclick="restoreBranch(<?= $branch['id']; ?>)">
+                        <button class="icon-btn success" title="Restore" onclick="restoreBranch(event, <?= $branch['id']; ?>)">
                           <span class="icon">restore</span>
                         </button>
                       <?php else: ?>
-                        <button class="icon-btn danger" title="Deactivate" onclick="deactivateBranch(<?= $branch['id']; ?>)">
+                        <button class="icon-btn danger" title="Deactivate" onclick="deactivateBranch(event, <?= $branch['id']; ?>)">
                           <span class="icon">delete</span>
                         </button>
                       <?php endif; ?>
@@ -134,61 +129,60 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
       </table>
 
       <div class="pagination-controls">
-        <div class="items-per-page">
-          <span>Show:</span>
-          <select class="items-select" onchange="changeItemsPerPage(this.value)">
-            <option value="5" <?= $itemsPerPage == 5 ? "selected" : "" ?>>5</option>
-            <option value="10" <?= $itemsPerPage == 10 ? "selected" : "" ?>>10</option>
-            <option value="20" <?= $itemsPerPage == 20 ? "selected" : "" ?>>20</option>
-            <option value="50" <?= $itemsPerPage == 50 ? "selected" : "" ?>>50</option>
-          </select>
-          <span>entries</span>
-        </div>
+                <div class="items-per-page">
+                    <span>Show:</span>
+                    <select class="items-select" onchange="changeItemsPerPage(this.value)">
+                        <option value="5" <?= $itemsPerPage == 5 ? "selected" : "" ?>>5</option>
+                        <option value="10" <?= $itemsPerPage == 10 ? "selected" : "" ?>>10</option>
+                        <option value="20" <?= $itemsPerPage == 20 ? "selected" : "" ?>>20</option>
+                        <option value="50" <?= $itemsPerPage == 50 ? "selected" : "" ?>>50</option>
+                    </select>
+                    <span>entries</span>
+                </div>
+                <?php if ($totalPages > 1): ?>
+                    <div class="pagination">
+                        <?php if ($page > 1): ?>
+                            <button class="page-btn" onclick="changePage(<?= $page - 1 ?>)">
+                                <span class="icon">chevron_left</span>
+                            </button>
+                        <?php endif; ?>
 
-        <?php if ($totalPages > 1): ?>
-          <div class="pagination">
-            <?php if ($page > 1): ?>
-              <button class="page-btn" onclick="changePage(<?= $page - 1 ?>)">
-                <span class="icon">chevron_left</span>
-              </button>
-            <?php endif; ?>
+                        <div class="page-numbers">
+                            <?php
+                            $maxButtons = 3;
+                            $halfMax = floor($maxButtons / 2);
+                            $start = max(1, min($page - $halfMax, $totalPages - $maxButtons + 1));
+                            $end = min($totalPages, $start + $maxButtons - 1);
 
-            <div class="page-numbers">
-              <?php
-              $maxButtons = 3;
-              $halfMax = floor($maxButtons / 2);
-              $start = max(1, min($page - $halfMax, $totalPages - $maxButtons + 1));
-              $end = min($totalPages, $start + $maxButtons - 1);
+                            if ($start > 1) {
+                                echo '<span class="page-number">1</span>';
+                                if ($start > 2) {
+                                    echo '<span class="page-dots">...</span>';
+                                }
+                            }
 
-              if ($start > 1) {
-                echo '<span class="page-number">1</span>';
-                if ($start > 2) {
-                  echo '<span class="page-dots">...</span>';
-                }
-              }
+                            for ($i = $start; $i <= $end; $i++) {
+                                echo '<span class="page-number ' . ($page == $i ? 'active' : '') . '"
+                              onclick="changePage(' . $i . ')">' . $i . '</span>';
+                            }
 
-              for ($i = $start; $i <= $end; $i++) {
-                echo '<span class="page-number ' . ($page == $i ? 'active' : '') . '"
-                    onclick="changePage(' . $i . ')">' . $i . '</span>';
-              }
+                            if ($end < $totalPages) {
+                                if ($end < $totalPages - 1) {
+                                    echo '<span class="page-dots">...</span>';
+                                }
+                                echo '<span class="page-number">' . $totalPages . '</span>';
+                            }
+                            ?>
+                        </div>
 
-              if ($end < $totalPages) {
-                if ($end < $totalPages - 1) {
-                  echo '<span class="page-dots">...</span>';
-                }
-                echo '<span class="page-number">' . $totalPages . '</span>';
-              }
-              ?>
+                        <?php if ($page < $totalPages): ?>
+                            <button class="page-btn" onclick="changePage(<?= $page + 1 ?>)">
+                                <span class="icon">chevron_right</span>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
             </div>
-
-            <?php if ($page < $totalPages): ?>
-              <button class="page-btn" onclick="changePage(<?= $page + 1 ?>)">
-                <span class="icon">chevron_right</span>
-              </button>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
-      </div>
     </div>
   </div>
 </div>

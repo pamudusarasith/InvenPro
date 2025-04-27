@@ -88,9 +88,8 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
             return strtotime($batch['expiry_date']) > time() || !$batch['expiry_date'] ? $batch['current_quantity'] : 0;
           }, $product['batches']));
           ?>
-          <div class="stat-value"><?= number_format($totalStock, 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
+          <div class="stat-value"><?= $product['is_int'] ? number_format($totalStock ?? 0, 0) : number_format($totalStock, 3); ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
         </div>
-
         <div class="stat-card">
           <div class="stat-header">
             <span class="icon text-info">trending_up</span>

@@ -1,177 +1,5 @@
 <?php
-
 use App\Services\RBACService;
-// Simulate data coming from controller
-// $reportTypes = [
-//     'sales' => 'Sales Report',
-//     'inventory' => 'Inventory Report',
-//     'suppliers' => 'Supplier Performance',
-//     'orders' => 'Purchase Orders',
-//     'low_stock' => 'Low Stock Analysis',
-//     'customers' => 'Customer Analysis',
-//     'product_category' => 'Product Category Analysis',
-//     'inventory_value' => 'Inventory Valuation',
-//     'batch_expiry' => 'Batch Expiry Report'
-// ];
-
-// $timePeriods = [
-//     'today' => 'Today',
-//     'yesterday' => 'Yesterday',
-//     'this_week' => 'This Week',
-//     'last_week' => 'Last Week',
-//     'this_month' => 'This Month',
-//     'last_month' => 'Last Month',
-//     'this_year' => 'This Year',
-//     'last_year' => 'Last Year',
-//     'custom' => 'Custom Range'
-// ];
-
-// $expiryTimePeriods = [
-//    'next_week' => 'Next Week',
-//    'next_month' => 'Next Month'
-// ];
-
-// Selected filters (simulated data)
-// $selectedReportType = $_GET['report_type'] ?? 'sales';
-// $selectedTimePeriod = $_GET['time_period'] ?? 'this_month';
-// $startDate = $_GET['start_date'] ?? date('Y-m-d', strtotime('-30 days'));
-// $endDate = $_GET['end_date'] ?? date('Y-m-d');
-
-// KPI Metrics (simulated data)
-// $kpiMetrics = [
-//     [
-//         'label' => 'Total Sales',
-//         'value' => 'LKR 427,350.00',
-//         'trend' => '+12.5%',
-//         'trend_type' => 'positive',
-//         'icon' => 'payments',
-//         'type' => 'primary'
-//     ],
-//     [
-//         'label' => 'Total Orders',
-//         'value' => '142',
-//         'trend' => '+8.3%',
-//         'trend_type' => 'positive',
-//         'icon' => 'shopping_cart',
-//         'type' => 'success'
-//     ],
-//     [
-//         'label' => 'Average Order Value',
-//         'value' => 'LKR 3,009.51',
-//         'trend' => '+4.2%',
-//         'trend_type' => 'positive',
-//         'icon' => 'inventory',
-//         'type' => 'accent'
-//     ],
-//     [
-//         'label' => 'Profit Margin',
-//         'value' => '24.6%',
-//         'trend' => '-1.8%',
-//         'trend_type' => 'negative',
-//         'icon' => 'trending_up',
-//         'type' => 'warning'
-//     ]
-// ];
-
-// Top selling products (simulated data)
-// $topSellingProducts = [
-//     ['product_name' => 'Organic Ceylon Tea 250g', 'quantity' => 152, 'revenue' => 'LKR 45,600.00'],
-//     ['product_name' => 'Fresh Milk 1L', 'quantity' => 135, 'revenue' => 'LKR 33,750.00'],
-//     ['product_name' => 'Whole Wheat Bread 700g', 'quantity' => 124, 'revenue' => 'LKR 24,800.00'],
-//     ['product_name' => 'Free-Range Eggs (12pk)', 'quantity' => 103, 'revenue' => 'LKR 20,600.00'],
-//     ['product_name' => 'Basmati Rice 5kg', 'quantity' => 89, 'revenue' => 'LKR 44,500.00']
-// ];
-
-// Daily sales data (simulated data)
-// $dailySalesData = [
-//     ['date' => 'Apr 01', 'sales' => 12500],
-//     ['date' => 'Apr 05', 'sales' => 17800],
-//     ['date' => 'Apr 10', 'sales' => 14300],
-//     ['date' => 'Apr 15', 'sales' => 21000],
-//     ['date' => 'Apr 20', 'sales' => 15600],
-//     ['date' => 'Apr 25', 'sales' => 19200],
-// ];
-
-// Stock status (simulated data)
-// $stockStatus = [
-//     'in_stock' => 268,
-//     'low_stock' => 43,
-//     'out_of_stock' => 17,
-//     'total_value' => 'LKR 2,432,750.00'
-// ];
-
-// Recent purchase orders (simulated data)
-// $recentPurchaseOrders = [
-//     ['reference' => 'PO-20250420-12345', 'supplier' => 'Ceylon Tea Suppliers', 'date' => '2025-04-20', 'status' => 'completed', 'total' => 'LKR 125,000.00'],
-//     ['reference' => 'PO-20250418-12344', 'supplier' => 'Fresh Farm Dairies', 'date' => '2025-04-18', 'status' => 'open', 'total' => 'LKR 87,500.00'],
-//     ['reference' => 'PO-20250415-12343', 'supplier' => 'Organic Grains Ltd', 'date' => '2025-04-15', 'status' => 'completed', 'total' => 'LKR 103,750.00'],
-//     ['reference' => 'PO-20250410-12342', 'supplier' => 'Island Rice Mills', 'date' => '2025-04-10', 'status' => 'completed', 'total' => 'LKR 145,000.00'],
-//     ['reference' => 'PO-20250405-12341', 'supplier' => 'Global Spice Traders', 'date' => '2025-04-05', 'status' => 'canceled', 'total' => 'LKR 76,250.00']
-// ];
-
-// Additional data for new reports
-// $categoryData = [
-//     ['name' => 'Beverages', 'count' => 42],
-//     ['name' => 'Dairy', 'count' => 38],
-//     ['name' => 'Bakery', 'count' => 24],
-//     ['name' => 'Grains', 'count' => 19],
-//     ['name' => 'Spices', 'count' => 31]
-// ];
-
-// $supplierPerformance = [
-//     ['name' => 'Ceylon Tea Suppliers', 'on_time' => 92, 'quality' => 88],
-//     ['name' => 'Fresh Farm Dairies', 'on_time' => 85, 'quality' => 95],
-//     ['name' => 'Organic Grains Ltd', 'on_time' => 78, 'quality' => 92],
-//     ['name' => 'Island Rice Mills', 'on_time' => 90, 'quality' => 85],
-//     ['name' => 'Global Spice Traders', 'on_time' => 72, 'quality' => 90]
-// ];
-
-// $categoryRevenueData = [
-//     ['name' => 'Beverages', 'revenue' => 145000],
-//     ['name' => 'Dairy', 'revenue' => 98000],
-//     ['name' => 'Bakery', 'revenue' => 76500],
-//     ['name' => 'Grains', 'revenue' => 68000],
-//     ['name' => 'Spices', 'revenue' => 39850]
-// ];
-
-// $expiringBatches = [
-//     ['product_name' => 'Fresh Milk 1L', 'batch_code' => 'FM2504001', 'expiry_date' => '2025-05-15', 'quantity' => 45, 'days_left' => 20],
-//     ['product_name' => 'Yogurt 500g', 'batch_code' => 'YG2504002', 'expiry_date' => '2025-05-10', 'quantity' => 36, 'days_left' => 15],
-//     ['product_name' => 'Cottage Cheese 250g', 'batch_code' => 'CC2504003', 'expiry_date' => '2025-05-07', 'quantity' => 24, 'days_left' => 12],
-//     ['product_name' => 'Whole Wheat Bread 700g', 'batch_code' => 'WWB2504001', 'expiry_date' => '2025-05-03', 'quantity' => 18, 'days_left' => 8],
-//     ['product_name' => 'Organic Butter 200g', 'batch_code' => 'OB2504001', 'expiry_date' => '2025-05-08', 'quantity' => 12, 'days_left' => 13]
-// ];
-
-// $customerAnalytics = [
-//     'loyal_customers' => 87,
-//     'new_customers' => 34,
-//     'avg_purchase_frequency' => 2.4,
-//     'avg_order_value' => 'LKR 3,010',
-//     'top_customers' => [
-//         ['name' => 'Hotel Seaside', 'total_purchases' => 'LKR 52,350', 'total_orders' => 12],
-//         ['name' => 'Green Leaf Restaurant', 'total_purchases' => 'LKR 48,750', 'total_orders' => 15],
-//         ['name' => 'City Supermarket', 'total_purchases' => 'LKR 43,200', 'total_orders' => 8],
-//         ['name' => 'Royal Bakery', 'total_purchases' => 'LKR 36,500', 'total_orders' => 10],
-//         ['name' => 'Wellness Cafe', 'total_purchases' => 'LKR 29,800', 'total_orders' => 9]
-//     ]
-// ];
-
-// $lowStockItems = [
-//     ['product_name' => 'Basmati Rice 5kg', 'current_stock' => 8, 'reorder_level' => 15, 'days_to_out' => 6],
-//     ['product_name' => 'Ceylon Black Tea 250g', 'current_stock' => 12, 'reorder_level' => 20, 'days_to_out' => 5],
-//     ['product_name' => 'Coconut Oil 1L', 'current_stock' => 6, 'reorder_level' => 12, 'days_to_out' => 4],
-//     ['product_name' => 'Brown Sugar 1kg', 'current_stock' => 10, 'reorder_level' => 18, 'days_to_out' => 7],
-//     ['product_name' => 'Curry Powder 200g', 'current_stock' => 5, 'reorder_level' => 15, 'days_to_out' => 3]
-// ];
-
-// Monthly sales by day (simulated data for line chart)
-// $monthlySalesData = [];
-// for ($i = 1; $i <= 30; $i++) {
-//     $date = sprintf('Apr %02d', $i);
-//     $sales = rand(8000, 22000);
-//     $monthlySalesData[] = ['date' => $date, 'sales' => $sales];
-// }
-
 ?>
 
 <div class="body">
@@ -188,44 +16,53 @@ use App\Services\RBACService;
         </div>
 
         <div class="reports-container">
-    <!-- Filters Section -->
-    <div class="card glass">
-        <div class="content">
-            <div class="report-filters">
-                <div class="form-field">
-                    <label for="report-type">Report Type</label>
-                    <select id="report-type" name="report_type" onchange="updateTimePeriodOptions(this.value)">
-                        <?php foreach ($reportTypes as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= $selectedReportType === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <!-- Filters Section -->
+            <div class="card glass">
+                <div class="content">
+                    <div class="report-filters">
+                        <div class="form-field">
+                            <label for="report-type">Report Type</label>
+                            <select id="report-type" name="report_type" onchange="updateTimePeriodOptions(this.value)">
+                                <?php foreach ($reportTypes as $value => $label): ?>
+                                    <option value="<?= $value ?>" <?= $selectedReportType === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
-                <div class="filter-divider"></div>
 
-                <div class="form-field">
-                    <label for="time-period">Time Period</label>
-                    <select id="time-period" name="time_period" onchange="toggleDateRange(this.value)">
-                        <?php if ($selectedReportType === 'batch_expiry'): ?>
-                            <?php foreach ($expiryTimePeriods as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <?php foreach ($timePeriods as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                </div>
+                        <div class="form-field" id="time-period-container">
+                            <label for="time-period">Time Period</label>
+                            <select id="time-period" name="time_period" onchange="toggleDateRange(this.value)">
+                                <?php if ($selectedReportType === 'batch_expiry'): ?>
+                                    <?php foreach ($expiryTimePeriods as $value => $label): ?>
+                                        <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                <?php elseif (!in_array($selectedReportType, ['inventory', 'suppliers'])): ?>
+                                    <?php foreach ($timePeriods as $value => $label): ?>
+                                        <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
 
                 
 
 <script>
-    // JavaScript to update time period options based on report type
-    function updateTimePeriodOptions(reportType) {
+function updateTimePeriodOptions(reportType) {
+        const timePeriodContainer = document.getElementById('time-period-container');
         const timePeriodSelect = document.getElementById('time-period');
-        const currentValue = timePeriodSelect.value; // Store current selection
-        timePeriodSelect.innerHTML = ''; // Clear existing options
+        const dateRangeContainer = document.getElementById('date-range-container');
+        const currentValue = timePeriodSelect.value;
+
+        if (reportType === 'inventory' || reportType === 'suppliers') {
+            timePeriodContainer.style.display = 'none';
+            dateRangeContainer.style.display = 'none';
+            timePeriodSelect.innerHTML = '';
+            return;
+        }
+
+        timePeriodContainer.style.display = 'block';
+        timePeriodSelect.innerHTML = '';
 
         let options = [];
         if (reportType === 'batch_expiry') {
@@ -247,7 +84,6 @@ use App\Services\RBACService;
             ];
         }
 
-        // Populate the dropdown with new options
         options.forEach(option => {
             const opt = document.createElement('option');
             opt.value = option.value;
@@ -255,22 +91,35 @@ use App\Services\RBACService;
             timePeriodSelect.appendChild(opt);
         });
 
-        // Restore the previous selection if it exists in the new options
         const validOption = options.find(opt => opt.value === currentValue);
         timePeriodSelect.value = validOption ? currentValue : options[0].value;
 
-        // Update date range visibility
         toggleDateRange(timePeriodSelect.value);
     }
 
-    // JavaScript to toggle date range visibility
     function toggleDateRange(timePeriod) {
         const dateRangeContainer = document.getElementById('date-range-container');
-        dateRangeContainer.style.display = timePeriod === 'custom' ? 'block' : 'none';
+        dateRangeContainer.style.display = timePeriod === 'custom' ? 'flex' : 'none';
+    }
+
+    function generateReport() {
+        const reportType = document.getElementById('report-type').value;
+        let url = `/reports?report_type=${reportType}`;
+
+        if (reportType !== 'inventory' && reportType !== 'suppliers') {
+            const timePeriod = document.getElementById('time-period').value;
+            url += `&time_period=${timePeriod}`;
+            if (timePeriod === 'custom') {
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                url += `&start_date=${startDate}&end_date=${endDate}`;
+            }
+        }
+
+        window.location.href = url;
     }
 </script>
 
-                        <div class="filter-divider"></div>
 
                             <div id="date-range-container" class="date-range" style="<?= $selectedTimePeriod === 'custom' ? '' : 'display: none;' ?>">
                                 <div class="form-field">
@@ -284,7 +133,7 @@ use App\Services\RBACService;
                                 </div>
                             </div>
 
-                            <button type="button" class="btn btn-primary" onclick="generateReport()">
+                            <button type="button" class="btn btn-primary margin-report" onclick="generateReport()">
                                 <span class="icon">analytics</span>
                                 Generate Report
                             </button>
@@ -294,9 +143,10 @@ use App\Services\RBACService;
             </div>
 
             <!-- KPI Metrics -->
+            <?php if ($selectedReportType === 'sales' || $selectedReportType === '' ): ?>
             <div class="kpi-grid">
                 <?php foreach ($kpiMetrics as $metric): ?>
-                    <div class="kpi-card <?= $metric['type'] ?>">
+                    <div class="kpi-card card <?= $metric['type'] ?>">
                         <div class="kpi-header">
                             <span class="icon"><?= $metric['icon'] ?></span>
                             <h4 class="kpi-label"><?= $metric['label'] ?></h4>
@@ -309,6 +159,7 @@ use App\Services\RBACService;
                     </div>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
 
             <!-- Report Sections -->
             <div class="chart-sections">
@@ -321,15 +172,15 @@ use App\Services\RBACService;
                     <div class="report-card-body">
                         <div class="report-summary">
                             <div class="summary-item">
-                                <div class="summary-value"><?= number_format($countAndRevenue['count']) ?></div>
+                                <div class="summary-value"><?= $salesStats['total_orders'] ?></div>
                                 <div class="summary-label">Total Orders</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">LKR <?= number_format($countAndRevenue['revenue']) ?></div>
+                                <div class="summary-value"><?= $salesStats['total_revenue'] ?></div>
                                 <div class="summary-label">Total Revenue</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">LKR <?= $countAndRevenue['count'] > 0 ? number_format($countAndRevenue['revenue'] / $countAndRevenue['count']) : '0.00' ?></div>
+                                <div class="summary-value"><?= $salesStats['avg_order_value'] ?></div>
                                 <div class="summary-label">Avg. Order Value</div>
                             </div>
                         </div>
@@ -337,7 +188,7 @@ use App\Services\RBACService;
                             <canvas id="salesTrendChart"></canvas>
                         </div>
                     </div>
-                </div>
+                </div>   
                 <?php endif; ?>
                 <?php if ($selectedReportType === 'inventory'): ?>
                 <!-- Inventory Status -->
@@ -349,21 +200,21 @@ use App\Services\RBACService;
                     <div class="report-card-body">
                         <div class="report-summary">
                             <div class="summary-item">
-                                <div class="summary-value"><?= $stockStatus['in_stock'] ?></div>
+                                <div class="summary-value"><?= $inventoryStats['in_stock'] ?></div>
                                 <div class="summary-label">In Stock</div>
                                 <div class="summary-trend positive">
                                     <span class="icon">check_circle</span>
                                 </div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value"><?= $stockStatus['low_stock'] ?></div>
+                                <div class="summary-value"><?= $inventoryStats['low_stock'] ?></div>
                                 <div class="summary-label">Low Stock</div>
                                 <div class="summary-trend">
                                     <span class="icon text-warning">warning</span>
                                 </div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value"><?= $stockStatus['out_of_stock'] ?></div>
+                                <div class="summary-value"><?= $inventoryStats['out_of_stock'] ?></div>
                                 <div class="summary-label">Out of Stock</div>
                                 <div class="summary-trend negative">
                                     <span class="icon">error</span>
@@ -395,15 +246,15 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value">5</div>
+                                <div class="summary-value"><?= $categoryStats['category_count'] ?></div>
                                 <div class="summary-label">Categories</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">154</div>
+                                <div class="summary-value"><?= $categoryStats['total_products'] ?></div>
                                 <div class="summary-label">Total Products</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value">30.8</div>
+                                <div class="summary-value"><?= $categoryStats['avg_products_per_category'] ?></div>
                                 <div class="summary-label">Avg Products/Category</div>
                             </div>
                         </div>
@@ -449,9 +300,44 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value">LKR <?= count($categoryRevenueData) > 0 ? number_format(array_sum(array_column($categoryRevenueData, 'revenue')) / count($categoryRevenueData)) : '0.00' ?></div>
+                                <div class="summary-value"><?= count($categoryRevenueData) > 0 ? 'LKR ' . number_format(array_sum(array_column($categoryRevenueData, 'revenue')) / count($categoryRevenueData), 2) : 'LKR 0.00' ?></div>
                                 <div class="summary-label">Avg Revenue/Category</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                <?php if ($selectedReportType === 'sales' || $selectedReportType === '' ): ?>
+                <!-- Top Product Combinations -->
+                <div class="report-card">
+                    <div class="report-card-header">
+                        <h3>Top Product Combinations</h3>
+                    </div>
+                    <div class="report-card-body">
+                        <div class="report-table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product1</th>
+                                        <th>Product2</th>
+                                        <th>Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($basketAnalysisResults as $combination): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($combination['product1']) ?></td>
+                                            <td><?= htmlspecialchars($combination['product2']) ?></td>
+                                            <td><?= $combination['frequency'] ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    <?php if (empty($basketAnalysisResults)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No product combinations found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -483,6 +369,11 @@ use App\Services\RBACService;
                                             <td><?= $product['revenue'] ?></td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No top selling products found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -528,6 +419,11 @@ use App\Services\RBACService;
                                             <td><?= $order['total'] ?></td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No orders found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -573,14 +469,19 @@ use App\Services\RBACService;
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No products found to be expried in the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                         <div class="report-actions">
-                            <button class="btn btn-secondary" onclick="markForDiscount()">
+                            <!--<button class="btn btn-secondary" onclick="markForDiscount()">
                                 <span class="icon">sell</span>
                                 Mark for Discount
-                            </button>
+                            </button>-->
                             <div class="export-options">
                                 <button class="btn btn-secondary" onclick="viewAllExpiryAlerts()">
                                     <span class="icon">notification_important</span>
@@ -629,6 +530,11 @@ use App\Services\RBACService;
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No products found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -647,30 +553,7 @@ use App\Services\RBACService;
 </div>
 
 <script>
-    // Toggle custom date range based on selected time period
-    function toggleDateRange(value) {
-        const dateRangeContainer = document.getElementById('date-range-container');
-        if (value === 'custom') {
-            dateRangeContainer.style.display = 'flex';
-        } else {
-            dateRangeContainer.style.display = 'none';
-        }
-    }
-
-    // Generate report based on selected filters
-    function generateReport() {
-        const reportType = document.getElementById('report-type').value;
-        const timePeriod = document.getElementById('time-period').value;
-        let url = `/reports?report_type=${reportType}&time_period=${timePeriod}`;
-        
-        if (timePeriod === 'custom') {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            url += `&start_date=${startDate}&end_date=${endDate}`;
-        }
-        
-        window.location.href = url;
-    }
+   
 
     // View all products function
     function viewAllProducts() {
@@ -722,9 +605,6 @@ use App\Services\RBACService;
         // Only load charts if Chart.js is available
         if (typeof Chart !== 'undefined') {
             initializeCharts();
-        } else {
-            // If Chart.js isn't loaded, load it dynamically
-            loadChartJS();
         }
     });
 
@@ -736,6 +616,34 @@ use App\Services\RBACService;
         drawCategoryChart();
         drawSupplierChart();
         drawSalesByCategoryChart();
+    }
+
+    // Function to set up chart placeholders if drawing fails
+    function setupChartPlaceholders() {
+        const placeholders = document.querySelectorAll('.chart-placeholder');
+        placeholders.forEach(placeholder => {
+            // Style placeholder
+            placeholder.style.backgroundColor = '#f9fafb';
+            placeholder.style.border = '1px dashed #d1d5db';
+            placeholder.style.borderRadius = '4px';
+            placeholder.style.display = 'flex';
+            placeholder.style.justifyContent = 'center';
+            placeholder.style.alignItems = 'center';
+            placeholder.style.height = '200px';
+            placeholder.style.cursor = 'pointer';
+            
+            // Add placeholder text
+            const text = document.createElement('div');
+            text.textContent = 'Chart Placeholder - Click to load';
+            text.style.color = '#6b7280';
+            text.style.fontSize = '14px';
+            placeholder.appendChild(text);
+            
+            // Add click event
+            placeholder.addEventListener('click', function() {
+                alert('Charts would be loaded here in the final implementation');
+            });
+        });
     }
 
     // Draw line chart for sales trend
@@ -916,6 +824,7 @@ use App\Services\RBACService;
         
         return { cp1x, cp1y, cp2x, cp2y };
     }
+
     // Draw doughnut chart for inventory status
     function drawInventoryChart() {
         const canvas = document.getElementById('inventoryChart');
@@ -1480,34 +1389,6 @@ use App\Services\RBACService;
         ctx.font = '16px Arial'; // Increased font size
         ctx.fillText(yLabel, 0, 0);
         ctx.restore();
-    }
-
-    // Function to set up chart placeholders if drawing fails
-    function setupChartPlaceholders() {
-        const placeholders = document.querySelectorAll('.chart-placeholder');
-        placeholders.forEach(placeholder => {
-            // Style placeholder
-            placeholder.style.backgroundColor = '#f9fafb';
-            placeholder.style.border = '1px dashed #d1d5db';
-            placeholder.style.borderRadius = '4px';
-            placeholder.style.display = 'flex';
-            placeholder.style.justifyContent = 'center';
-            placeholder.style.alignItems = 'center';
-            placeholder.style.height = '200px';
-            placeholder.style.cursor = 'pointer';
-            
-            // Add placeholder text
-            const text = document.createElement('div');
-            text.textContent = 'Chart Placeholder - Click to load';
-            text.style.color = '#6b7280';
-            text.style.fontSize = '14px';
-            placeholder.appendChild(text);
-            
-            // Add click event
-            placeholder.addEventListener('click', function() {
-                alert('Charts would be loaded here in the final implementation');
-            });
-        });
     }
 
     // Function to dynamically load charts

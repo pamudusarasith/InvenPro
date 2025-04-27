@@ -3,8 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\{Controller, View};
-use App\Models\{DiscountModel, ProductModel, SaleModel};
+use App\Models\{DiscountModel, ProductModel, SaleModel, UserModel};
 use App\Services\DiscountService;
+use App\Services\NotificationService;
 
 class POSController extends Controller
 {
@@ -118,11 +119,60 @@ class POSController extends Controller
     $data['total'] = $subtotal - $data['discount'];
 
     $saleModel = new SaleModel();
-    $saleModel->createSale($data);
+    $saleId = $saleModel->createSale($data);
+
+    if (!$saleId) {
+      self::sendJSON([
+        "success" => false,
+        "message" => "Failed to create sale",
+      ]);
+      exit;
+    }
+
+    // Check each product for low stock after sale is completed
+    $productsToCheck = [];
+    foreach ($data['items'] as $item) {
+      $productsToCheck[] = $item['product_id'];
+    }
+
+    // Trigger low stock notifications for affected products
+    foreach ($productsToCheck as $productId) {
+      if ($productModel->checkLowStock($productId)) {
+        $this->sendLowStockNotification($productId);
+      }
+    }
 
     self::sendJSON([
       "success" => true,
       "message" => "Sale created successfully",
+      "sale_id" => $saleId
     ]);
+  }
+
+  public function sendLowStockNotification(int $productId): void
+  {
+    $productModel = new ProductModel();
+    $product = $productModel->getProductById($productId);
+    // Notify users with create_purchase_orders permission
+    $userModel = new UserModel();
+    $usersWithPermission = $userModel->getUsersByPermission('create_purchase_orders');
+
+    foreach ($usersWithPermission as $user) {
+      NotificationService::sendToUser(
+        $user['id'],
+        'Low Stock Alert',
+        "Product {$product['product_name']} is low on stock.",
+        'warning',
+        'high',
+        [
+          'product_id' => $product['id'],
+          'product_name' => $product['product_name'],
+          'current_quantity' => $product['current_quantity'],
+          'reorder_level' => $product['reorder_level'],
+          'action' => 'view_product'
+        ],
+        null
+      );
+    }
   }
 }

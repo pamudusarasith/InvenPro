@@ -16,6 +16,7 @@
 @import "components/forms.css";
 @import "components/modals.css";
 @import "components/navbar.css";
+@import "components/notifications.css";
 @import "components/pagination.css";
 @import "components/popup.css";
 @import "components/search.css";
@@ -29,4 +30,4 @@
 @import "pages/product-details.css";
 @import "pages/adminDashboard.css";
 @import "pages/reports.css";
-
+@import "pages/sales.css";

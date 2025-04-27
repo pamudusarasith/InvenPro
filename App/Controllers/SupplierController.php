@@ -24,12 +24,14 @@ class SupplierController extends Controller
     $totalPages = ceil($totalRecords / $itemsPerPage);
 
     $branchModel = new BranchModel();
-    $branches = $branchModel->getBranches();
+    $branches = $branchModel->getBranches($page, $itemsPerPage, $search , $status);
+    $brachForCreateSupplier = $branchModel->getBranchesForCreateSupplier($page, $itemsPerPage, $search , $status);
 
     View::renderTemplate('Suppliers', [
       'title' => 'Suppliers',
       'suppliers' => $suppliers,
       'branches' => $branches,
+      'brachForCreateSupplier' => $brachForCreateSupplier,
       'page' => $page,
       'itemsPerPage' => $itemsPerPage,
       'totalPages' => $totalPages,
@@ -40,29 +42,43 @@ class SupplierController extends Controller
     ]);
   }
 
-  public function details(array $params): void
-  {
+
+public function details(array $params): void
+{
+    $page = $_GET['p'] ?? 1;
+    $itemsPerPage = $_GET['ipp'] ?? 10;
+    $page = max(1, (int) ($_GET['p'] ?? 1));
+    $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
+    $search = $_GET['search'] ?? '';
+    $branchId = $_GET['branch'] ?? '';
+    $status = $_GET['status'] ?? '';
+
     $supplierModel = new SupplierModel();
     $supplier = $supplierModel->getSupplier($params['id']);
 
     $branchModel = new BranchModel();
-    $branches = $branchModel->getBranches();
+    $branches = $branchModel->getBranches($page, $itemsPerPage, $search, $status);
 
     if (!$supplier) {
-      $_SESSION['message'] = 'Supplier not found';
-      $_SESSION['message_type'] = 'error';
-      View::redirect('/suppliers');
+        $_SESSION['message'] = 'Supplier not found';
+        $_SESSION['message_type'] = 'error';
+        View::redirect('/suppliers');
     }
+
+    // Fetch statistics for the supplier
+    $stats = $supplierModel->getSupplierStats($params['id']);
+
     $product = $supplierModel->getSupplierProducts($params['id']);
     $order = $supplierModel->getOrderDetails($params['id']);
     View::renderTemplate('SupplierDetails', [
-      'title' => 'Supplier Details',
-      'supplier' => $supplier,
-      'branches' => $branches,
-      'supplier_products' => $product,
-      'orders' => $order,
+        'title' => 'Supplier Details',
+        'supplier' => $supplier,
+        'branches' => $branches,
+        'supplier_products' => $product,
+        'orders' => $order,
+        'stats' => $stats, // Pass stats to the view
     ]);
-  }
+}
 
   public function search(): void
   {
