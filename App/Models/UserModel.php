@@ -165,6 +165,18 @@ class UserModel extends Model
     $sql = 'UPDATE user SET password = ?,  WHERE id = ?';
     self::$db->query($sql, [password_hash($password, PASSWORD_BCRYPT), $id]);
 
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        'user',
+        $id,
+        'UPDATE_PASSWORD',
+        json_encode(['id' => $id, 'password' => 'updated']),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
+
     $_SESSION['message'] = 'Password updated successfully';
     $_SESSION['message_type'] = 'success';
   }
@@ -192,26 +204,48 @@ class UserModel extends Model
       $id
     ]);
 
+    // Log the action
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        'user',
+        $id,
+        'UPDATE',
+        json_encode(['id' => $id, $data]),
+        json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($data['branch_id']) ? $data['branch_id'] : null
+    );
+
     $_SESSION['message'] = 'User updated successfully';
     $_SESSION['message_type'] = 'success';
-
   }
 
   public function deleteUser(int $id): void
   {
-      // Fetch user details to get branch_id
-      $user = $this->getUserById($id);
-      if (!$user) {
-          throw new \Exception('User not found');
-      }
+    // Fetch user details to get branch_id
+    $user = $this->getUserById($id);
+    if (!$user) {
+      throw new \Exception('User not found');
+    }
 
-      // Soft delete the user
-      $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
-      self::$db->query($sql, [$id]);
+    // Soft delete the user
+    $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
+    self::$db->query($sql, [$id]);
 
+      // Log the action
+      $auditLogModel = new AuditLogModel();
+      $auditLogModel->logAction(
+          'user',
+          $id,
+          'DELETE',
+          json_encode($user),
+          json_encode(['ip' => $_SERVER['REMOTE_ADDR'], 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+          isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+          isset($user['branch_id']) ? $user['branch_id'] : null
+      );
 
-      $_SESSION['message'] = 'User deleted successfully';
-      $_SESSION['message_type'] = 'success';
+    $_SESSION['message'] = 'User deleted successfully';
+    $_SESSION['message_type'] = 'success';
   }
 
   public function recordLastLogin(int $id): void
@@ -220,6 +254,16 @@ class UserModel extends Model
     $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
     self::$db->query($sql, [$ip, $id]);
 
+    $auditLogModel = new AuditLogModel();
+    $auditLogModel->logAction(
+        'user',
+        $id,
+        'LOGIN',
+        json_encode(['id' => $id, 'last_login' => date('Y-m-d H:i:s'), 'last_login_ip' => $ip]),
+        json_encode(['ip' => $ip, 'user_agent' => $_SERVER['HTTP_USER_AGENT']]),
+        isset($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null,
+        isset($_SESSION['user']['branch_id']) ? $_SESSION['user']['branch_id'] : null
+    );
   }
 
   public function getFailedLoginAttempts(string $email): int
@@ -232,7 +276,7 @@ class UserModel extends Model
   public function recordFailedLoginAttempt(string $email): void
   {
     $timestamp = date('Y-m-d H:i:s');
-    
+
     $attempts = $this->getFailedLoginAttempts($email);
     if ($attempts >= 3) {
       return; // User is already locked out
@@ -260,6 +304,31 @@ class UserModel extends Model
     self::$db->query($sql, [$id]);
   }
 
-}
+  public function getUsersByRole(int $roleId): array
+  {
+    $sql = 'SELECT id, display_name, email FROM user WHERE role_id = ? AND deleted_at IS NULL AND branch_id = ?';
+    $stmt = self::$db->query($sql, [$roleId, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll();
+  }
 
-  
+  public function getUsersByBranch(int $branchId): array
+  {
+    $sql = 'SELECT id, display_name, email FROM user WHERE branch_id = ? AND deleted_at IS NULL';
+    $stmt = self::$db->query($sql, [$branchId]);
+    return $stmt->fetchAll();
+  }
+
+  public function getUsersByPermission(string $permission): array
+  {
+    $sql = '
+      SELECT u.id, u.display_name, u.email
+      FROM user u
+      JOIN role r ON u.role_id = r.id
+      JOIN role_permission rp ON r.id = rp.role_id
+      JOIN permission p ON rp.permission_id = p.id
+      WHERE p.permission_name = ? AND u.deleted_at IS NULL AND u.branch_id = ?
+    ';
+    $stmt = self::$db->query($sql, [$permission, $_SESSION['user']['branch_id']]);
+    return $stmt->fetchAll();
+  }
+}

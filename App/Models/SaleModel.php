@@ -25,7 +25,7 @@ class SaleModel extends Model
     return self::$db->query($sql, $params)->fetch();
   }
 
-  public function createSale(array $data): void
+  public function createSale(array $data): int|false
   {
     try {
       self::$db->beginTransaction();
@@ -54,6 +54,9 @@ class SaleModel extends Model
       ]);
 
       $saleId = self::$db->lastInsertId();
+      if (!$saleId) {
+        throw new \Exception('Failed to create sale');
+      }
 
       foreach ($data['items'] as $item) {
         $sql = '
@@ -64,7 +67,10 @@ class SaleModel extends Model
             id = ?
         ';
 
-        self::$db->query($sql, [$item['quantity'], $item['batch_id']]);
+        $stmt = self::$db->query($sql, [$item['quantity'], $item['batch_id']]);
+        if ($stmt->rowCount() === 0) {
+          throw new \Exception('Failed to update product batch');
+        }
 
         $sql = '
           INSERT INTO sale_item (
@@ -76,19 +82,24 @@ class SaleModel extends Model
           VALUES (?, ?, ?, ?, ?)
         ';
 
-        self::$db->query($sql, [
+        $stmt = self::$db->query($sql, [
           $saleId,
           $item['product_id'],
           $item['batch_id'],
           $item['quantity'],
           $item['unit_price'],
         ]);
+        if ($stmt->rowCount() === 0) {
+          throw new \Exception('Failed to create sale item');
+        }
       }
 
       self::$db->commit();
+      return $saleId;
     } catch (\Exception $e) {
       self::$db->rollBack();
-      throw $e;
+      error_log($e->getMessage() . "\n" . $e->getTraceAsString());
+      return false;
     }
   }
 
@@ -108,7 +119,6 @@ class SaleModel extends Model
 
     $params = ($_SESSION['user']['branch_id'] == 1) ? [] : [$_SESSION['user']['branch_id']];
     return self::$db->query($sql, $params)->fetchColumn() ?: 0;
-
   }
 
   /**

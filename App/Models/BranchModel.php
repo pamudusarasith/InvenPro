@@ -32,9 +32,56 @@ class BranchModel extends Model
             b.address,
             b.phone,
             b.email,
-            IF(b.deleted_at IS NULL, "Active", "Inactive") AS status
+            IF(b.deleted_at IS NULL, "Active", "Inactive") AS status,
+            b.deleted_at
         FROM branch b
-        WHERE 1 = 1
+        WHERE 1=1
+        
+    ';
+    $params = [];
+
+    // Add search filter
+    if ($search) {
+        $sql .= ' AND (b.branch_name LIKE ? OR b.branch_code LIKE ? OR b.email LIKE ?)';
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+    }
+
+    // Add status filter
+    if ($status) {
+        if ($status === 'active') {
+            $sql .= ' AND b.deleted_at IS NULL';
+        } elseif ($status === 'inactive') {
+            $sql .= ' AND b.deleted_at IS NOT NULL';
+        }
+    }
+
+    $sql .= ' ORDER BY b.id LIMIT ? OFFSET ?';
+    $params[] = $itemsPerPage;
+    $params[] = $offset;
+
+    $stmt = self::$db->query($sql, $params);
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+}
+
+
+public function getBranchesForCreateSupplier(int $page, int $itemsPerPage, ?string $search = '', ?string $status = ''): array
+{
+    $offset = ($page - 1) * $itemsPerPage;
+    $sql = '
+        SELECT
+            b.id,
+            b.branch_code,
+            b.branch_name,
+            b.address,
+            b.phone,
+            b.email,
+            IF(b.deleted_at IS NULL, "Active", "Inactive") AS status,
+            b.deleted_at
+        FROM branch b
+        WHERE b.deleted_at IS NULL
+        
     ';
     $params = [];
 
@@ -67,7 +114,9 @@ class BranchModel extends Model
 public function getBranchesCount(?string $search = '', ?string $status = ''): int
 {
     $sql = 'SELECT COUNT(*) FROM branch WHERE 1 = 1';
+    $stmt = self::$db->query($sql);
     $params = [];
+    return $stmt->fetchColumn();
 
     // Add search filter
     if ($search) {
@@ -129,9 +178,9 @@ public function getBranchesCount(?string $search = '', ?string $status = ''): in
     ]);
 }
 
-public function updateDeletedAt($branchId, $deletedAt)
+public function updateDeletedAt(int $branchId, ?string $deletedAt): void
 {
-    $sql = 'UPDATE Branch SET deleted_at = ? WHERE id = ?';
+    $sql = 'UPDATE branch SET deleted_at = ? WHERE id = ?';
     self::$db->query($sql, [$deletedAt, $branchId]);
 }
 
@@ -162,5 +211,7 @@ public function searchBranches(string $query, int $page, int $itemsPerPage): arr
     ]);
     return $stmt->fetchAll();
 }
+
+
   
 }

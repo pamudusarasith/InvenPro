@@ -21,6 +21,7 @@ class ProductModel extends Model
         p.*,
         u.unit_name,
         u.unit_symbol,
+        u.is_int,
         bp.reorder_level,
         bp.reorder_quantity
       FROM product p
@@ -422,6 +423,17 @@ class ProductModel extends Model
     self::$db->commit();
   }
 
+  public function productCodeExists(string $productCode, ?int $productId = null): bool
+  {
+    $sql = '
+    SELECT COUNT(*) 
+    FROM product 
+    WHERE (id IS NULL AND product_code = ?) OR (id IS NOT NULL AND product_code = ? AND id != ?)';
+    $stmt = self::$db->query($sql, [$productCode, $productCode, $productId]);
+    return $stmt->fetchColumn() > 0;
+  }
+
+
   public function deleteProduct(int $id): void
   {
     $sql = '
@@ -491,7 +503,7 @@ class ProductModel extends Model
     return $counts;
   }
 
-
+  
   public function getPendingReturnsCount(): int
   {
     if ($_SESSION['user']['branch_id'] == 1) {
@@ -503,6 +515,47 @@ class ProductModel extends Model
     }
   }
 
+  public function checkLowStock(int $productId): bool
+  {
+    try {
+      self::$db->beginTransaction();
+
+      $sql = '
+      SELECT
+        SUM(current_quantity) AS total_quantity
+      FROM product_batch
+      WHERE product_id = ?
+        AND branch_id = ?
+        AND deleted_at IS NULL
+    ';
+      $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+      $totalQuantity = $stmt->fetchColumn();
+
+      $sql = '
+      SELECT
+        reorder_level
+      FROM branch_product
+      WHERE product_id = ?
+        AND branch_id = ?
+    ';
+      $stmt = self::$db->query($sql, [$productId, $_SESSION['user']['branch_id']]);
+      $reorderLevel = $stmt->fetchColumn();
+      if ($totalQuantity === false || $reorderLevel === false) {
+        return false; // Error in query or no data found
+      }
+      // Check if the total quantity is less than or equal to the reorder level
+      if ($totalQuantity > $reorderLevel) {
+        return false; // Stock is sufficient
+      }
+
+      return true; // Stock is low
+    } catch (\Exception $e) {
+      self::$db->rollBack();
+      throw $e;
+    } finally {
+      self::$db->commit();
+    }
+  }
   public function getReorderQuantity(int $productId)
   {
     $sql = '

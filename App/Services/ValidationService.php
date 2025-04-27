@@ -233,6 +233,11 @@ class ValidationService
 
   public function validateCreateProduct(array $data): bool
   {
+    // if ($data['reorder_level'] < 0) {
+    //   $this->errors = [['Reo']];
+    //   return false;
+    // }
+
     $validator = new Validator($data);
     $validator->rule('product_name', new Required('Product Name is required'))
       ->rule('product_code', new Required('Product Code is required'))
@@ -243,8 +248,10 @@ class ValidationService
       ->rule('categories.*', new IsNumeric('Invalid Category ID'))
       ->rule('reorder_level', new Required('Reorder Level is required'))
       ->rule('reorder_level', new IsNumeric('Reorder Level must be numeric'))
+      ->rule('reorder_level', new CompareWithValue('>=', 0, 'numeric', 'Reorder Level must be greater than or equal to 0'))
       ->rule('reorder_quantity', new Required('Reorder Quantity is required'))
-      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'));
+      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'))
+      ->rule('reorder_quantity', new CompareWithValue('>', 0, 'numeric', 'Reorder Quantity must be greater than 0'));
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;
@@ -264,8 +271,10 @@ class ValidationService
       ->rule('categories.*', new IsNumeric('Invalid Category ID'))
       ->rule('reorder_level', new Required('Reorder Level is required'))
       ->rule('reorder_level', new IsNumeric('Reorder Level must be numeric'))
+      ->rule('reorder_level', new CompareWithValue('>', 0, 'numeric', 'Reorder Level must be greater than 0'))
       ->rule('reorder_quantity', new Required('Reorder Quantity is required'))
-      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'));
+      ->rule('reorder_quantity', new IsNumeric('Reorder Quantity must be numeric'))
+      ->rule('reorder_quantity', new CompareWithValue('>', 0, 'numeric', 'Reorder Quantity must be greater than 0'));
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;
