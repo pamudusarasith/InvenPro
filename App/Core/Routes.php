@@ -41,6 +41,8 @@ return [
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
     '/notifications' => 'App\Controllers\NotificationController::index',
     '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
+    '/sales' => 'App\Controllers\SalesController::index',
+    '/sales/list' => 'App\Controllers\SalesController::salesList',
     '/branches' => 'App\Controllers\BranchController::index',
     '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
     '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch', 
@@ -79,6 +81,9 @@ return [
     '/api/notifications/mark-all-read' => 'App\Controllers\NotificationController::markAllAsRead',
     '/branches/new' => 'App\Controllers\BranchController::createBranch',
     '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
+    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
+    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
+    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',
+
   ],
 ];
-

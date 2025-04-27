@@ -6,6 +6,20 @@ use App\Core\Model;
 
 class BranchModel extends Model
 {
+
+  public function getAllBranches(){
+    $sql = '
+      SELECT
+            b.id,
+            b.branch_code,
+            b.branch_name
+        FROM branch b
+        WHERE b.deleted_at IS NULL
+    ';
+
+    $results = self::$db->query($sql);
+    return $results->fetchAll();
+  }
   
   public function getBranches(int $page, int $itemsPerPage, ?string $search = '', ?string $status = ''): array
 {
