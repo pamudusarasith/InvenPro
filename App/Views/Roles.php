@@ -1,4 +1,5 @@
 <?php
+
 use App\Services\RBACService;
 
 // Validate data from controller to prevent undefined variable errors
@@ -47,7 +48,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
           <h3><?= htmlspecialchars($role['role_name'] ?? 'Unnamed Role') ?></h3>
         </div>
         <div class="role-card-body">
-          <p><?= htmlspecialchars($role['description'] ?? 'No description') ?></p>
+          <p class=""><?= htmlspecialchars($role['description'] ?? 'No description') ?></p>
           <div class="role-permission-count">
             <span class="icon">verified_user</span>
             <?php if ($roleId === 1): ?>
@@ -62,18 +63,22 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
             <?php endforeach; ?>
           </div>
         </div>
-        <div class="role-card-actions">
-          <button class="btn btn-sm btn-secondary" onclick="viewRoleDetails(<?= $roleId ?>)">
-            <span class="icon">visibility</span>
-            View
-          </button>
-          <?php if (RBACService::hasPermission('manage_roles')): ?>
-            <button class="btn btn-sm btn-primary" onclick="openEditRoleDialog(<?= $roleId ?>)">
-              <span class="icon">edit</span>
-              Edit
+          
+          <div class="card-actions">
+            <button class="icon-btn secondary" onclick="viewRoleDetails(<?= $roleId ?>)" title="">
+              <span class="icon">visibility</span>
             </button>
-          <?php endif; ?>
-        </div>
+            <?php if (RBACService::hasPermission('manage_roles')): ?>
+              <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
+                <span class="icon">edit</span>
+              </button>
+            <?php endif; ?>
+            <?php if (RBACService::hasPermission('manage_roles')): ?>
+              <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
+                <span class="icon">delete</span>
+              </button>
+            <?php endif; ?>
+          </div>
       </div>
       <?php endforeach; ?>
     </div>
@@ -82,11 +87,11 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
 
 <!-- Add/Edit Role Dialog -->
 <?php if (RBACService::hasPermission('manage_roles')): ?>
-  <dialog id="roleDialog">
+  <dialog id="roleDialog" class="modal">
     <div class="modal-content wide-modal">
       <div class="modal-header">
         <h2 id="roleDialogTitle">Add New Role</h2>
-        <button class="btn btn-secondary" onclick="cancelEdit()">
+        <button class="icon-btn secondary" onclick="cancelEdit()">
         <button class="close-btn" onclick="closeRoleDialog()">
           <span class="icon">close</span>
         </button>
@@ -111,46 +116,43 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
             <p class="subtitle">Select the permissions to assign to this role</p>
 
             <div class="permission-tabs">
-                <?php $isFirst = true; ?>
-                <?php foreach ($allPermissionsByCategory as $category => $permissions): ?>
-                    <div class="permission-tab <?= $isFirst ? 'active' : '' ?>" data-tab="<?= str_replace(' ', '_', strtolower($category)) ?>">
-                        <?= htmlspecialchars($category) ?>
-                    </div>
-                    <?php $isFirst = false; ?>
-                <?php endforeach; ?>
+              <?php $isFirst = true; ?>
+              <?php foreach ($allPermissionsByCategory as $category => $permissions): ?>
+                <div class="permission-tab <?= $isFirst ? 'active' : '' ?>" data-tab="<?= str_replace(' ', '_', strtolower($category)) ?>">
+                  <?= htmlspecialchars($category) ?>
+                </div>
+                <?php $isFirst = false; ?>
+              <?php endforeach; ?>
             </div>
 
             <?php $isFirst = true; ?>
             <?php foreach ($allPermissionsByCategory as $category => $permissions): ?>
-                <div class="permission-content" id="<?= str_replace(' ', '_', strtolower($category)) ?>-tab" <?= $isFirst ? '' : 'style="display: none;"' ?>>
-                    <div class="permission-header">
-                        <h3><?= htmlspecialchars($category) ?> Permissions</h3>
-                        <span class="select-all" data-group="<?= str_replace(' ', '_', strtolower($category)) ?>">Select All</span>
-                    </div>
-                    <div class="permission-list">
-                        <?php foreach ($permissions as $permission): ?>
-                            <div class="permission-item">
-                                <label>
-                                    <input type="checkbox" name="permissions[]" value="<?= htmlspecialchars($permission['id']) ?>">
-                                    <?= htmlspecialchars($permission['description']) ?>
-                                </label>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
+              <div class="permission-content" id="<?= str_replace(' ', '_', strtolower($category)) ?>-tab" <?= $isFirst ? '' : 'style="display: none;"' ?>>
+                <div class="permission-header">
+                  <h3><?= htmlspecialchars($category) ?> Permissions</h3>
+                  <span class="select-all" data-group="<?= str_replace(' ', '_', strtolower($category)) ?>">Select All</span>
                 </div>
-                <?php $isFirst = false; ?>
+                <div class="permission-list">
+                  <?php foreach ($permissions as $permission): ?>
+                    <div class="permission-item">
+                      <label>
+                        <input type="checkbox" name="permissions[]" value="<?= htmlspecialchars($permission['id']) ?>">
+                        <?= htmlspecialchars($permission['description']) ?>
+                      </label>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+              <?php $isFirst = false; ?>
             <?php endforeach; ?>
-        </div>
+          </div>
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeRoleDialog()">
-            <span class="icon">close</span>
-            Cancel
-          </button>
-          <button type="submit" class="btn btn-primary">
+        
+          <button type="submit" class="icon-btn primary" title="Save Role">
             <span class="icon">save</span>
-            Save</button>
+            </button>
         </div>
       </form>
     </div>
@@ -159,66 +161,64 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
 
 <!-- View Role Details Dialog -->
 <?php if (RBACService::hasPermission('manage_roles')): ?>
-<dialog id="roleDetailsDialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2 id="roleDetailsTitle">Role Details</h2>
-      <button class="close-btn" onclick="closeRoleDetailsDialog()">
-        <span class="icon">close</span>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <div class="details-section">
-        <h3 id="detailsRoleName"></h3>
-        <p id="detailsRoleDescription"></p>
-        
-        <div class="details-grid">
-          <div class="details-item">
-            <span class="details-label">Created</span>
-            <span class="details-value" id="detailsCreatedAt"></span>
-          </div>
-          <div class="details-item">
-            <span class="details-label">Users with this role</span>
-            <span class="details-value" id="detailsUserCount"></span>
-          </div>
-        </div>
-
-        <div class="details-divider"></div>
-        
-        <h4>Permissions</h4>
-        <?php if (!empty($allPermissionsByCategory)): ?>
-          <?php foreach (array_keys($allPermissionsByCategory) as $category): ?>
-            <div class="permission-category">
-              <h5><?= htmlspecialchars($category) ?></h5>
-              <ul class="permission-details-list" id="details<?= str_replace(' ', '', $category) ?>Permissions">
-                <!-- Populated by JavaScript -->
-              </ul>
-            </div>
-          <?php endforeach; ?>
-        <?php else: ?>
-          <p>No permission categories available.</p>
-        <?php endif; ?>
+  <dialog id="roleDetailsDialog" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="roleDetailsTitle">Role Details</h2>
+        <button class="close-btn" onclick="closeRoleDetailsDialog()">
+          <span class="icon">close</span>
+        </button>
       </div>
-    </div>
+
+      <div class="modal-body">
+        <div class="details-section">
+          <h3 id="detailsRoleName"></h3>
+          <p id="detailsRoleDescription"></p>
+
+          <div class="details-grid">
+            <div class="details-item">
+              <span class="details-label">Created</span>
+              <span class="details-value" id="detailsCreatedAt"></span>
+            </div>
+            <div class="details-item">
+              <span class="details-label">Users with this role</span>
+              <span class="details-value" id="detailsUserCount"></span>
+            </div>
+          </div>
+
+          <div class="details-divider"></div>
+
+          <h4>Permissions</h4>
+          <?php if (!empty($allPermissionsByCategory)): ?>
+            <?php foreach (array_keys($allPermissionsByCategory) as $category): ?>
+              <div class="permission-category">
+                <h5><?= htmlspecialchars($category) ?></h5>
+                <ul class="permission-details-list" id="details<?= str_replace(' ', '', $category) ?>Permissions">
+                  <!-- Populated by JavaScript -->
+                </ul>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p>No permission categories available.</p>
+          <?php endif; ?>
+        </div>
+      </div>
 
     <div class="modal-footer">
       <?php if (RBACService::hasPermission('manage_roles')): ?>
-        <button class="btn btn-danger" onclick="deleteRole(<?= htmlspecialchars($roleId ?? 'null') ?>)">
-          <span class="icon">delete</span>
-          Delete Role
-        </button>
-      <?php endif; ?>
-      <?php if (RBACService::hasPermission('manage_roles')): ?>
-        <button type="button" class="btn btn-primary" id="editRoleBtn">
-          <span class="icon">edit</span>
-          Edit Role
-        </button>
-      <?php endif; ?>
+          <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
+            <span class="icon">edit</span>
+          </button>
+          <?php endif; ?>
+          <?php if (RBACService::hasPermission('manage_roles')): ?>
+            <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
+              <span class="icon">delete</span>
+            </button>
+          <?php endif; ?>
     </div>
   </dialog>
-</div>
-<?php endif; ?> 
+  </div>
+<?php endif; ?>
 
 <link rel="stylesheet" href="/css/pages/roles.css">
 
@@ -236,7 +236,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
   const roles = <?= json_encode($roles, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
   document.addEventListener('DOMContentLoaded', function() {
-    initSearch(); 
+    initSearch();
     initPermissionTabs();
     initSelectAllPermissions();
   });
@@ -248,11 +248,11 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
       searchInput.addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
         const roleCards = document.querySelectorAll('.role-card');
-        
+
         roleCards.forEach(card => {
           const roleName = card.querySelector('.role-card-header h3').textContent.toLowerCase();
           const roleDescription = card.querySelector('.role-card-body p').textContent.toLowerCase();
-          
+
           if (roleName.includes(searchTerm) || roleDescription.includes(searchTerm)) {
             card.style.display = '';
           } else {
@@ -266,17 +266,17 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
   // Initialize permission tabs
   function initPermissionTabs() {
     const tabs = document.querySelectorAll('.permission-tab');
-    
+
     tabs.forEach(tab => {
       tab.addEventListener('click', function() {
         document.querySelectorAll('.permission-content').forEach(content => {
           content.style.display = 'none';
         });
-        
+
         tabs.forEach(t => t.classList.remove('active'));
-        
+
         this.classList.add('active');
-        
+
         const tabId = this.getAttribute('data-tab');
         const tabContent = document.getElementById(`${tabId}-tab`);
         if (tabContent) {
@@ -289,7 +289,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
   // Initialize select all functionality
   function initSelectAllPermissions() {
     const selectAllBtns = document.querySelectorAll('.select-all');
-    
+
     selectAllBtns.forEach(btn => {
       btn.addEventListener('click', function() {
         const group = this.getAttribute('data-group');
@@ -297,11 +297,11 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
         if (tabContent) {
           const checkboxes = tabContent.querySelectorAll('input[type="checkbox"]');
           const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-          
+
           checkboxes.forEach(cb => {
             cb.checked = !allChecked;
           });
-          
+
           this.textContent = allChecked ? 'Select All' : 'Deselect All';
         }
       });
@@ -316,11 +316,11 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
       form.reset();
       dialogTitle.textContent = 'Add New Role';
       form.action = '/roles/new';
-      
+
       document.querySelectorAll('input[name="permissions[]"]').forEach(cb => {
         cb.checked = false;
       });
-      
+
       document.getElementById('roleDialog').showModal();
       currentRoleId = null;
     }
@@ -329,103 +329,103 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
   let initialPermissions = []; // To store the initial permissions of the role
 
   function openEditRoleDialog(roleId) {
-      currentRoleId = roleId;
-      const role = roles[roleId];
-      const form = document.getElementById('roleForm');
-      const dialogTitle = document.getElementById('roleDialogTitle');
+    currentRoleId = roleId;
+    const role = roles[roleId];
+    const form = document.getElementById('roleForm');
+    const dialogTitle = document.getElementById('roleDialogTitle');
 
-      if (role && form && dialogTitle) {
-          dialogTitle.textContent = 'Edit Role';
-          form.action = `/roles/${roleId}/update`;
+    if (role && form && dialogTitle) {
+      dialogTitle.textContent = 'Edit Role';
+      form.action = `/roles/${roleId}/update`;
 
-          // Populate the form fields
-          document.getElementById('roleName').value = role.role_name || '';
-          document.getElementById('roleDescription').value = role.description || '';
+      // Populate the form fields
+      document.getElementById('roleName').value = role.role_name || '';
+      document.getElementById('roleDescription').value = role.description || '';
 
-          // Reset all permission checkboxes
-          document.querySelectorAll('input[name="permissions[]"]').forEach(cb => {
-              cb.checked = false;
-          });
+      // Reset all permission checkboxes
+      document.querySelectorAll('input[name="permissions[]"]').forEach(cb => {
+        cb.checked = false;
+      });
 
-          // Add the role_id as a hidden input field if it doesn't already exist
-          let roleIdInput = document.getElementById('roleIdInput');
-          if (!roleIdInput) {
-              roleIdInput = document.createElement('input');
-              roleIdInput.type = 'hidden';
-              roleIdInput.id = 'roleIdInput';
-              roleIdInput.name = 'role_id';
-              form.appendChild(roleIdInput);
-          }
-          roleIdInput.value = roleId;
-
-          // Populate permissions and store initial permissions
-          initialPermissions = []; // Reset initial permissions
-          const permissionIds = [];
-          for (const category in role.permissions) {
-              role.permissions[category].forEach(perm => {
-                  <?php foreach ($allPermissionsByCategory as $category => $permissions): ?>
-                      <?php foreach ($permissions as $p): ?>
-                          if (perm === '<?= $p['permission_name'] ?>') {
-                              permissionIds.push('<?= $p['id'] ?>');
-                              initialPermissions.push('<?= $p['id'] ?>'); // Store initial permissions
-                          }
-                      <?php endforeach; ?>
-                  <?php endforeach; ?>
-              });
-          }
-
-          permissionIds.forEach(id => {
-              const checkbox = document.querySelector(`input[value="${id}"]`);
-              if (checkbox) {
-                  checkbox.checked = true;
-              }
-          });
-
-          // Show the dialog
-          document.getElementById('roleDialog').showModal();
+      // Add the role_id as a hidden input field if it doesn't already exist
+      let roleIdInput = document.getElementById('roleIdInput');
+      if (!roleIdInput) {
+        roleIdInput = document.createElement('input');
+        roleIdInput.type = 'hidden';
+        roleIdInput.id = 'roleIdInput';
+        roleIdInput.name = 'role_id';
+        form.appendChild(roleIdInput);
       }
+      roleIdInput.value = roleId;
+
+      // Populate permissions and store initial permissions
+      initialPermissions = []; // Reset initial permissions
+      const permissionIds = [];
+      for (const category in role.permissions) {
+        role.permissions[category].forEach(perm => {
+          <?php foreach ($allPermissionsByCategory as $category => $permissions): ?>
+            <?php foreach ($permissions as $p): ?>
+              if (perm === '<?= $p['permission_name'] ?>') {
+                permissionIds.push('<?= $p['id'] ?>');
+                initialPermissions.push('<?= $p['id'] ?>'); // Store initial permissions
+              }
+            <?php endforeach; ?>
+          <?php endforeach; ?>
+        });
+      }
+
+      permissionIds.forEach(id => {
+        const checkbox = document.querySelector(`input[value="${id}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+
+      // Show the dialog
+      document.getElementById('roleDialog').showModal();
+    }
   }
 
   // Add event listener to the form to handle submission
-  document.getElementById('roleForm').addEventListener('submit', function (event) {
-      event.preventDefault(); // Prevent default form submission
+  document.getElementById('roleForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
 
-      // Get the current state of permissions
-      const currentPermissions = Array.from(document.querySelectorAll('input[name="permissions[]"]:checked')).map(cb => cb.value);
+    // Get the current state of permissions
+    const currentPermissions = Array.from(document.querySelectorAll('input[name="permissions[]"]:checked')).map(cb => cb.value);
 
-      // Determine added and removed permissions
-      const addedPermissions = currentPermissions.filter(id => !initialPermissions.includes(id));
-      const removedPermissions = initialPermissions.filter(id => !currentPermissions.includes(id));
+    // Determine added and removed permissions
+    const addedPermissions = currentPermissions.filter(id => !initialPermissions.includes(id));
+    const removedPermissions = initialPermissions.filter(id => !currentPermissions.includes(id));
 
-      // Log the arrays for debugging
-      console.log('Added Permissions:', addedPermissions);
-      console.log('Removed Permissions:', removedPermissions);
+    // Log the arrays for debugging
+    console.log('Added Permissions:', addedPermissions);
+    console.log('Removed Permissions:', removedPermissions);
 
-      // Create a hidden input to send the added and removed permissions
-      let addedInput = document.getElementById('addedPermissionsInput');
-      if (!addedInput) {
-          addedInput = document.createElement('input');
-          addedInput.type = 'hidden';
-          addedInput.id = 'addedPermissionsInput';
-          addedInput.name = 'added_permissions';
-          this.appendChild(addedInput);
-      }
-      addedInput.value = JSON.stringify(addedPermissions);
+    // Create a hidden input to send the added and removed permissions
+    let addedInput = document.getElementById('addedPermissionsInput');
+    if (!addedInput) {
+      addedInput = document.createElement('input');
+      addedInput.type = 'hidden';
+      addedInput.id = 'addedPermissionsInput';
+      addedInput.name = 'added_permissions';
+      this.appendChild(addedInput);
+    }
+    addedInput.value = JSON.stringify(addedPermissions);
 
-      let removedInput = document.getElementById('removedPermissionsInput');
-      if (!removedInput) {
-          removedInput = document.createElement('input');
-          removedInput.type = 'hidden';
-          removedInput.id = 'removedPermissionsInput';
-          removedInput.name = 'removed_permissions';
-          this.appendChild(removedInput);
-      }
-      removedInput.value = JSON.stringify(removedPermissions);
+    let removedInput = document.getElementById('removedPermissionsInput');
+    if (!removedInput) {
+      removedInput = document.createElement('input');
+      removedInput.type = 'hidden';
+      removedInput.id = 'removedPermissionsInput';
+      removedInput.name = 'removed_permissions';
+      this.appendChild(removedInput);
+    }
+    removedInput.value = JSON.stringify(removedPermissions);
 
-      // Submit the form
-      this.submit();
+    // Submit the form
+    this.submit();
   });
-  
+
   // Close the role dialog
   function closeRoleDialog() {
     const dialog = document.getElementById('roleDialog');
@@ -438,29 +438,29 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
   function viewRoleDetails(roleId) {
     currentRoleId = roleId;
     const role = roles[roleId];
-    
+
     if (role) {
       const createdDate = new Date(role.created_at);
-      const formattedDate = isNaN(createdDate) ? 'Unknown' : createdDate.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const formattedDate = isNaN(createdDate) ? 'Unknown' : createdDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
-      
+
       document.getElementById
       document.getElementById('detailsRoleName').textContent = role.role_name || 'Unnamed Role';
       document.getElementById('detailsRoleDescription').textContent = role.description || 'No description';
       document.getElementById('detailsCreatedAt').textContent = formattedDate;
       document.getElementById('detailsUserCount').textContent = role.user_count || 0;
-      
+
       <?php foreach (array_keys($allPermissionsByCategory) as $category): ?>
         const listEl<?= str_replace(' ', '', $category) ?> = document.getElementById('details<?= str_replace(' ', '', $category) ?>Permissions');
         if (listEl<?= str_replace(' ', '', $category) ?>) {
           listEl<?= str_replace(' ', '', $category) ?>.innerHTML = '';
-          
+
           const categoryKey = '<?= strtolower(str_replace(' ', '_', $category)) ?>';
           const perms = role.permissions[categoryKey] || (categoryKey === 'uncategorized' ? role.permissions[''] : null);
-          
+
           if (perms && perms.length > 0) {
             perms.forEach(perm => {
               let description = perm;
@@ -481,7 +481,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
           }
         }
       <?php endforeach; ?>
-      
+
       const editBtn = document.getElementById('editRoleBtn');
       if (editBtn) {
         editBtn.onclick = function() {
@@ -489,7 +489,7 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
           openEditRoleDialog(roleId);
         };
       }
-      
+
       document.getElementById('roleDetailsDialog').showModal();
     }
   }
@@ -506,26 +506,25 @@ $allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPer
     // Use currentRoleId if roleId is not provided or invalid
     const id = roleId || currentRoleId;
     if (!id) {
-        alert('Error: Role ID is missing.');
-        return;
+      alert('Error: Role ID is missing.');
+      return;
     }
 
     if (confirm('Are you sure you want to delete this role?')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/roles/${id}/delete`;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/roles/${id}/delete`;
 
-        // Add role_id to the form
-        const roleIdInput = document.createElement('input');
-        roleIdInput.type = 'hidden';
-        roleIdInput.name = 'role_id';
-        roleIdInput.value = id;
-        form.appendChild(roleIdInput);
+      // Add role_id to the form
+      const roleIdInput = document.createElement('input');
+      roleIdInput.type = 'hidden';
+      roleIdInput.name = 'role_id';
+      roleIdInput.value = id;
+      form.appendChild(roleIdInput);
 
-        document.body.appendChild(form);
-        form.submit();
+      document.body.appendChild(form);
+      form.submit();
     }
     closeRoleDetailsDialog();
   }
-
 </script>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Services\RBACService;
+
 $roles = $roles ?? [];
 $branches = $branches ?? [];
 $activities = $activities ?? [];
@@ -267,46 +268,46 @@ $activities = $activities ?? [];
 
 <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
     <!-- Password Reset Dialog -->
-        <dialog id="passwordResetDialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Reset Password</h2>
-                    <button class="close-btn" onclick="closePasswordResetDialog()">
-                        <span class="icon">close</span>
-                    </button>
-                </div>
-
-                <form id="passwordResetForm" method="POST" action="/profile/reset-password" onsubmit="validateFrom(event);">
-                    <div class="form-grid">
-                        <div class="form-field span-1">
-                            <label for="new_password">Old Password</label>
-                            <input type="password" id="old_password" name="old_password" required>
-                        </div>
-                        <div class="form-field span-1">
-                            <label for="new_password">New Password</label>
-                            <input type="password" id="new_password" name="new_password" required>
-                        </div>
-                        <div class="form-field span-1">
-                            <label for="confirm_password">Confirm Password</label>
-                            <input type="password" id="confirm_password" name="confirm_password" required>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
-                            <button type="submit" class="btn btn-primary">Reset Password</button>
-                        </div>
-                    </div>
-                </form>
+    <dialog id="passwordResetDialog" class="modeal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+                <button class="close-btn" onclick="closePasswordResetDialog()">
+                    <span class="icon">close</span>
+                </button>
             </div>
-        </dialog>
+
+            <form id="passwordResetForm" method="POST" action="/profile/reset-password" onsubmit="validateFrom(event);">
+                <div class="form-grid">
+                    <div class="form-field span-1">
+                        <label for="new_password">Old Password</label>
+                        <input type="password" id="old_password" name="old_password" required>
+                    </div>
+                    <div class="form-field span-1">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" required>
+                    </div>
+                    <div class="form-field span-1">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </dialog>
 <?php endif; ?>
 
 <!-- Include any additional scripts here -->
 <?php if (isset($_SESSION['message'])): ?>
-  <div class="card glass notification <?= htmlspecialchars($_SESSION['message_type']) ?>">
-    <p><?= htmlspecialchars($_SESSION['message']) ?></p>
-    <button class="close-btn" onclick="this.parentElement.remove()">✕</button>
-  </div>
-  <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
+    <div class="card glass notification <?= htmlspecialchars($_SESSION['message_type']) ?>">
+        <p><?= htmlspecialchars($_SESSION['message']) ?></p>
+        <button class="close-btn" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
 <?php endif; ?>
 
 
@@ -357,7 +358,7 @@ $activities = $activities ?? [];
     function saveChanges() {
         if (!confirm('Are you sure you want to save these changes?')) {
             return;
-        }        
+        }
 
         // Implement save changes logic
         const form = document.getElementById('details-form');
@@ -365,23 +366,23 @@ $activities = $activities ?? [];
         const accessControlFields = document.querySelectorAll('.form-field.AccessControl :is(input, select)');
         accessControlFields.forEach(field => {
             if (field.disabled) {
-            // Add the field's name and value to a hidden input
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = field.name;
-            hiddenInput.value = field.value;
-            form.appendChild(hiddenInput);
+                // Add the field's name and value to a hidden input
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = field.name;
+                hiddenInput.value = field.value;
+                form.appendChild(hiddenInput);
             }
         });
 
         form.submit();
     }
 
-    
+
 
     // Password Reset Dialog Functions
     <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
-                               
+
         function openPasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
             dialog.showModal(); // Show the dialog
@@ -410,7 +411,7 @@ $activities = $activities ?? [];
             const newPassword = form.querySelector('#new_password');
             const confirmPassword = form.querySelector('#confirm_password');
             const submitButton = form.querySelector('button[type="submit"]');
-            
+
             // Clear existing errors
             const errorFields = form.querySelectorAll('.error');
             errorFields.forEach(field => {

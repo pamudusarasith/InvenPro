@@ -2,6 +2,11 @@
 
 use App\Services\RBACService;
 
+$canEditProduct = RBACService::hasPermission('edit_product_Details');
+$canDeleteProduct = RBACService::hasPermission('delete_product');
+$canCreateReturn = RBACService::hasPermission('create_return');
+$canPlaceOrder = RBACService::hasPermission('place_order');
+
 ?>
 
 <div class="body">
@@ -12,9 +17,6 @@ use App\Services\RBACService;
     <div class="profile-container">
       <div class="details-header">
         <div class="details-header-left">
-          <img src="<?= htmlspecialchars($product['image_path']) ?>"
-            alt="<?= htmlspecialchars($product['product_name']) ?>"
-            class="product-image">
           <div class="profile-info">
             <div class="details-title">
               <h1 class="title-name"><?= htmlspecialchars($product['product_name']) ?></h1>
@@ -45,20 +47,30 @@ use App\Services\RBACService;
               Save
             </button>
           </div>
-          <?php if (RBACService::hasPermission('edit_product')): ?>
+          <?php if ($canCreateReturn || $canDeleteProduct || $canEditProduct): ?>
             <div class="dropdown">
               <button class="dropdown-trigger icon-btn" title="More options">
                 <span class="icon">more_vert</span>
               </button>
               <div class="dropdown-menu">
-                <button class="dropdown-item" onclick="enableEditing()">
-                  <span class="icon">edit</span>
-                  Edit Product
-                </button>
-                <button class="dropdown-item danger" onclick="deleteProduct(<?= $product['id'] ?>)">
-                  <span class="icon">delete</span>
-                  Delete Product
-                </button>
+                <?php if ($canCreateReturn): ?>
+                  <button class="dropdown-item" onclick="openReturnDetailsDialog()">
+                    <span class="icon">undo</span>
+                    Returns
+                  </button>
+                <?php endif; ?>
+                <?php if ($canDeleteProduct): ?>
+                  <button class="dropdown-item" onclick="enableEditing()">
+                    <span class="icon">edit</span>
+                    Edit Product
+                  </button>
+                <?php endif; ?>
+                <?php if ($canEditProduct): ?>
+                  <button class="dropdown-item danger" onclick="deleteProduct(<?= $product['id'] ?>)">
+                    <span class="icon">delete</span>
+                    Delete Product
+                  </button>
+                <?php endif; ?>
               </div>
             </div>
           <?php endif; ?>
@@ -76,15 +88,14 @@ use App\Services\RBACService;
             return strtotime($batch['expiry_date']) > time() || !$batch['expiry_date'] ? $batch['current_quantity'] : 0;
           }, $product['batches']));
           ?>
-          <div class="stat-value"><?= number_format($totalStock, 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
+          <div class="stat-value"><?= $product['is_int'] ? number_format($totalStock ?? 0, 0) : number_format($totalStock, 3); ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
         </div>
-
         <div class="stat-card">
           <div class="stat-header">
             <span class="icon text-info">trending_up</span>
             <span class="stat-label">Sales This Month</span>
           </div>
-          <div class="stat-value"><?= number_format($stats['monthly_sales'], 3) ?> <?= htmlspecialchars($product['unit_symbol']) ?></div>
+          <div class="stat-value"><?= number_format($sales['monthly_sales'], 2) ?></div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
@@ -117,7 +128,6 @@ use App\Services\RBACService;
       <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
       <button class="tab-btn" onclick="switchTab('batches')">Stock Batches</button>
       <button class="tab-btn" onclick="switchTab('suppliers')">Suppliers</button>
-      <button class="tab-btn" onclick="switchTab('history')">History</button>
     </div>
 
     <form id="details-form" method="POST" action="/products/<?= $product['id'] ?>/update">
@@ -147,10 +157,6 @@ use App\Services\RBACService;
                   </option>
                 <?php endforeach; ?>
               </select>
-            </div>
-            <div class="form-field">
-              <label for="image">Product Image</label>
-              <input type="file" id="image" name="image" accept="image/*" disabled>
             </div>
             <div class="form-field span-2">
               <label for="description">Description</label>
@@ -251,8 +257,9 @@ use App\Services\RBACService;
                   <th>Supplier Name</th>
                   <th>Contact Person</th>
                   <th>Preferred</th>
-                  <th>Last Order</th>
-                  <th>Actions</th>
+                  <?php if ($canCreateReturn): ?>
+                    <th>Actions</th>
+                  <?php endif; ?>
                 </tr>
               </thead>
               <tbody>
@@ -260,21 +267,21 @@ use App\Services\RBACService;
                 if (empty($suppliers)) {
                   echo '<tr><td colspan="6" style="text-align: center;">No suppliers found</td></tr>';
                 } else {
-                  foreach ($suppliers as $suppliers): ?>
+                  foreach ($suppliers as $supplier): ?>
                     <tr>
-                      <td><?= htmlspecialchars($suppliers['supplier_name']) ?></td>
-                      <td><?= htmlspecialchars($suppliers['contact_person']) ?></td>
+                      <td><?= htmlspecialchars($supplier['supplier_name']) ?></td>
+                      <td><?= htmlspecialchars($supplier['contact_person']) ?></td>
                       <td>
-                        <span class="badge <?= $suppliers['is_preferred_supplier'] ? 'success' : '' ?>">
-                          <?= $suppliers['is_preferred_supplier'] ? 'Yes' : 'No' ?>
+                        <span class="badge <?= $supplier['is_preferred_supplier'] ? 'success' : '' ?>">
+                          <?= $supplier['is_preferred_supplier'] ? 'Yes' : 'No' ?>
                         </span>
                       </td>
-                      <td><?= $suppliers['last_order'] ? date('M d, Y', strtotime($suppliers['last_order'])) : '-' ?></td>
                       <td>
-                        <button type="button" class="icon-btn"
-                          onclick="window.location.href='/suppliers/<?= $suppliers['id'] ?>'">
-                          <span class="icon">visibility</span>
-                        </button>
+                        <?php if ($canPlaceOrder): ?>
+                          <button type="button" class="action-btn badge" onclick="confirmPlaceOrder()">
+                            Place Order
+                          </button>
+                        <?php endif; ?>
                       </td>
                     </tr>
                 <?php endforeach;
@@ -292,37 +299,40 @@ use App\Services\RBACService;
   </div>
 </div>
 
-<!-- Batch Details dialog-->
-<dialog id="batchDetailsDialog" class="modal">
+<!-- Return Details dialog-->
+<dialog id="returnDetailsDialog" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2></h2>
-      <button type="button" class="close-btn" onclick="closeEditBatchDetailsDialog()">
+      <h2>Product Return Details</h2>
+      <button type="button" class="close-btn" onclick="closeReturnDetailsDialog()">
         <span class="icon">close</span>
       </button>
     </div>
-    <form id="batchDetailsForm" class="modal-body" method="post">
+    <form id="returnDetailsForm" class="modal-body" method="post" onsubmit="validateForm(event);">
       <div class="form-grid">
-        <input type="text" name="product_id" value="<?= $product['id'] ?>" hidden>
-        <div class="form-field">
-          <label for="po_number">Purchase Order Number</label>
-          <input type="text" name="po_number">
+        <h3><?= $product['product_code'] ?> - <?= $product['product_name'] ?></h3>
+        <div class="form-field span-2">
+          <label for="reason">Reason</label>
+          <textarea id="reason" name="reason"></textarea>
         </div>
         <div class="form-field">
-          <label for="batch_code">Batch Code</label>
-          <input type="text" name="batch_code">
+          <label for="price">Product Price *</label>
+          <select id="price" name="price" required>
+            <option value="" disabled selected>Select a price</option>
+            <?php foreach ($prices as $price): ?>
+              <option value="<?= htmlspecialchars($price['id']) ?>">
+                <?= htmlspecialchars($price['unit_price']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
         </div>
         <div class="form-field">
-          <label for="manufactured_date">Manufacturing Date</label>
-          <input type="date" name="manufactured_date">
-        </div>
-        <div class="form-field">
-          <label for="expiry_date">Expiry Date</label>
-          <input type="date" name="expiry_date">
+          <label for="quantity">Quantity *</label>
+          <input type="text" id="quantity" name="quantity">
         </div>
       </div>
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" onclick="closeEditBatchDetailsDialog()">
+        <button type="button" class="btn btn-secondary" onclick="closeReturnDetailsDialog()">
           Cancel
         </button>
         <button type="submit" class="btn btn-primary">
@@ -333,11 +343,6 @@ use App\Services\RBACService;
   </div>
 </dialog>
 
-<?php if (RBACService::hasPermission('edit_product')): ?>
-  <dialog id="addBatchModal" class="modal">
-    <!-- Add batch form dialog content -->
-  </dialog>
-<?php endif; ?>
 
 <!-- Message popup and script section similar to SupplierDetails.php -->
 <script>
@@ -371,6 +376,12 @@ use App\Services\RBACService;
     document.querySelector('.tab-content.active').scrollIntoView({
       behavior: 'smooth'
     });
+  }
+
+  function confirmPlaceOrder() {
+    if (confirm('Are you sure want to place order?')) {
+      window.location.href = '/products/<?= $product['id'] ?>/placeorder?supplier=<?= $supplier['id'] ?>'
+    }
   }
 
   function cancelEdit() {
@@ -458,5 +469,14 @@ use App\Services\RBACService;
     }
 
     renderCategorySearchResults(data.data);
+  }
+
+
+  function openReturnDetailsDialog() {
+    document.getElementById("returnDetailsDialog").showModal();
+  }
+
+  function closeReturnDetailsDialog() {
+    document.getElementById("returnDetailsDialog").close();
   }
 </script>

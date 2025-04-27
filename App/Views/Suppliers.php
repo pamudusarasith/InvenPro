@@ -28,72 +28,17 @@ $branches = $branches ?? [];
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
-        <input type="text" id="searchInput" placeholder="Search suppliers..." oninput="filterSuppliers()">
+        <input type="text" id="searchInput" name="search" placeholder="Search Suppliers..." value="<?= htmlspecialchars($search ?? '') ?>">
       </div>
-
-      <script>
-        function filterSuppliers() {
-          const searchInput = document.getElementById('searchInput').value.toLowerCase();
-          const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
-
-          tableRows.forEach(row => {
-            const supplierName = row.children[0].textContent.toLowerCase();
-            const email = row.children[2].textContent.toLowerCase();
-
-            if (supplierName.includes(searchInput) || email.includes(searchInput)) {
-              row.style.display = '';
-            } else {
-              row.style.display = 'none';
-            }
-          });
-        }
-      </script>
       <div class="filters">
-        <select id="filterBranch" onchange="filterByBranch()">
+        <select id="filterBranch" name="branch">
           <option value="">All Branches</option>
           <?php foreach ($branches as $branch): ?>
-            <option value="<?= $branch['branch_name'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
+            <option value="<?= $branch['id'] ?>" <?= isset($branchId) && $branchId == $branch['id'] ? 'selected' : '' ?>>
+              <?= htmlspecialchars($branch['branch_name']) ?>
+            </option>
           <?php endforeach; ?>
         </select>
-
-        <script>
-          function filterByBranch() {
-            const selectedBranch = document.getElementById('filterBranch').value.toLowerCase();
-            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
-
-            tableRows.forEach(row => {
-              const branchName = row.children[4].textContent.toLowerCase();
-
-              if (!selectedBranch || branchName === selectedBranch) {
-                row.style.display = '';
-              } else {
-                row.style.display = 'none';
-              }
-            });
-          }
-        </script>
-        <select id="filterStatus" onchange="filterByStatus()">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-
-        <script>
-          function filterByStatus() {
-            const selectedStatus = document.getElementById('filterStatus').value.toLowerCase();
-            const tableRows = document.querySelectorAll('#suppliers-table tbody tr');
-
-            tableRows.forEach(row => {
-              const status = row.children[5].textContent.toLowerCase();
-
-              if (!selectedStatus || status.includes(selectedStatus)) {
-                row.style.display = '';
-              } else {
-                row.style.display = 'none';
-              }
-            });
-          }
-        </script>
       </div>
     </div>
 
@@ -107,7 +52,6 @@ $branches = $branches ?? [];
             <th>Email</th>
             <th>Phone</th>
             <th>Branch</th>
-            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -123,11 +67,7 @@ $branches = $branches ?? [];
                 <td><?= htmlspecialchars($supplier['email']) ?></td>
                 <td><?= htmlspecialchars($supplier['phone']) ?></td>
                 <td><?= htmlspecialchars($supplier['branch_name']) ?></td>
-                <td>
-                  <span class="badge <?= $supplier['deleted_at'] ? 'danger' : 'success' ?>">
-                    <?= $supplier['deleted_at'] ? 'Inactive' : 'Active' ?>
-                  </span>
-                </td>
+              
               </tr>
           <?php endforeach;
           } ?>
@@ -195,7 +135,7 @@ $branches = $branches ?? [];
 </div>
 
 <?php if (RBACService::hasPermission('add_supplier')): ?>
-  <dialog id="addSupplierModal">
+  <dialog id="addSupplierModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Add New Supplier</h2>
@@ -230,7 +170,7 @@ $branches = $branches ?? [];
             <label for="branch">Branch *</label>
             <select id="branch" name="branch_id" required>
               <option value="">Select Branch</option>
-              <?php foreach ($branches as $branch): ?>
+              <?php foreach ($brachForCreateSupplier as $branch): ?>
                 <option value="<?= $branch['id'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
               <?php endforeach; ?>
             </select>
@@ -311,6 +251,42 @@ $branches = $branches ?? [];
       errorMessage.classList.add('error-message');
       errorMessage.innerText = message;
       field.appendChild(errorMessage);
+    }
+
+    // Apply status filter client-side
+    function applyFilters() {
+      const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
+      const rows = document.querySelectorAll('#suppliers-table tbody tr');
+      rows.forEach(row => {
+        const status = row.cells[5].textContent.toLowerCase(); // Adjusted for the "Status" column in suppliers table
+        const matchesStatus = statusFilter === '' || status === statusFilter;
+        row.style.display = matchesStatus ? '' : 'none';
+      });
+    }
+
+    // Update URL with search and filter parameters
+    function updateSearchParams() {
+      const search = document.getElementById('searchInput').value;
+      const branch = document.getElementById('filterBranch').value;
+
+      const url = new URL(location.href);
+      url.pathname = '/suppliers';
+      url.searchParams.set('search', search);
+      url.searchParams.set('branch', branch);
+      location.href = url.toString();
+    }
+
+    // Event listeners
+    document.getElementById('filterBranch').addEventListener('change', updateSearchParams);
+    document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
+
+    // Debounce function to limit URL updates
+    function debounce(func, wait) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
     }
   <?php endif; ?>
 </script>

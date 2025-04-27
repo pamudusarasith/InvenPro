@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\View;
+use App\Models\OrderModel;
 use App\Models\ProductModel;
 use Exception;
 
@@ -15,13 +16,20 @@ class ProductsController extends Controller
     $product = $productModel->getProductById($params['id']);
     $units = $productModel->getMeasuringUnits();
     $suppliers = $productModel->getSuppliersByProductId($params['id']);
+    $sales = $productModel->getSalesOfMonth($params['id']);
+    $prices = $productModel->getMultiplePrices($params['id']);
+
+
     View::renderTemplate('ProductDetails', [
       'title' => 'Product Details',
       'product' => $product,
       'units' => $units,
-      'suppliers' => $suppliers
+      'suppliers' => $suppliers,
+      'sales' => $sales,
+      'prices' => $prices,
     ]);
   }
+
 
   public function createProduct()
   {
@@ -32,6 +40,11 @@ class ProductsController extends Controller
     }
 
     $productModel = new ProductModel();
+    if ($productModel->productCodeExists($_POST['product_code']) === true) {
+      $_SESSION['message'] = 'Product code already exists';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/inventory');
+    }
     $productModel->createProduct($_POST);
 
     $_SESSION['message'] = 'Product created successfully';
@@ -48,6 +61,11 @@ class ProductsController extends Controller
     }
 
     $productModel = new ProductModel();
+    if ($productModel->productCodeExists($_POST['product_code'], $params['id']) === true) {
+      $_SESSION['message'] = 'Product code already exists';
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/products/' . $params['id']);
+    }
     $productModel->updateProduct($params['id'], $_POST);
 
     $_SESSION['message'] = 'Product updated successfully';
@@ -94,6 +112,53 @@ class ProductsController extends Controller
         "success" => false,
         "message" => "Failed searching products"
       ]);
+    }
+  }
+
+  public function placeOrder(array $params)
+  {
+    $supplier_id = $_GET['supplier'] ?? null;
+    $product_id = $params['id'] ?? null;
+
+    if (!$supplier_id || !$product_id) {
+      $_SESSION['message'] = 'Missing required parameters';
+      $_SESSION['message_type'] = 'error';
+      View::redirect("/products/$product_id");
+      return;
+    }
+
+    $productModel = new ProductModel();
+    $reorderquantity = $productModel->getReorderQuantity($product_id);
+
+    $orderData = [
+      'supplier_id' => $supplier_id,
+      'order_date' => date('Y-m-d'),
+      'reference' => 'PO-' . date('YmdHis'),
+      'items' => [
+        [
+          'id' => $product_id,
+          'quantity' => $reorderquantity['reorder_quantity']
+        ]
+      ]
+    ];
+
+    $orderModel = new OrderModel();
+    try {
+      $order_id = $orderModel->createOrder($orderData);
+
+      if ($order_id) {
+        $_SESSION['message'] = 'Order placed successfully';
+        $_SESSION['message_type'] = 'success';
+        View::redirect('/orders/' . $order_id);
+      } else {
+        $_SESSION['message'] = 'Failed to place order';
+        $_SESSION['message_type'] = 'error';
+        View::redirect('/products');
+      }
+    } catch (\Exception $e) {
+      $_SESSION['message'] = 'Error: ' . $e->getMessage();
+      $_SESSION['message_type'] = 'error';
+      View::redirect('/products');
     }
   }
 }

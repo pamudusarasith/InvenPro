@@ -10,6 +10,7 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `invenpro_new` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `invenpro_new`;
 
+DROP TABLE IF EXISTS `audit_log`;
 CREATE TABLE `audit_log` (
   `id` bigint(20) NOT NULL,
   `table_name` varchar(50) NOT NULL,
@@ -22,6 +23,7 @@ CREATE TABLE `audit_log` (
   `created_at` timestamp(6) NOT NULL DEFAULT current_timestamp(6)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `branch`;
 CREATE TABLE `branch` (
   `id` int(11) NOT NULL,
   `branch_code` varchar(20) NOT NULL,
@@ -33,6 +35,7 @@ CREATE TABLE `branch` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `branch_product`;
 CREATE TABLE `branch_product` (
   `branch_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -41,6 +44,7 @@ CREATE TABLE `branch_product` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category` (
   `id` int(11) NOT NULL,
   `category_name` varchar(50) NOT NULL,
@@ -63,6 +67,7 @@ CREATE TABLE `customer` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `customer_return`;
 CREATE TABLE `customer_return` (
   `id` int(11) NOT NULL,
   `return_number` varchar(50) NOT NULL,
@@ -77,6 +82,7 @@ CREATE TABLE `customer_return` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `customer_return_item`;
 CREATE TABLE `customer_return_item` (
   `id` int(11) NOT NULL,
   `return_id` int(11) NOT NULL,
@@ -87,6 +93,7 @@ CREATE TABLE `customer_return_item` (
   `reason` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `discount`;
 CREATE TABLE `discount` (
   `id` int(11) NOT NULL,
   `branch_id` int(11) DEFAULT NULL,
@@ -102,6 +109,7 @@ CREATE TABLE `discount` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `discount_condition`;
 CREATE TABLE `discount_condition` (
   `id` int(11) NOT NULL,
   `discount_id` int(11) NOT NULL,
@@ -110,6 +118,7 @@ CREATE TABLE `discount_condition` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `discount_usage`;
 CREATE TABLE `discount_usage` (
   `id` int(11) NOT NULL,
   `discount_id` int(11) NOT NULL,
@@ -119,6 +128,7 @@ CREATE TABLE `discount_usage` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `loyalty_transaction`;
 CREATE TABLE `loyalty_transaction` (
   `id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
@@ -128,6 +138,7 @@ CREATE TABLE `loyalty_transaction` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `notification`;
 CREATE TABLE `notification` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
@@ -150,6 +161,7 @@ CREATE TABLE `permission` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `permission_category`;
 CREATE TABLE `permission_category` (
   `id` int(11) NOT NULL,
   `category_name` varchar(255) NOT NULL,
@@ -157,6 +169,7 @@ CREATE TABLE `permission_category` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `product`;
 CREATE TABLE `product` (
   `id` int(11) NOT NULL,
   `product_code` varchar(50) DEFAULT NULL,
@@ -168,6 +181,7 @@ CREATE TABLE `product` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `product_batch`;
 CREATE TABLE `product_batch` (
   `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -185,12 +199,14 @@ CREATE TABLE `product_batch` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `product_category`;
 CREATE TABLE `product_category` (
   `product_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `purchase_order`;
 CREATE TABLE `purchase_order` (
   `id` int(11) NOT NULL,
   `reference` varchar(50) NOT NULL,
@@ -205,6 +221,7 @@ CREATE TABLE `purchase_order` (
   `created_by` int(11) NOT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+DROP TRIGGER IF EXISTS `purchase_order_after_insert`;
 DELIMITER $$
 CREATE TRIGGER `purchase_order_after_insert` AFTER INSERT ON `purchase_order` FOR EACH ROW BEGIN
     DECLARE meta_data JSON;
@@ -241,7 +258,6 @@ CREATE TRIGGER `purchase_order_after_insert` AFTER INSERT ON `purchase_order` FO
             'reference', NEW.reference,
             'branch_id', NEW.branch_id,
             'supplier_id', NEW.supplier_id,
-            'order_date', NEW.order_date,
             'expected_date', NEW.expected_date,
             'status', NEW.status,
             'total_amount', NEW.total_amount,
@@ -256,6 +272,7 @@ CREATE TRIGGER `purchase_order_after_insert` AFTER INSERT ON `purchase_order` FO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `purchase_order_after_update`;
 DELIMITER $$
 CREATE TRIGGER `purchase_order_after_update` AFTER UPDATE ON `purchase_order` FOR EACH ROW BEGIN
     -- Initialize JSON variables
@@ -277,10 +294,6 @@ CREATE TRIGGER `purchase_order_after_update` AFTER UPDATE ON `purchase_order` FO
     
     IF NOT(OLD.supplier_id <=> NEW.supplier_id) THEN
         SET changes = JSON_SET(changes, '$.supplier_id', JSON_OBJECT('old', OLD.supplier_id, 'new', NEW.supplier_id));
-    END IF;
-    
-    IF NOT(OLD.order_date <=> NEW.order_date) THEN
-        SET changes = JSON_SET(changes, '$.order_date', JSON_OBJECT('old', OLD.order_date, 'new', NEW.order_date));
     END IF;
     
     IF NOT(OLD.expected_date <=> NEW.expected_date) THEN
@@ -332,6 +345,7 @@ CREATE TRIGGER `purchase_order_after_update` AFTER UPDATE ON `purchase_order` FO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `purchase_order_hard_delete`;
 DELIMITER $$
 CREATE TRIGGER `purchase_order_hard_delete` BEFORE DELETE ON `purchase_order` FOR EACH ROW BEGIN
     DECLARE meta_data JSON;
@@ -367,7 +381,6 @@ CREATE TRIGGER `purchase_order_hard_delete` BEFORE DELETE ON `purchase_order` FO
             'reference', OLD.reference,
             'branch_id', OLD.branch_id,
             'supplier_id', OLD.supplier_id,
-            'order_date', OLD.order_date,
             'expected_date', OLD.expected_date,
             'status', OLD.status,
             'total_amount', OLD.total_amount,
@@ -383,6 +396,7 @@ CREATE TRIGGER `purchase_order_hard_delete` BEFORE DELETE ON `purchase_order` FO
 END
 $$
 DELIMITER ;
+DROP TRIGGER IF EXISTS `purchase_order_soft_delete`;
 DELIMITER $$
 CREATE TRIGGER `purchase_order_soft_delete` AFTER UPDATE ON `purchase_order` FOR EACH ROW BEGIN
     DECLARE meta_data JSON;
@@ -420,7 +434,6 @@ CREATE TRIGGER `purchase_order_soft_delete` AFTER UPDATE ON `purchase_order` FOR
                 'reference', OLD.reference,
                 'branch_id', OLD.branch_id,
                 'supplier_id', OLD.supplier_id,
-                'order_date', OLD.order_date,
                 'expected_date', OLD.expected_date,
                 'status', OLD.status,
                 'total_amount', OLD.total_amount,
@@ -444,6 +457,24 @@ CREATE TABLE `purchase_order_action` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `purchase_order_action` (
+  `id` int(11) NOT NULL,
+  `po_id` int(11) NOT NULL,
+  `action` enum('create','update','approve','cancel','receive','delete','complete') NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS `purchase_order_action`;
+CREATE TABLE `purchase_order_action` (
+  `id` int(11) NOT NULL,
+  `po_id` int(11) NOT NULL,
+  `action` enum('create','update','approve','cancel','receive','delete','complete') NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+DROP TABLE IF EXISTS `purchase_order_item`;
 CREATE TABLE `purchase_order_item` (
   `po_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -451,6 +482,7 @@ CREATE TABLE `purchase_order_item` (
   `received_qty` decimal(10,3) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role` (
   `id` int(11) NOT NULL,
   `role_name` varchar(50) NOT NULL,
@@ -459,6 +491,7 @@ CREATE TABLE `role` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `role_permission`;
 CREATE TABLE `role_permission` (
   `role_id` int(11) NOT NULL,
   `permission_id` int(11) NOT NULL,
@@ -466,6 +499,7 @@ CREATE TABLE `role_permission` (
   `granted_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `sale`;
 CREATE TABLE `sale` (
   `id` int(11) NOT NULL,
   `branch_id` int(11) NOT NULL,
@@ -482,6 +516,7 @@ CREATE TABLE `sale` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `sale_item`;
 CREATE TABLE `sale_item` (
   `id` int(11) NOT NULL,
   `sale_id` int(11) NOT NULL,
@@ -492,6 +527,7 @@ CREATE TABLE `sale_item` (
   `discount` decimal(12,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `supplier`;
 CREATE TABLE `supplier` (
   `id` int(11) NOT NULL,
   `branch_id` int(11) DEFAULT NULL,
@@ -504,6 +540,7 @@ CREATE TABLE `supplier` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `supplier_product`;
 CREATE TABLE `supplier_product` (
   `supplier_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -512,6 +549,7 @@ CREATE TABLE `supplier_product` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `supplier_return`;
 CREATE TABLE `supplier_return` (
   `id` int(11) NOT NULL,
   `return_number` varchar(50) NOT NULL,
@@ -527,6 +565,7 @@ CREATE TABLE `supplier_return` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `supplier_return_item`;
 CREATE TABLE `supplier_return_item` (
   `id` int(11) NOT NULL,
   `return_id` int(11) NOT NULL,
@@ -538,6 +577,7 @@ CREATE TABLE `supplier_return_item` (
   `reason` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `unit`;
 CREATE TABLE `unit` (
   `id` int(11) NOT NULL,
   `unit_name` varchar(20) NOT NULL,
@@ -547,6 +587,7 @@ CREATE TABLE `unit` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `id` int(11) NOT NULL,
   `first_name` varchar(50) DEFAULT NULL,

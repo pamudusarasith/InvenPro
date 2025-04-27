@@ -6,34 +6,93 @@ use App\Core\Model;
 
 class SupplierModel extends Model
 {
-  public function getSuppliers(int $page, int $itemsPerPage): array
-  {
-    $offset = ($page - 1) * $itemsPerPage;
-    $sql = '
-      SELECT
-        s.id,
-        s.supplier_name,
-        s.contact_person,
-        s.email,
-        s.phone,
-        b.branch_name
-      FROM supplier s
-      LEFT JOIN branch b ON s.branch_id = b.id
-      WHERE s.deleted_at IS NULL
-      ORDER BY s.id
-      LIMIT ? OFFSET ?
-    ';
-    $stmt = self::$db->query($sql, [$itemsPerPage, $offset]);
-    return $stmt->fetchAll();
-  }
+  
+  
+  public function getSuppliers(int $page, int $itemsPerPage, ?string $search = '', ?string $branchId = null, ?string $status = ''): array
+    {
+        $offset = ($page - 1) * $itemsPerPage;
+        $sql = '
+            SELECT
+                s.id,
+                s.supplier_name,
+                s.contact_person,
+                s.email,
+                s.phone,
+                b.branch_name,
+                IF(s.deleted_at IS NULL, "Active", "Inactive") AS status
+            FROM supplier s
+            LEFT JOIN branch b ON s.branch_id = b.id
+            WHERE s.deleted_at IS NULL
+        ';
+        $params = [];
+
+        // Add search filter
+        if ($search) {
+            $sql .= ' AND (s.supplier_name LIKE ? OR s.contact_person LIKE ? OR s.email LIKE ?)';
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+        }
+
+        // Add branch filter
+        if ($branchId) {
+            $sql .= ' AND s.branch_id = ?';
+            $params[] = $branchId;
+        }
+
+        // Add status filter
+        if ($status) {
+            if ($status === 'active') {
+                $sql .= ' AND s.deleted_at IS NULL';
+            } elseif ($status === 'inactive') {
+                $sql .= ' AND s.deleted_at IS NOT NULL';
+            }
+        }
+
+        $sql .= ' ORDER BY s.id LIMIT ? OFFSET ?';
+        $params[] = $itemsPerPage;
+        $params[] = $offset;
+
+        $stmt = self::$db->query($sql, $params);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
 
   public function getSuppliersCount(): int
   {
     $sql = 'SELECT COUNT(*) FROM supplier WHERE deleted_at IS NULL';
     $stmt = self::$db->query($sql);
+    $params = [];
     return $stmt->fetchColumn();
+
+    // Add search filter
+    if ($search) {
+      $sql .= ' AND (s.supplier_name LIKE ? OR s.contact_person LIKE ? OR s.email LIKE ?)';
+      $params[] = "%$search%";
+      $params[] = "%$search%";
+      $params[] = "%$search%";
   }
 
+  // Add branch filter
+  if ($branchId) {
+      $sql .= ' AND s.branch_id = ?';
+      $params[] = $branchId;
+  }
+
+  // Add status filter
+  if ($status) {
+      if ($status === 'active') {
+          $sql .= ' AND s.deleted_at IS NULL';
+      } elseif ($status === 'inactive') {
+          $sql .= ' AND s.deleted_at IS NOT NULL';
+      }
+  }
+
+  $stmt = self::$db->query($sql, $params);
+  return (int) $stmt->fetchColumn();
+}
+
+  
   public function getSupplier(int $id): ?array
   {
     $sql = '
@@ -220,10 +279,12 @@ public function getOrderDetails(int $supplireID): array
         WHERE s.id = ?
           AND po.deleted_at IS NULL
           AND po.branch_id = ?
+        GROUP BY po.id
+        ORDER BY po.order_date DESC
       ';
       $stmt = self::$db->query($sql, [$supplireID, $_SESSION['user']['branch_id']]);
       $orders = $stmt->fetchAll();
-
+      error_log(print_r($orders, true)); // Log the orders for debugging
       self::$db->commit();
       return $orders ?: [];
     } catch (\Exception $e) {
@@ -244,6 +305,49 @@ public function deleteAssignedProduct(int $productId, int $supplierId): void
     self::$db->query($sql, [$productId, $supplierId, $_SESSION['user']['branch_id']]);
 }
 
+
+public function getSupplierStats(int $supplierId): array
+{
+    // Fetch active products count
+    $sqlActiveProducts = '
+        SELECT COUNT(*) AS active_products
+        FROM supplier_product sp
+        INNER JOIN product p ON sp.product_id = p.id
+        WHERE sp.supplier_id = ? AND p.deleted_at IS NULL
+    ';
+    $activeProducts = self::$db->query($sqlActiveProducts, [$supplierId])->fetchColumn();
+
+    // Fetch total orders count
+    $sqlTotalOrders = '
+        SELECT COUNT(*) AS total_orders
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $totalOrders = self::$db->query($sqlTotalOrders, [$supplierId])->fetchColumn();
+
+    // Fetch total spend
+    $sqlTotalSpend = '
+        SELECT SUM(total_amount) AS total_spend
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $totalSpend = self::$db->query($sqlTotalSpend, [$supplierId])->fetchColumn();
+
+    // Fetch last order date
+    $sqlLastOrder = '
+        SELECT MAX(order_date) AS last_order
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $lastOrder = self::$db->query($sqlLastOrder, [$supplierId])->fetchColumn();
+
+    return [
+        'active_products' => (int) $activeProducts,
+        'total_orders' => (int) $totalOrders,
+        'total_spend' => (float) $totalSpend,
+        'last_order' => $lastOrder ? date('Y-m-d', strtotime($lastOrder)) : null,
+    ];
+}
 
 }
 
