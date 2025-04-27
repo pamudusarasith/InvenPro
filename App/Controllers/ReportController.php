@@ -7,6 +7,13 @@ use App\Models\{ReportModel, BranchModel};
 
 class ReportController extends Controller
 {
+    private ReportModel $reportModel;
+
+    public function __construct()
+    {
+        $this->reportModel = new ReportModel();
+    }
+
     /**
      * Display the reports dashboard with filtered data
      */
@@ -24,6 +31,7 @@ class ReportController extends Controller
             $startDate = $dateRange['start'];
             $endDate = $dateRange['end'];
         }
+
         // Validate custom date range
         if ($timePeriod === 'custom' && !$this->validateDateRange($startDate, $endDate)) {
             $_SESSION['message'] = 'Invalid date range selected';
@@ -58,7 +66,6 @@ class ReportController extends Controller
             'next_month' => 'Next Month'
         ];
 
-
         // Fetch data based on filters
         $data = $this->fetchReportData($reportType, $timePeriod, $startDate, $endDate);
 
@@ -84,7 +91,11 @@ class ReportController extends Controller
             'lowStockItems' => $data['lowStockItems'],
             'monthlySalesData' => $data['monthlySalesData'],
             'countAndRevenue' => $data['countAndRevenue'],
-            'categoryStats' => $data['categoryStats']
+            'salesStats' => $data['salesStats'],
+            'inventoryStats' => $data['inventoryStats'],
+            'categoryStats' => $data['categoryStats'],
+            'basketAnalysisResults' => $data['basketAnalysisResults']
+
         ]);
     }
 
@@ -93,157 +104,86 @@ class ReportController extends Controller
      */
     private function fetchReportData(string $reportType, string $timePeriod, string $startDate, string $endDate): array
     {
+        // Fetch datasets
+        $topSellingProducts = $this->getTopSellingProducts($startDate, $endDate);
+        $salesData = $this->getSalesData($startDate, $endDate);
+        $countAndRevenue = $this->getCountAndRevenue($startDate, $endDate);
+        $stockStatus = $this->getStockStatus();
+        $recentPurchaseOrders = $this->getRecentPurchaseOrders($startDate, $endDate);
+        $categoryData = $this->getCategoryData();
+        $supplierPerformance = $this->getSupplierPerformance($startDate, $endDate);
+        $categoryRevenueData = $this->getCategoryRevenueData($startDate, $endDate);
+        $expiringBatches = $this->getExpiringBatches($startDate, $endDate);
+        $lowStockItems = $this->getLowStockItems();
+        $monthlySalesData = $this->getMonthlySalesData($startDate, $endDate);
 
-        $reportModel = new ReportModel();
+        // Fetch stats for hardcoded values in the view
+        $salesStats = $this->getSalesStats($startDate, $endDate);
+        $inventoryStats = $this->getInventoryStats();
+        $categoryStats = $this->getCategoryStats();
 
-        $topSellingProducts = $reportModel->getTopSellingProducts($startDate, $endDate);
-        //error_log('Top Selling Products: ' . print_r($topSellingProducts, true)); // Log the data for debugging
+        // Get previous period date range for trend calculations
+        $previousPeriod = $this->getPreviousPeriodRange($timePeriod, $startDate, $endDate);
 
+        // Fetch previous period data for trends
+        $previousCountAndRevenue = $this->getCountAndRevenue($previousPeriod['start'], $previousPeriod['end']);
+        $previousProfitMargin = $this->getProfitMargin($previousPeriod['start'], $previousPeriod['end']);
 
-        // $topSellingProducts = [
-        //     ['product_name' => 'Organic Ceylon Tea 250g', 'quantity' => 152, 'revenue' => 'LKR 45,600.00'],
-        //     ['product_name' => 'Fresh Milk 1L', 'quantity' => 135, 'revenue' => 'LKR 33,750.00'],
-        //     ['product_name' => 'Whole Wheat Bread 700g', 'quantity' => 124, 'revenue' => 'LKR 24,800.00'],
-        //     ['product_name' => 'Free-Range Eggs (12pk)', 'quantity' => 103, 'revenue' => 'LKR 20,600.00'],
-        //     ['product_name' => 'Basmati Rice 5kg', 'quantity' => 89, 'revenue' => 'LKR 44,500.00']
-        // ];
+        // Current period data
+        $currentRevenue = $countAndRevenue['revenue'] ?? 0;
+        $currentOrderCount = $countAndRevenue['order_count'] ?? 0;
+        $currentAvgOrderValue = $currentOrderCount > 0 ? $currentRevenue / $currentOrderCount : 0;
+        $currentProfitMargin = $this->getProfitMargin($startDate, $endDate);
 
-        $salesData = $reportModel->getSalesData($startDate, $endDate);
-        $countAndRevenue = $reportModel->getCountAndRevenue($startDate, $endDate);
-        $countAndRevenue['avg'] = $countAndRevenue['count'] > 0 ? number_format($countAndRevenue['revenue'] / $countAndRevenue['count'], 2) : '0.00';
-        error_log('Count and Revenue: ' . print_r($countAndRevenue, true)); // Log the data for debugging
+        // Previous period data
+        $previousRevenue = $previousCountAndRevenue['revenue'] ?? 0;
+        $previousOrderCount = $previousCountAndRevenue['order_count'] ?? 0;
+        $previousAvgOrderValue = $previousOrderCount > 0 ? $previousRevenue / $previousOrderCount : 0;
 
-        // error_log('Sales Data: ' . print_r($salesData, true)); // Log the data for debugging
+        // Calculate trends
+        $revenueTrend = $this->calculateTrend($currentRevenue, $previousRevenue);
+        $orderCountTrend = $this->calculateTrend($currentOrderCount, $previousOrderCount);
+        $avgOrderValueTrend = $this->calculateTrend($currentAvgOrderValue, $previousAvgOrderValue);
+        $profitMarginTrend = $this->calculateTrend($currentProfitMargin, $previousProfitMargin);
 
-        // $dailySalesData = [
-        //     ['date' => 'Apr 01', 'sales' => 12500],
-        //     ['date' => 'Apr 05', 'sales' => 17800],
-        //     ['date' => 'Apr 10', 'sales' => 14300],
-        //     ['date' => 'Apr 15', 'sales' => 21000],
-        //     ['date' => 'Apr 20', 'sales' => 15600],
-        //     ['date' => 'Apr 25', 'sales' => 19200],
-        //];
-
-        $stockStatus = $reportModel->getstockStatus($startDate, $endDate);
-
-        //$stockStatus = [
-        //    'in_stock' => 268,
-        //    'low_stock' => 43,
-        //    'out_of_stock' => 17,
-        //    'total_value' => 'LKR 'number_format(); 
-        //];
-
-        $recentPurchaseOrders = [
-            ['reference' => 'PO-20250420-12345', 'supplier' => 'Ceylon Tea Suppliers', 'date' => '2025-04-20', 'status' => 'completed', 'total' => 'LKR 125,000.00'],
-            ['reference' => 'PO-20250418-12344', 'supplier' => 'Fresh Farm Dairies', 'date' => '2025-04-18', 'status' => 'open', 'total' => 'LKR 87,500.00'],
-            ['reference' => 'PO-20250415-12343', 'supplier' => 'Organic Grains Ltd', 'date' => '2025-04-15', 'status' => 'completed', 'total' => 'LKR 103,750.00'],
-            ['reference' => 'PO-20250410-12342', 'supplier' => 'Island Rice Mills', 'date' => '2025-04-10', 'status' => 'completed', 'total' => 'LKR 145,000.00'],
-            ['reference' => 'PO-20250405-12341', 'supplier' => 'Global Spice Traders', 'date' => '2025-04-05', 'status' => 'canceled', 'total' => 'LKR 76,250.00']
-        ];
-
-        $categoryData = $reportModel->getCategoryData();
-        //error_log('Category Data: ' . print_r($categoryData, true)); // Log the data for debugging
-
-        //$categoryData = [
-        //    ['name' => 'Beverages', 'count' => 42],
-        //    ['name' => 'Dairy', 'count' => 38],
-        //    ['name' => 'Bakery', 'count' => 24],
-        //   ['name' => 'Grains', 'count' => 19],
-        //    ['name' => 'Spices', 'count' => 31]
-        //];
-
-        // $supplierPerformance1 = $reportModel->getSupplierPerformance($startDate, $endDate);
-        // error_log('Supplier Performance: ' . print_r($supplierPerformance1, true)); // Log the data for debugging
-
-        $supplierPerformance = [
-            ['name' => 'Ceylon Tea Suppliers', 'on_time' => 92, 'quality' => 88],
-            ['name' => 'Fresh Farm Dairies', 'on_time' => 85, 'quality' => 95],
-            ['name' => 'Organic Grains Ltd', 'on_time' => 78, 'quality' => 92],
-            ['name' => 'Island Rice Mills', 'on_time' => 90, 'quality' => 85],
-            ['name' => 'Global Spice Traders', 'on_time' => 72, 'quality' => 90]
-        ];
-
-        $categoryRevenueData = $reportModel->getCategoryRevenueData($startDate, $endDate);
-        $totalRevenueByCategory = array_sum(array_column($categoryRevenueData, 'revenue'));
-        $categoryStats['avgRevByCat'] = $totalRevenueByCategory / (count($categoryRevenueData) > 0 ? count($categoryRevenueData) : 1);
-        $categoryStats['catCount'] = count($categoryData);
-        $categoryStats['catTotalProducts'] = array_sum(array_column($categoryData, 'count'));
-        $categoryStats['catAvgProducts'] = (float)$categoryStats['catTotalProducts'] / ((int)$categoryStats['catCount'] > 0 ? (int)$categoryStats['catCount'] : 1);
-
-        error_log('Category Revenue Data: ' . print_r($categoryRevenueData, true)); // Log the data for debugging
-
-        // $categoryRevenueData = [
-        //    ['name' => 'Beverages', 'revenue' => 145000],
-        //     ['name' => 'Dairy', 'revenue' => 98000],
-        //     ['name' => 'Bakery', 'revenue' => 76500],
-        //     ['name' => 'Grains', 'revenue' => 68000],
-        //     ['name' => 'Spices', 'revenue' => 39850]
-        // ];
-
-        $expiringBatches = $reportModel->getExpiringBatches($startDate, $endDate);
-        //error_log('Expiring Batches: ' . print_r($expiringBatches, true)); // Log the data for debugging
-
-        //$expiringBatches = [
-        //   ['product_name' => 'Fresh Milk 1L', 'batch_code' => 'FM2504001', 'expiry_date' => '2025-05-15', 'quantity' => 45, 'days_left' => 20],
-        //    ['product_name' => 'Yogurt 500g', 'batch_code' => 'YG2504002', 'expiry_date' => '2025-05-10', 'quantity' => 36, 'days_left' => 15],
-        //    ['product_name' => 'Cottage Cheese 250g', 'batch_code' => 'CC2504003', 'expiry_date' => '2025-05-07', 'quantity' => 24, 'days_left' => 12],
-        //    ['product_name' => 'Whole Wheat Bread 700g', 'batch_code' => 'WWB2504001', 'expiry_date' => '2025-05-03', 'quantity' => 18, 'days_left' => 8],
-        //    ['product_name' => 'Organic Butter 200g', 'batch_code' => 'OB2504001', 'expiry_date' => '2025-05-08', 'quantity' => 12, 'days_left' => 13]
-        //];
-
-        $lowStockItems = $reportModel->getLowStock();
-        //error_log('Low Stock Items: ' . print_r($lowStockItems, true)); // Log the data for debugging
-
-        //$lowStockItems = [
-        //    ['product_name' => 'Basmati Rice 5kg', 'current_stock' => 8, 'reorder_level' => 15, 'days_to_out' => 6],
-        //    ['product_name' => 'Ceylon Black Tea 250g', 'current_stock' => 12, 'reorder_level' => 20, 'days_to_out' => 5],
-        //    ['product_name' => 'Coconut Oil 1L', 'current_stock' => 6, 'reorder_level' => 12, 'days_to_out' => 4],
-        //    ['product_name' => 'Brown Sugar 1kg', 'current_stock' => 10, 'reorder_level' => 18, 'days_to_out' => 7],
-        //    ['product_name' => 'Curry Powder 200g', 'current_stock' => 5, 'reorder_level' => 15, 'days_to_out' => 3]
-        //];
-
-        $monthlySalesData = [];
-        for ($i = 1; $i <= 30; $i++) {
-            $date = sprintf('Apr %02d', $i);
-            $sales = rand(8000, 22000);
-            $monthlySalesData[] = ['date' => $date, 'sales' => $sales];
-        }
-
-        // Sample data from the view
+        // KPI Metrics with dynamic trends
         $kpiMetrics = [
             [
                 'label' => 'Total Sales',
-                'value' => 'LKR '.number_format($countAndRevenue['revenue'], 2),
-                'trend' => '+12.5%',
-                'trend_type' => 'positive',
+                'value' => 'LKR ' . number_format($currentRevenue, 2),
+                'trend' => $revenueTrend['percentage'],
+                'trend_type' => $revenueTrend['type'],
                 'icon' => 'payments',
                 'type' => 'primary'
             ],
             [
                 'label' => 'Total Orders',
-                'value' => '142',
-                'trend' => '+8.3%',
-                'trend_type' => 'positive',
+                'value' => $currentOrderCount,
+                'trend' => $orderCountTrend['percentage'],
+                'trend_type' => $orderCountTrend['type'],
                 'icon' => 'shopping_cart',
                 'type' => 'success'
             ],
             [
                 'label' => 'Average Order Value',
-                'value' => 'LKR 3,009.51',
-                'trend' => '+4.2%',
-                'trend_type' => 'positive',
+                'value' => 'LKR ' . number_format($currentAvgOrderValue, 2),
+                'trend' => $avgOrderValueTrend['percentage'],
+                'trend_type' => $avgOrderValueTrend['type'],
                 'icon' => 'inventory',
                 'type' => 'accent'
             ],
             [
                 'label' => 'Profit Margin',
-                'value' => '24.6%',
-                'trend' => '-1.8%',
-                'trend_type' => 'negative',
+                'value' => number_format($currentProfitMargin, 1) . '%',
+                'trend' => $profitMarginTrend['percentage'],
+                'trend_type' => $profitMarginTrend['type'],
                 'icon' => 'trending_up',
                 'type' => 'warning'
             ]
         ];
+
+        // basket analysis
+        $basketAnalysisResults = $this->reportModel->getTopProductCombinations($startDate,$endDate);
 
         // Return all data
         return [
@@ -259,7 +199,212 @@ class ReportController extends Controller
             'lowStockItems' => $lowStockItems,
             'monthlySalesData' => $monthlySalesData,
             'countAndRevenue' => $countAndRevenue,
-            'categoryStats' => $categoryStats
+            'salesStats' => $salesStats,
+            'inventoryStats' => $inventoryStats,
+            'categoryStats' => $categoryStats,
+            'basketAnalysisResults' => $basketAnalysisResults
+        ];
+    }
+
+    /**
+     * Get top selling products
+     */
+    private function getTopSellingProducts(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getTopSellingProducts($startDate, $endDate);
+    }
+
+    /**
+     * Get sales data for charts
+     */
+    private function getSalesData(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getSalesData($startDate, $endDate);
+    }
+
+    /**
+     * Get count and revenue for sales
+     */
+    private function getCountAndRevenue(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getCountAndRevenue($startDate, $endDate);
+    }
+
+    /**
+     * Get stock status
+     */
+    private function getStockStatus(): array
+    {
+        return $this->reportModel->getStockStatus();
+    }
+
+    /**
+     * Get recent purchase orders
+     */
+    private function getRecentPurchaseOrders(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getRecentPurchaseOrders($startDate, $endDate);
+    }
+
+    /**
+     * Get category data
+     */
+    private function getCategoryData(): array
+    {
+        return $this->reportModel->getCategoryData();
+    }
+
+    /**
+     * Get supplier performance
+     */
+    private function getSupplierPerformance(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getSupplierPerformance($startDate, $endDate);
+    }
+
+    /**
+     * Get category revenue data
+     */
+    private function getCategoryRevenueData(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getCategoryRevenueData($startDate, $endDate);
+    }
+
+    /**
+     * Get expiring batches
+     */
+    private function getExpiringBatches(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getExpiringBatches($startDate, $endDate);
+    }
+
+    /**
+     * Get low stock items
+     */
+    private function getLowStockItems(): array
+    {
+        return $this->reportModel->getLowStock();
+    }
+
+    /**
+     * Get monthly sales data
+     */
+    private function getMonthlySalesData(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getMonthlySalesData($startDate, $endDate);
+    }
+
+    /**
+     * Get sales stats for hardcoded view values
+     */
+    private function getSalesStats(string $startDate, string $endDate): array
+    {
+        return $this->reportModel->getSalesStats($startDate, $endDate);
+    }
+
+    /**
+     * Get inventory stats for hardcoded view values
+     */
+    private function getInventoryStats(): array
+    {
+        return $this->reportModel->getInventoryStats();
+    }
+
+    /**
+     * Get category stats for hardcoded view values
+     */
+    private function getCategoryStats(): array
+    {
+        return $this->reportModel->getCategoryStats();
+    }
+
+    /**
+     * Get profit margin
+     */
+    private function getProfitMargin(string $startDate, string $endDate): float
+    {
+        return $this->reportModel->getProfitMargin($startDate, $endDate);
+    }
+
+    /**
+     * Calculate date range for the previous period
+     */
+    private function getPreviousPeriodRange(string $timePeriod, string $startDate, string $endDate): array
+    {
+        $start = strtotime($startDate);
+        $end = strtotime($endDate);
+        $duration = $end - $start;
+
+        switch ($timePeriod) {
+            case 'today':
+                return [
+                    'start' => date('Y-m-d', strtotime('-1 day', $start)),
+                    'end' => date('Y-m-d', strtotime('-1 day', $end))
+                ];
+            case 'yesterday':
+                return [
+                    'start' => date('Y-m-d', strtotime('-2 days', $start)),
+                    'end' => date('Y-m-d', strtotime('-2 days', $end))
+                ];
+            case 'this_week':
+            case 'last_week':
+                return [
+                    'start' => date('Y-m-d', strtotime('-1 week', $start)),
+                    'end' => date('Y-m-d', strtotime('-1 week', $end))
+                ];
+            case 'this_month':
+            case 'last_month':
+                return [
+                    'start' => date('Y-m-d', strtotime('-1 month', $start)),
+                    'end' => date('Y-m-d', strtotime('-1 month', $end))
+                ];
+            case 'this_year':
+            case 'last_year':
+                return [
+                    'start' => date('Y-m-d', strtotime('-1 year', $start)),
+                    'end' => date('Y-m-d', strtotime('-1 year', $end))
+                ];
+            case 'custom':
+                // For custom range, use the same duration before the start date
+                return [
+                    'start' => date('Y-m-d', $start - $duration - 86400), // Subtract 1 day to avoid overlap
+                    'end' => date('Y-m-d', $start - 86400)
+                ];
+            case 'next_week':
+            case 'next_month':
+                // For future periods, compare with the previous equivalent period
+                return [
+                    'start' => date('Y-m-d', strtotime('-1 month', $start)),
+                    'end' => date('Y-m-d', strtotime('-1 month', $end))
+                ];
+            default:
+                return [
+                    'start' => date('Y-m-d', strtotime('-30 days', $start)),
+                    'end' => date('Y-m-d', strtotime('-30 days', $end))
+                ];
+        }
+    }
+
+    /**
+     * Calculate trend percentage and type
+     */
+    private function calculateTrend(float $currentValue, float $previousValue): array
+    {
+        if ($previousValue == 0) {
+            return [
+                'percentage' => $currentValue > 0 ? '+100.0%' : '0.0%',
+                'type' => $currentValue > 0 ? 'positive' : 'neutral'
+            ];
+        }
+
+        $change = $currentValue - $previousValue;
+        $percentage = ($change / $previousValue) * 100;
+        $formattedPercentage = number_format(abs($percentage), 1) . '%';
+        $formattedPercentage = $percentage >= 0 ? '+' . $formattedPercentage : '-' . $formattedPercentage;
+
+        return [
+            'percentage' => $formattedPercentage,
+            'type' => $percentage >= 0 ? 'positive' : 'negative'
         ];
     }
 
@@ -286,9 +431,9 @@ class ReportController extends Controller
             case 'last_year':
                 return ['start' => date('Y-01-01', strtotime('last year')), 'end' => date('Y-12-31', strtotime('last year'))];
             case 'next_week':
-                return ['start' => date('Y-m-d'), 'end' => date('Y-m-d', strtotime('7 day'))];
+                return ['start' => date('Y-m-d'), 'end' => date('Y-m-d', strtotime('+7 days'))];
             case 'next_month':
-                return ['start' => date('Y-m-d', ), 'end' => date('Y-m-d',strtotime('1 month'))];
+                return ['start' => date('Y-m-d'), 'end' => date('Y-m-d', strtotime('+1 month'))];
             default:
                 return ['start' => date('Y-m-d', strtotime('-30 days')), 'end' => date('Y-m-d')];
         }
