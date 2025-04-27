@@ -28,7 +28,7 @@ class OrderController extends Controller
 
   public function index()
   {
-    if (!RBACService::hasPermission('view_purchase_orders')) {
+    if (!RBACService::hasPermission('order_view')) {
       $_SESSION['message'] = 'You do not have permission to view orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -53,7 +53,7 @@ class OrderController extends Controller
 
   public function details(array $params)
   {
-    if (!RBACService::hasPermission('view_purchase_orders')) {
+    if (!RBACService::hasPermission('order_view')) {
       $_SESSION['message'] = 'You do not have permission to view orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -83,7 +83,7 @@ class OrderController extends Controller
 
   public function createOrder()
   {
-    if (!RBACService::hasPermission('create_purchase_orders')) {
+    if (!RBACService::hasPermission('order_create')) {
       $_SESSION['message'] = 'You do not have permission to create orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -123,7 +123,7 @@ class OrderController extends Controller
 
   public function updateOrder(array $params)
   {
-    if (!RBACService::hasPermission('edit_purchase_orders')) {
+    if (!RBACService::hasPermission('order_update')) {
       $_SESSION['message'] = 'You do not have permission to edit orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -183,7 +183,7 @@ class OrderController extends Controller
 
   public function deleteOrder(array $params)
   {
-    if (!RBACService::hasPermission('delete_purchase_orders')) {
+    if (!RBACService::hasPermission('order_delete')) {
       $_SESSION['message'] = 'You do not have permission to delete orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -226,7 +226,7 @@ class OrderController extends Controller
 
   public function approveOrder(array $params)
   {
-    if (!RBACService::hasPermission('approve_purchase_orders')) {
+    if (!RBACService::hasPermission('order_approve')) {
       $_SESSION['message'] = 'You do not have permission to approve orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -276,7 +276,7 @@ class OrderController extends Controller
 
   public function completeOrder(array $params)
   {
-    if (!RBACService::hasPermission('complete_purchase_orders')) {
+    if (!RBACService::hasPermission('order_complete')) {
       $_SESSION['message'] = 'You do not have permission to complete orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -319,7 +319,7 @@ class OrderController extends Controller
 
   public function cancelOrder(array $params)
   {
-    if (!RBACService::hasPermission('cancel_purchase_orders')) {
+    if (!RBACService::hasPermission('order_cancel')) {
       $_SESSION['message'] = 'You do not have permission to cancel orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -362,7 +362,7 @@ class OrderController extends Controller
 
   public function receiveOrder(array $params)
   {
-    if (!RBACService::hasPermission('receive_purchase_orders')) {
+    if (!RBACService::hasPermission('order_receive')) {
       $_SESSION['message'] = 'You do not have permission to receive orders';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');

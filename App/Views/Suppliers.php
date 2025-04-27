@@ -16,7 +16,7 @@ $branches = $branches ?? [];
         <h1>Supplier Management</h1>
         <p class="subtitle">Manage suppliers and their product associations</p>
       </div>
-      <?php if (RBACService::hasPermission('add_supplier')): ?>
+      <?php if (RBACService::hasPermission('supplier_create')): ?>
         <button class="btn btn-primary" onclick="openAddSupplierDialog()">
           <span class="icon">person_add</span>
           Add Supplier
@@ -134,7 +134,7 @@ $branches = $branches ?? [];
   </div>
 </div>
 
-<?php if (RBACService::hasPermission('add_supplier')): ?>
+<?php if (RBACService::hasPermission('supplier_create')): ?>
   <dialog id="addSupplierModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -205,7 +205,7 @@ $branches = $branches ?? [];
     location.href = url.toString();
   }
 
-  <?php if (RBACService::hasPermission('add_supplier')): ?>
+  <?php if (RBACService::hasPermission('supplier_create')): ?>
 
     function openAddSupplierDialog() {
       const dialog = document.getElementById('addSupplierModal');

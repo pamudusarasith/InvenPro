@@ -38,7 +38,7 @@ use App\Services\RBACService;
                                     <span class="icon">remove_shopping_cart</span>
                                     Clear Cart
                                 </button>
-                                <?php if (RBACService::hasPermission('add_customer') && $_SESSION['user']['id'] != $user['id']): ?>
+                                <?php if (RBACService::hasPermission('pos_use') && $_SESSION['user']['id'] != $user['id']): ?>
                                     <button id="add-customer-btn" class="dropdown-item" onclick="pos.openNewCustomerDialog()">
                                         <span class="icon">person_add</span>
                                         New Customer

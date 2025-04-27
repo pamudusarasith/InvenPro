@@ -28,11 +28,11 @@ $typeFilter = $_GET['type'] ?? '';
 $fromDate = $_GET['from'] ?? '';
 $toDate = $_GET['to'] ?? '';
 
-$canAddDiscount = RBACService::hasPermission('add_discounts');
-$canEditDiscounts = RBACService::hasPermission('edit_discounts');
-$canDeleteDiscounts = RBACService::hasPermission('delete_discounts');
-$canActivateDiscounts = RBACService::hasPermission('activate_discounts');
-$canDeactivateDiscounts = RBACService::hasPermission('deactivate_discounts');
+$canAddDiscount = RBACService::hasPermission('discount_create');
+$canEditDiscounts = RBACService::hasPermission('discount_update');
+$canDeleteDiscounts = RBACService::hasPermission('discount_delete');
+$canActivateDiscounts = RBACService::hasPermission('discount_update');
+$canDeactivateDiscounts = RBACService::hasPermission('discount_update');
 $canViewDiscounts = RBACService::hasPermission('view_discounts');
 ?>
 

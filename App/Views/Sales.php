@@ -12,9 +12,7 @@ $period = $_GET['period'] ?? 'monthly'; // Default to monthly view
 $branchId = $_GET['branch'] ?? '';
 
 // Check permissions
-$canViewDetails = RBACService::hasPermission('view_sale_details');
-$canPrintReceipt = RBACService::hasPermission('print_sale_receipt');
-$canViewSalesAnalytics = RBACService::hasPermission('view_sales_analytics');
+$canViewSalesAnalytics = RBACService::hasPermission('sales_report');
 
 
 // Helper function to get badge class based on status

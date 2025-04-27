@@ -67,7 +67,7 @@ function getStatusBadgeClass($status)
               Save
             </button>
           </div>
-          <?php if (RBACService::hasPermission('edit_supplier')): ?>
+          <?php if (RBACService::hasPermission('supplier_update')): ?>
             <div class="dropdown">
               <button class="dropdown-trigger icon-btn" title="More options">
                 <span class="icon">more_vert</span>
@@ -276,7 +276,7 @@ function getStatusBadgeClass($status)
   </div>
 </div>
 
-<?php if (RBACService::hasPermission('edit_supplier')): ?>
+<?php if (RBACService::hasPermission('supplier_update')): ?>
   <dialog id="assignProductsModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">

@@ -35,7 +35,7 @@ function getStatusBadgeClass($status)
   }
 }
 
-$canCreateOrder = RBACService::hasPermission('create_purchase_order');
+$canCreateOrder = RBACService::hasPermission('order_create');
 ?>
 
 <link rel="stylesheet" href="/css/pages/purchase-orders.css">

@@ -19,12 +19,12 @@ function getStatusBadgeClass($status)
   }
 }
 
-$canEditOrder = RBACService::hasPermission('edit_purchase_orders');
-$canApproveOrder = RBACService::hasPermission('approve_purchase_orders');
-$canCancelOrder = RBACService::hasPermission('cancel_purchase_orders');
-$canDeleteOrder = RBACService::hasPermission('delete_purchase_orders');
-$canReceiveItems = RBACService::hasPermission('receive_purchase_orders');
-$canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
+$canEditOrder = RBACService::hasPermission('order_update');
+$canApproveOrder = RBACService::hasPermission('order_approve');
+$canCancelOrder = RBACService::hasPermission('order_cancel');
+$canDeleteOrder = RBACService::hasPermission('order_delete');
+$canReceiveItems = RBACService::hasPermission('order_receive');
+$canCompleteOrder = RBACService::hasPermission('order_complete');
 ?>
 
 <link rel="stylesheet" href="/css/pages/purchase-order-details.css">

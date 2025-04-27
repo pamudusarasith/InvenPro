@@ -310,7 +310,7 @@ $activities = $activities ?? [];
         });
 
         // Then handle AccessControl fields based on permission
-        <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
+        <?php if (RBACService::hasPermission('user_delete') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
             document.querySelectorAll('.form-field.AccessControl :is(input, select, textarea)').forEach(input => {
                 input.disabled = false;
             });

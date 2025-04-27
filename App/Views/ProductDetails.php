@@ -2,10 +2,10 @@
 
 use App\Services\RBACService;
 
-$canEditProduct = RBACService::hasPermission('edit_product_Details');
-$canDeleteProduct = RBACService::hasPermission('delete_product');
+$canEditProduct = RBACService::hasPermission('product_update');
+$canDeleteProduct = RBACService::hasPermission('product_delete');
 $canCreateReturn = RBACService::hasPermission('create_return');
-$canPlaceOrder = RBACService::hasPermission('place_order');
+$canPlaceOrder = RBACService::hasPermission('order_create');
 
 ?>
 
@@ -259,7 +259,7 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
                   <th>Supplier Name</th>
                   <th>Contact Person</th>
                   <th>Preferred</th>
-                  <?php if ($canCreateReturn): ?>
+                  <?php if ($canPlaceOrder): ?>
                     <th>Actions</th>
                   <?php endif; ?>
                 </tr>

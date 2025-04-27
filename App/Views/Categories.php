@@ -2,9 +2,9 @@
 
 use App\Services\RBACService;
 
-$canEditCategory = RBACService::hasPermission('edit_category_Details');
-$canDeleteCategory = RBACService::hasPermission('delete_category');
-$canAddCategory = RBACService::hasPermission('add_category');
+$canEditCategory = RBACService::hasPermission('category_update');
+$canDeleteCategory = RBACService::hasPermission('category_delete');
+$canAddCategory = RBACService::hasPermission('category_create');
 ?>
 
 <div class="body">
@@ -137,7 +137,7 @@ $canAddCategory = RBACService::hasPermission('add_category');
     </div>
 </div>
 
-<?php if (RBACService::hasPermission('add_category')): ?>
+<?php if (RBACService::hasPermission('category_create')): ?>
     <dialog id="addCategoryDialog" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -238,7 +238,7 @@ $canAddCategory = RBACService::hasPermission('add_category');
 
 
 
-    <?php if (RBACService::hasPermission('add_category')): ?>
+    <?php if (RBACService::hasPermission('category_create')): ?>
 
         function openAddCategoryDialog() {
             document.querySelector('#addCategoryDialog .modal-header h2').innerHTML = "Add New Category";
