@@ -50,15 +50,6 @@ CREATE TABLE `category` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `coupon` (
-  `id` int(11) NOT NULL,
-  `discount_id` int(11) NOT NULL,
-  `code` varchar(50) NOT NULL,
-  `is_active` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `deleted_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE `customer` (
   `id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
@@ -102,7 +93,6 @@ CREATE TABLE `discount` (
   `name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `discount_type` enum('percentage','fixed') NOT NULL,
-  `application_method` enum('regular','coupon') NOT NULL DEFAULT 'regular',
   `value` decimal(12,2) NOT NULL,
   `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `end_date` timestamp NULL DEFAULT NULL,
@@ -140,33 +130,16 @@ CREATE TABLE `loyalty_transaction` (
 
 CREATE TABLE `notification` (
   `id` int(11) NOT NULL,
-  `type_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
   `message` text NOT NULL,
-  `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`data`)),
+  `type` enum('info','warning','error','success') NOT NULL DEFAULT 'info',
   `priority` enum('low','normal','high') NOT NULL DEFAULT 'normal',
-  `branch_id` int(11) DEFAULT NULL,
-  `created_by` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `expires_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `notification_recipient` (
-  `id` int(11) NOT NULL,
-  `notification_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`metadata`)),
   `is_read` tinyint(1) DEFAULT 0,
   `read_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `notification_type` (
-  `id` int(11) NOT NULL,
-  `type_name` varchar(50) NOT NULL,
-  `description` text DEFAULT NULL,
-  `template` text NOT NULL,
-  `is_active` tinyint(1) DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expires_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `permission` (
@@ -223,7 +196,7 @@ CREATE TABLE `purchase_order` (
   `reference` varchar(50) NOT NULL,
   `branch_id` int(11) NOT NULL,
   `supplier_id` int(11) NOT NULL,
-  `order_date` date NOT NULL,
+  `order_date` date NOT NULL DEFAULT current_timestamp(),
   `expected_date` date DEFAULT NULL,
   `status` enum('pending','open','completed','canceled') NOT NULL DEFAULT 'pending',
   `total_amount` decimal(12,2) DEFAULT NULL,
@@ -463,6 +436,14 @@ END
 $$
 DELIMITER ;
 
+CREATE TABLE `purchase_order_action` (
+  `id` int(11) NOT NULL,
+  `po_id` int(11) NOT NULL,
+  `action` enum('create','update','approve','cancel','receive','delete','complete') NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE `purchase_order_item` (
   `po_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
@@ -474,7 +455,8 @@ CREATE TABLE `role` (
   `id` int(11) NOT NULL,
   `role_name` varchar(50) NOT NULL,
   `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `role_permission` (
@@ -604,11 +586,6 @@ ALTER TABLE `category`
   ADD UNIQUE KEY `category_name` (`category_name`),
   ADD KEY `parent_category_id` (`parent_id`);
 
-ALTER TABLE `coupon`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`),
-  ADD KEY `discount_id` (`discount_id`);
-
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
@@ -644,18 +621,7 @@ ALTER TABLE `loyalty_transaction`
 
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `type_id` (`type_id`),
-  ADD KEY `branch_id` (`branch_id`),
-  ADD KEY `created_by` (`created_by`);
-
-ALTER TABLE `notification_recipient`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `notification_id` (`notification_id`),
   ADD KEY `user_id` (`user_id`);
-
-ALTER TABLE `notification_type`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `type_name` (`type_name`);
 
 ALTER TABLE `permission`
   ADD PRIMARY KEY (`id`),
@@ -685,6 +651,11 @@ ALTER TABLE `purchase_order`
   ADD UNIQUE KEY `po_number` (`reference`),
   ADD KEY `branch_id` (`branch_id`),
   ADD KEY `supplier_id` (`supplier_id`),
+  ADD KEY `created_by` (`created_by`);
+
+ALTER TABLE `purchase_order_action`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `po_id` (`po_id`),
   ADD KEY `created_by` (`created_by`);
 
 ALTER TABLE `purchase_order_item`
@@ -755,9 +726,6 @@ ALTER TABLE `branch`
 ALTER TABLE `category`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
-ALTER TABLE `coupon`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
 ALTER TABLE `customer`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
@@ -782,12 +750,6 @@ ALTER TABLE `loyalty_transaction`
 ALTER TABLE `notification`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
-ALTER TABLE `notification_recipient`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE `notification_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
 ALTER TABLE `permission`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
@@ -801,6 +763,9 @@ ALTER TABLE `product_batch`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `purchase_order`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `purchase_order_action`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `role`
@@ -839,9 +804,6 @@ ALTER TABLE `branch_product`
 ALTER TABLE `category`
   ADD CONSTRAINT `category_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `category` (`id`);
 
-ALTER TABLE `coupon`
-  ADD CONSTRAINT `coupon_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`id`) ON DELETE CASCADE;
-
 ALTER TABLE `customer_return`
   ADD CONSTRAINT `customer_return_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`id`),
   ADD CONSTRAINT `customer_return_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
@@ -865,13 +827,7 @@ ALTER TABLE `loyalty_transaction`
   ADD CONSTRAINT `loyalty_transaction_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`);
 
 ALTER TABLE `notification`
-  ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`type_id`) REFERENCES `notification_type` (`id`),
-  ADD CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
-  ADD CONSTRAINT `notification_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
-
-ALTER TABLE `notification_recipient`
-  ADD CONSTRAINT `notification_recipient_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `notification_recipient_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
+  ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `permission`
   ADD CONSTRAINT `permission_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `permission_category` (`id`);
@@ -892,6 +848,10 @@ ALTER TABLE `purchase_order`
   ADD CONSTRAINT `purchase_order_ibfk_1` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
   ADD CONSTRAINT `purchase_order_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`),
   ADD CONSTRAINT `purchase_order_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
+
+ALTER TABLE `purchase_order_action`
+  ADD CONSTRAINT `purchase_order_action_ibfk_1` FOREIGN KEY (`po_id`) REFERENCES `purchase_order` (`id`),
+  ADD CONSTRAINT `purchase_order_action_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`);
 
 ALTER TABLE `purchase_order_item`
   ADD CONSTRAINT `purchase_order_item_ibfk_1` FOREIGN KEY (`po_id`) REFERENCES `purchase_order` (`id`),

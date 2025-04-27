@@ -315,6 +315,19 @@ class UserModel extends Model
     self::$db->query($sql, [$id]);
   }
 
+  public function getUsersByRole(int $roleId): array
+  {
+    $sql = 'SELECT id, display_name, email FROM user WHERE role_id = ? AND deleted_at IS NULL';
+    $stmt = self::$db->query($sql, [$roleId]);
+    return $stmt->fetchAll();
+  }
+
+  public function getUsersByBranch(int $branchId): array
+  {
+    $sql = 'SELECT id, display_name, email FROM user WHERE branch_id = ? AND deleted_at IS NULL';
+    $stmt = self::$db->query($sql, [$branchId]);
+    return $stmt->fetchAll();
+  }
 }
 
   

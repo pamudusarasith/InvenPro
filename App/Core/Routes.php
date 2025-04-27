@@ -39,6 +39,7 @@ return [
     '/api/products/search' => 'App\Controllers\ProductsController::searchProducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
+    '/notifications' => 'App\Controllers\NotificationController::index',
   ],
 
   'POST' => [
@@ -51,7 +52,7 @@ return [
     '/profile/reset-password' => 'App\Controllers\UserController::updateProfilePassword',
     '/suppliers/new' => 'App\Controllers\SupplierController::createSupplier',
     '/suppliers/{id}/update' => 'App\Controllers\SupplierController::updateSupplier',
-    '/suppliers/{id}/products'=>'App\Controllers\SupplierController::assignProduct',
+    '/suppliers/{id}/products' => 'App\Controllers\SupplierController::assignProduct',
     '/suppliers/{id}/products/delete' => 'App\Controllers\SupplierController::deleteAssignedProduct',
     '/products/new' => 'App\Controllers\ProductsController::createProduct',
     '/products/{id}/update' => 'App\Controllers\ProductsController::updateProduct',
@@ -69,5 +70,7 @@ return [
     '/orders/{id}/receive' => 'App\Controllers\OrderController::receiveOrder',
     '/discounts/new' => 'App\Controllers\DiscountsController::createDiscount',
     '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
+    '/api/notifications/mark-read' => 'App\Controllers\NotificationController::markAsRead',
+    '/api/notifications/mark-all-read' => 'App\Controllers\NotificationController::markAllAsRead',
   ],
 ];
