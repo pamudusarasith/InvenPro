@@ -28,9 +28,21 @@ class RBACService
    */
   public static function hasPermission(string $permissionName): bool
   {
-    return true;
     $roleId = $_SESSION['user']['role_id'] ?? -1;
     return self::getModel()->checkRolePermission($roleId, $permissionName);
+  }
+
+  /**
+   * Check if user has required permission and redirect to error page if not
+   *
+   * @param string $permissionName Permission to check
+   * @return void
+   */
+  public static function requirePermission(string $permissionName)
+  {
+    if (!self::hasPermission($permissionName)) {
+      View::renderError(403);
+    }
   }
 
   /**

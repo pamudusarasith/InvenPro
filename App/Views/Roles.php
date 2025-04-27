@@ -24,7 +24,7 @@ use App\Services\RBACService;
         <h1>Role Management</h1>
         <p class="subtitle">Manage user roles and permissions to control access throughout the system</p>
       </div>
-      <?php if (RBACService::hasPermission('manage_roles')): ?>
+      <?php if (RBACService::hasPermission('role_create')): ?>
         <button class="btn btn-primary" onclick="openAddRoleDialog()">
           <span class="icon">add</span>
           Add Role
@@ -68,12 +68,12 @@ use App\Services\RBACService;
             <button class="icon-btn secondary" onclick="viewRoleDetails(<?= $roleId ?>)" title="">
               <span class="icon">visibility</span>
             </button>
-            <?php if (RBACService::hasPermission('manage_roles')): ?>
+            <?php if (RBACService::hasPermission('role_update')): ?>
               <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
                 <span class="icon">edit</span>
               </button>
             <?php endif; ?>
-            <?php if (RBACService::hasPermission('manage_roles')): ?>
+            <?php if (RBACService::hasPermission('role_delete')): ?>
               <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
                 <span class="icon">delete</span>
               </button>
@@ -86,7 +86,7 @@ use App\Services\RBACService;
 </div>
 
 <!-- Add/Edit Role Dialog -->
-<?php if (RBACService::hasPermission('manage_roles')): ?>
+<?php if (RBACService::hasPermission('role_create') || RBACService::hasPermission('role_update')): ?>
   <dialog id="roleDialog" class="modal">
     <div class="modal-content wide-modal">
       <div class="modal-header">
@@ -160,7 +160,7 @@ use App\Services\RBACService;
 <?php endif; ?>
 
 <!-- View Role Details Dialog -->
-<?php if (RBACService::hasPermission('manage_roles')): ?>
+<?php if (RBACService::hasPermission('role_view')): ?>
   <dialog id="roleDetailsDialog" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -205,12 +205,12 @@ use App\Services\RBACService;
       </div>
 
     <div class="modal-footer">
-      <?php if (RBACService::hasPermission('manage_roles')): ?>
+      <?php if (RBACService::hasPermission('role_update')): ?>
           <button class="icon-btn edit" onclick="openEditRoleDialog(<?= $roleId ?>)" title="Edit Role">
             <span class="icon">edit</span>
           </button>
           <?php endif; ?>
-          <?php if (RBACService::hasPermission('manage_roles')): ?>
+          <?php if (RBACService::hasPermission('role_delete')): ?>
             <button class="icon-btn danger" onclick="deleteRole(<?= htmlspecialchars($roleId) ?>)" title="Delete discount">
               <span class="icon">delete</span>
             </button>

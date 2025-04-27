@@ -4,11 +4,19 @@ namespace App\Controllers;
 
 use App\Core\{Controller, View};
 use App\Models\{UserModel, RoleModel, BranchModel, AuditLogModel};
+use App\Services\RBACService;
 
 class UserController extends Controller
 {
+  public function __construct()
+  {
+    parent::__construct();
+    RBACService::requireAuthentication();
+  }
+
   public function index(): void
   {
+    RBACService::requirePermission('user_view');
     $page = max(1, (int) ($_GET['p'] ?? 1));
     $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
     $search = $_GET['search'] ?? '';
@@ -45,6 +53,7 @@ class UserController extends Controller
 
   public function details(array $params): void
   {
+    RBACService::requirePermission('user_view');
     $userModel = new UserModel();
     $user = $userModel->getUserById($params['id']);
 
@@ -143,13 +152,13 @@ class UserController extends Controller
 
     $_SESSION['user']['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
     $_SESSION['user']['is_locked'] = 0; // Reset the lock status
-    
+
     $_SESSION['message'] = 'Password updated successfully';
     $_SESSION['message_type'] = 'success';
 
     View::redirect('/profile');
   }
-  
+
   public function updatePassword(array $params): void
   {
     if (!$this->validator->validateUpdatePassword($_POST)) {
@@ -167,10 +176,11 @@ class UserController extends Controller
   }
 
 
-  
+
 
   public function createUser(): void
   {
+    RBACService::requirePermission('user_create');
     if (!$this->validator->validateCreateUser($_POST)) {
       $this->index($this->validator->getError(), 'error');
       exit;
@@ -264,6 +274,7 @@ class UserController extends Controller
 
   public function updateUser(array $params): void
   {
+    RBACService::requirePermission('user_update');
     if (!$this->validator->validateUpdateUser($_POST)) {
       $this->details($params, $this->validator->getError(), 'error');
       exit;
@@ -282,6 +293,7 @@ class UserController extends Controller
 
   public function deleteUser(array $params): void
   {
+    RBACService::requirePermission('user_delete');
     $userModel = new UserModel();
     $userModel->deleteUser($params['id']);
 

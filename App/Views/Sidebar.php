@@ -6,15 +6,15 @@
 
         $menuItems = [
             ['url' => '/dashboard', 'icon' => 'dashboard', 'label' => 'Dashboard', 'permission' => 'view_dashboard'],
-            ['url' => '/users', 'icon' => 'people', 'label' => 'Users', 'permission' => 'view_users'],
-            ['url' => '/roles', 'icon' => 'admin_panel_settings', 'label' => 'Roles', 'permission' => 'view_roles'],
-            ['url' => '/branches', 'icon' => 'business', 'label' => 'Branches', 'permission' => 'view_branches'],
-            ['url' => '/categories', 'icon' => 'category', 'label' => 'Categories', 'permission' => 'view_categories'],
-            ['url' => '/inventory', 'icon' => 'inventory_2', 'label' => 'Inventory', 'permission' => 'view_inventory'],
-            ['url' => '/suppliers', 'icon' => 'local_shipping', 'label' => 'Suppliers', 'permission' => 'view_suppliers'],
-            ['url' => '/orders', 'icon' => 'orders', 'label' => 'Purchase Orders', 'permission' => 'view_orders'],
-            ['url' => '/discounts', 'icon' => 'percent', 'label' => 'Discounts', 'permission' => 'view_discounts'],
-            ['url' => '/reports', 'icon' => 'bar_chart', 'label' => 'Reports', 'permission' => 'view_reports'],
+            ['url' => '/users', 'icon' => 'people', 'label' => 'Users', 'permission' => 'user_view'],
+            ['url' => '/roles', 'icon' => 'admin_panel_settings', 'label' => 'Roles', 'permission' => 'role_view'],
+            ['url' => '/branches', 'icon' => 'business', 'label' => 'Branches', 'permission' => 'branch_view'],
+            ['url' => '/categories', 'icon' => 'category', 'label' => 'Categories', 'permission' => 'category_view'],
+            ['url' => '/inventory', 'icon' => 'inventory_2', 'label' => 'Inventory', 'permission' => 'product_view'],
+            ['url' => '/suppliers', 'icon' => 'local_shipping', 'label' => 'Suppliers', 'permission' => 'supplier_view'],
+            ['url' => '/orders', 'icon' => 'orders', 'label' => 'Purchase Orders', 'permission' => 'order_view'],
+            ['url' => '/discounts', 'icon' => 'percent', 'label' => 'Discounts', 'permission' => 'discount_view'],
+            ['url' => '/reports', 'icon' => 'bar_chart', 'label' => 'Reports', 'permission' => 'report_view'],
         ];
 
         foreach ($menuItems as $item):

@@ -149,21 +149,6 @@ $activities = $activities ?? [];
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="assignment-history span-2">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Branch</th>
-                                        <th>Assigned Date</th>
-                                        <th>Assigned By</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Branch history -->
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -175,10 +160,9 @@ $activities = $activities ?? [];
                         <div class="security-item">
                             <div class="security-info">
                                 <h4>Password</h4>
-                                <p>Last changed 30 days ago</p>
                             </div>
                             <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
-                                <button class="btn btn-secondary" onclick="openPasswordResetDialog()">Reset Password</button>
+                                <button type="button" class="btn btn-secondary" onclick="openPasswordResetDialog()">Reset Password</button>
                             <?php else: ?>
                                 <button class="btn btn-secondary" disabled>Reset Password</button>
                                 <?php
@@ -188,13 +172,6 @@ $activities = $activities ?? [];
                                 }
                                 ?>
                             <?php endif; ?>
-                        </div>
-                        <div class="security-item">
-                            <div class="security-info">
-                                <h4>Login History</h4>
-                                <p>View your recent login activity</p>
-                            </div>
-                            <button class="btn btn-secondary">View History</button>
                         </div>
                     </div>
                 </div>
@@ -234,6 +211,7 @@ $activities = $activities ?? [];
                                     <th>Table</th>
                                     <th>Action</th>
                                     <th>IP Address</th>
+                                    <th>User Agent</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -268,7 +246,7 @@ $activities = $activities ?? [];
 
 <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
     <!-- Password Reset Dialog -->
-    <dialog id="passwordResetDialog" class="modeal">
+    <dialog id="passwordResetDialog" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Reset Password</h2>
@@ -279,22 +257,22 @@ $activities = $activities ?? [];
 
             <form id="passwordResetForm" method="POST" action="/profile/reset-password" onsubmit="validateFrom(event);">
                 <div class="form-grid">
-                    <div class="form-field span-1">
+                    <div class="form-field">
                         <label for="new_password">Old Password</label>
                         <input type="password" id="old_password" name="old_password" required>
                     </div>
-                    <div class="form-field span-1">
+                    <div class="form-field">
                         <label for="new_password">New Password</label>
                         <input type="password" id="new_password" name="new_password" required>
                     </div>
-                    <div class="form-field span-1">
+                    <div class="form-field">
                         <label for="confirm_password">Confirm Password</label>
                         <input type="password" id="confirm_password" name="confirm_password" required>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Reset Password</button>
-                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reset Password</button>
                 </div>
             </form>
         </div>
@@ -385,15 +363,14 @@ $activities = $activities ?? [];
 
         function openPasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            dialog.showModal(); // Show the dialog
             // Reset form
             document.getElementById('passwordResetForm').reset();
+            dialog.showModal();
         }
 
         function closePasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            dialog.style.display = 'none';
-
+            dialog.close();
         }
 
         function addErrorMessage(field, message) {

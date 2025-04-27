@@ -17,7 +17,7 @@ $branches = $branches ?? [];
         <h1>User Management</h1>
         <p class="subtitle">Manage system users and their roles</p>
       </div>
-      <?php if (RBACService::hasPermission('add_user')): ?>
+      <?php if (RBACService::hasPermission('user_create')): ?>
         <button class="btn btn-primary" onclick="openAddUserDialog()">
           <span class="icon">person_add</span>
           Add User
@@ -156,7 +156,7 @@ $branches = $branches ?? [];
 </div>
 
 <!--add user modal-->
-<?php if (RBACService::hasPermission('add_user')): ?>
+<?php if (RBACService::hasPermission('user_create')): ?>
 
   <dialog id="addUserModal" class="modal">
     <div class="modal-content">
@@ -222,7 +222,7 @@ $branches = $branches ?? [];
 
 <?php endif; ?>
 
-<?php if (RBACService::hasPermission('delete_user')): ?>
+<?php if (RBACService::hasPermission('user_delete')): ?>
 
   <dialog id="deleteConfirmModal" class="delete-confirm-modal" class="modal">
     <div class="modal-content">
@@ -257,7 +257,7 @@ $branches = $branches ?? [];
   document.getElementById('filterStatus').addEventListener('change', applyFilters);
 
 
-  <?php if (RBACService::hasPermission('add_user')): ?>
+  <?php if (RBACService::hasPermission('user_create')): ?>
 
     function openAddUserDialog() {
       const dialog = document.getElementById('addUserModal');
@@ -348,7 +348,7 @@ $branches = $branches ?? [];
     }
   <?php endif; ?>
 
-  <?php if (RBACService::hasPermission('edit_user')): ?>
+  <?php if (RBACService::hasPermission('user_update')): ?>
 
     function editUser(userId) {
       event.stopPropagation();
@@ -356,7 +356,7 @@ $branches = $branches ?? [];
     }
   <?php endif; ?>
 
-  <?php if (RBACService::hasPermission('delete_user')): ?>
+  <?php if (RBACService::hasPermission('user_delete')): ?>
     let userToDelete = null;
 
     function deleteUser(userId) {

@@ -58,19 +58,19 @@ $activities = $activities ?? [];
                     //error_log('Debug User ID: ' . (isset($user['id']) ? $user['id'] : 'Not set'));
                     //error_log('Debug Session User ID: ' . (isset($_SESSION['id']) ? $_SESSION['id'] : 'Not set'));
                     ?>
-                    <?php if (RBACService::hasPermission('edit_user') || RBACService::hasPermission('delete_user')): ?>
+                    <?php if (RBACService::hasPermission('user_update') || RBACService::hasPermission('user_delete')): ?>
                         <div class="dropdown">
                             <button class="dropdown-trigger icon-btn" title="More options">
                                 <span class="icon">more_vert</span>
                             </button>
                             <div class="dropdown-menu">
-                                <?php if (RBACService::hasPermission('edit_user')): ?>
+                                <?php if (RBACService::hasPermission('user_update')): ?>
                                     <button class="dropdown-item" onclick="enableEditing()">
                                         <span class="icon">edit</span>
                                         Edit Profile
                                     </button>
                                 <?php endif; ?>
-                                <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
+                                <?php if (RBACService::hasPermission('user_delete') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
                                     <button class="dropdown-item danger" onclick="deleteUser(<?= $user['id'] ?>)">
                                         <span class="icon">delete</span>
                                         Delete User
@@ -155,21 +155,6 @@ $activities = $activities ?? [];
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="assignment-history span-2">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Branch</th>
-                                        <th>Assigned Date</th>
-                                        <th>Assigned By</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Branch history -->
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -181,10 +166,9 @@ $activities = $activities ?? [];
                         <div class="security-item">
                             <div class="security-info">
                                 <h4>Password</h4>
-                                <p>Last changed 30 days ago</p>
                             </div>
                             <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
-                                <button class="btn btn-secondary" onclick="openPasswordResetDialog()">Reset Password</button>
+                                <button type="button" class="btn btn-secondary" onclick="openPasswordResetDialog()">Reset Password</button>
                             <?php else: ?>
                                 <button class="btn btn-secondary" disabled>Reset Password</button>
                                 <?php
@@ -194,13 +178,6 @@ $activities = $activities ?? [];
                                 }
                                 ?>
                             <?php endif; ?>
-                        </div>
-                        <div class="security-item">
-                            <div class="security-info">
-                                <h4>Login History</h4>
-                                <p>View your recent login activity</p>
-                            </div>
-                            <button class="btn btn-secondary">View History</button>
                         </div>
                     </div>
                 </div>
@@ -240,6 +217,7 @@ $activities = $activities ?? [];
                                     <th>Table</th>
                                     <th>Action</th>
                                     <th>IP Address</th>
+                                    <th>User Agent</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -278,7 +256,7 @@ $activities = $activities ?? [];
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Reset Password</h2>
-                <button class="btn btn-secondary" onclick="closePasswordResetDialog()">
+                <button class="close-btn" onclick="closePasswordResetDialog()">
                     <span class="icon">close</span>
                 </button>
             </div>
@@ -297,10 +275,10 @@ $activities = $activities ?? [];
                         <label for="confirm_password">Confirm Password</label>
                         <input type="password" id="confirm_password" name="confirm_password" required>
                     </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Reset Password</button>
-                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordResetDialog()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reset Password</button>
                 </div>
             </form>
         </div>
@@ -338,7 +316,7 @@ $activities = $activities ?? [];
         });
 
         // Then handle AccessControl fields based on permission
-        <?php if (RBACService::hasPermission('delete_user') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
+        <?php if (RBACService::hasPermission('user_delete') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
             document.querySelectorAll('.form-field.AccessControl :is(input, select, textarea)').forEach(input => {
                 input.disabled = false;
             });
@@ -402,15 +380,14 @@ $activities = $activities ?? [];
 
         function openPasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            dialog.showModal(); // Show the dialog
             // Reset form
             document.getElementById('passwordResetForm').reset();
+            dialog.showModal(); // Show the dialog
         }
 
         function closePasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            dialog.style.display = 'none';
-
+            dialog.close(); // Close the dialog
         }
 
         function addErrorMessage(field, message) {

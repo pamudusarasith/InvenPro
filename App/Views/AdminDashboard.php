@@ -6,6 +6,8 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
 
 ?>
 
+<link rel="stylesheet" href="/css/pages/admin-dashboard.css">
+
 <?php if (RBACService::hasPermission('view_dashboard')): ?>
 <div class="body">
 
