@@ -397,8 +397,6 @@ $activities = $activities ?? [];
         form.submit();
     }
 
-
-
     // Password Reset Dialog Functions
     <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
 

@@ -232,7 +232,6 @@
   font-size: 0.85rem;
   color: var(--primary-600);
   cursor: pointer;
-  user-select: none;
 }
 
 .select-all:hover {

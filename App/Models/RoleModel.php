@@ -144,7 +144,7 @@ class RoleModel extends Model
      */
     public function getRoleByName(string $roleName): array
     {
-        $sql = 'SELECT id, role_name, description, created_at FROM role WHERE role_name = ? AND deleted_at IS NULL';
+        $sql = 'SELECT id as role_id, role_name, description, created_at FROM role WHERE role_name = ? AND deleted_at IS NULL';
         $stmt = self::$db->query($sql, [$roleName]);
         $result = $stmt ? $stmt->fetch() : null;
         return $result ?: [];

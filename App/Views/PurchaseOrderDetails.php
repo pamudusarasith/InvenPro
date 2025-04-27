@@ -55,7 +55,7 @@ $canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
           </div>
           <div class="row flex-wrap items-center">
             <span class="icon text-info">person</span>
-            <span class="text text-secondary">Created by: <?= htmlspecialchars($order['created_by']) ?></span>
+            <span class="text text-secondary">Created by: <?= htmlspecialchars($order['created_by_name']) ?></span>
           </div>
         </div>
       </div>
