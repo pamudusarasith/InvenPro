@@ -336,7 +336,7 @@ class UserModel extends Model
       JOIN role r ON u.role_id = r.id
       JOIN role_permission rp ON r.id = rp.role_id
       JOIN permission p ON rp.permission_id = p.id
-      WHERE p.name = ? AND u.deleted_at IS NULL AND u.branch_id = ?
+      WHERE p.permission_name = ? AND u.deleted_at IS NULL AND u.branch_id = ?
     ';
     $stmt = self::$db->query($sql, [$permission, $_SESSION['user']['branch_id']]);
     return $stmt->fetchAll();

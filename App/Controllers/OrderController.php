@@ -5,7 +5,9 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\View;
 use App\Models\OrderModel;
+use App\Models\SupplierModel;
 use App\Models\UserModel;
+use App\Services\EmailService;
 use App\Services\NotificationService;
 use App\Services\RBACService;
 
@@ -13,6 +15,7 @@ class OrderController extends Controller
 {
   private $orderModel;
   private $userModel;
+  private $supplierModel;
 
   public function __construct()
   {
@@ -20,6 +23,7 @@ class OrderController extends Controller
     RBACService::requireAuthentication();
     $this->orderModel = new OrderModel();
     $this->userModel = new UserModel();
+    $this->supplierModel = new SupplierModel();
   }
 
   public function index()
@@ -103,10 +107,10 @@ class OrderController extends Controller
     $orderId = $this->orderModel->createOrder($_POST);
     if ($orderId) {
       $this->orderModel->saveOrderAction($orderId, 'create');
-      
+
       // Send notification to users with approve_purchase_orders permission
       $this->notifyOrderCreation($orderId, $_POST);
-      
+
       $_SESSION['message'] = 'Order created successfully';
       $_SESSION['message_type'] = 'success';
       View::redirect('/orders');
@@ -168,10 +172,10 @@ class OrderController extends Controller
 
     $this->orderModel->updateOrder($orderId, $order);
     $this->orderModel->saveOrderAction($orderId, 'update');
-    
+
     // Send notification about order update
     $this->notifyOrderUpdate($orderId, $order);
-    
+
     $_SESSION['message'] = 'Order updated successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -211,10 +215,10 @@ class OrderController extends Controller
 
     $this->orderModel->deleteOrder($orderId);
     $this->orderModel->saveOrderAction($orderId, 'delete');
-    
+
     // Send notification about order deletion
     $this->notifyOrderDeletion($orderId, $order);
-    
+
     $_SESSION['message'] = 'Order deleted successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders');
@@ -261,10 +265,10 @@ class OrderController extends Controller
 
     $this->orderModel->approveOrder($orderId);
     $this->orderModel->saveOrderAction($orderId, 'approve');
-    
+
     // Send notification about order approval
     $this->notifyOrderApproval($orderId, $order);
-    
+
     $_SESSION['message'] = 'Order approved successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -304,10 +308,10 @@ class OrderController extends Controller
 
     $this->orderModel->completeOrder($orderId);
     $this->orderModel->saveOrderAction($orderId, 'complete');
-    
+
     // Send notification about order completion
     $this->notifyOrderCompletion($orderId, $order);
-    
+
     $_SESSION['message'] = 'Order completed successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -347,10 +351,10 @@ class OrderController extends Controller
 
     $this->orderModel->changeOrderStatus($orderId, 'canceled');
     $this->orderModel->saveOrderAction($orderId, 'cancel');
-    
+
     // Send notification about order cancellation
     $this->notifyOrderCancellation($orderId, $order);
-    
+
     $_SESSION['message'] = 'Order canceled successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -402,10 +406,10 @@ class OrderController extends Controller
 
     $this->orderModel->receiveOrderItems($orderId, $_POST);
     $this->orderModel->saveOrderAction($orderId, 'receive');
-    
+
     // Send notification about items received
     $this->notifyOrderItemsReceived($orderId, $order, $_POST);
-    
+
     $_SESSION['message'] = 'Received items added successfully';
     $_SESSION['message_type'] = 'success';
     View::redirect('/orders/' . $orderId);
@@ -421,13 +425,13 @@ class OrderController extends Controller
   {
     // Get users with permission to approve orders
     $usersWithPermission = $this->userModel->getUsersByPermission('approve_purchase_orders');
-    
+
     // If supplier is specified, also notify the order creator
     $creatorId = $_SESSION['user']['id'];
-    
+
     // Create the order reference for the notification
     $orderRef = "#{$orderData['reference']}";
-    
+
     // Send notification to each approver
     foreach ($usersWithPermission as $user) {
       // Don't notify the creator twice if they also have approval permission
@@ -446,7 +450,7 @@ class OrderController extends Controller
         );
       }
     }
-    
+
     // Notify the creator for confirmation
     NotificationService::sendToUser(
       $creatorId,
@@ -472,10 +476,10 @@ class OrderController extends Controller
   {
     // Get users with permission to approve orders
     $usersWithPermission = $this->userModel->getUsersByPermission('approve_purchase_orders');
-    
+
     // Create the order reference for the notification
     $orderRef = "#{$orderData['reference']}";
-    
+
     // Send notification to each approver
     foreach ($usersWithPermission as $user) {
       NotificationService::sendToUser(
@@ -504,7 +508,7 @@ class OrderController extends Controller
     // Notify the order creator if they didn't delete it themselves
     $creatorId = $orderData['created_by'];
     $currentUserId = $_SESSION['user']['id'];
-    
+
     if ($creatorId != $currentUserId) {
       NotificationService::sendToUser(
         $creatorId,
@@ -529,7 +533,7 @@ class OrderController extends Controller
   {
     // Notify the order creator
     $creatorId = $orderData['created_by'];
-    
+
     NotificationService::sendToUser(
       $creatorId,
       'Purchase Order Approved',
@@ -542,12 +546,12 @@ class OrderController extends Controller
         'action' => 'view_order'
       ]
     );
-    
+
     // Notify users with receive_purchase_orders permission
     $usersWithPermission = $this->userModel->getUsersByPermission('receive_purchase_orders');
-    
+
     foreach ($usersWithPermission as $user) {
-      // Don't notify the creator twice if they are also have receiving permission
+      // Don't notify the creator twice if they also have receiving permission
       if ($user['id'] != $creatorId) {
         NotificationService::sendToUser(
           $user['id'],
@@ -563,6 +567,76 @@ class OrderController extends Controller
         );
       }
     }
+
+    // Send email notification to the supplier
+    try {
+      // Get supplier information
+      $supplierInfo = $this->supplierModel->getSupplier($orderData['supplier_id']);
+
+      if ($supplierInfo && isset($supplierInfo['email']) && !empty($supplierInfo['email'])) {
+        // Get order items
+        $orderItems = $orderData['items'] ?? [];
+
+        // Get company information
+        $companyInfo = [
+          'company_name' => $_ENV['COMPANY_NAME'] ?? 'InvenPro',
+          'company_address' => $_ENV['COMPANY_ADDRESS'] ?? '',
+          'logo_url' => $_ENV['LOGO_URL'] ?? '',
+        ];
+
+        // Get branch address for shipping
+        $branchAddress = $this->orderModel->getOrderBranchAddress($orderId);
+
+        // Format order items for the email template
+        $formattedItems = [];
+        $orderTotal = 0;
+
+        foreach ($orderItems as $item) {
+          $unitPrice = $item['unit_price'] ?? 0;
+          $quantity = $item['quantity'] ?? 0;
+          $totalPrice = $unitPrice * $quantity;
+          $orderTotal += $totalPrice;
+
+          $formattedItems[] = [
+            'name' => $item['product_name'] ?? '',
+            'quantity' => $quantity,
+            'unit_price' => number_format($unitPrice, 2),
+            'total_price' => number_format($totalPrice, 2)
+          ];
+        }
+
+        // Prepare data for the email template
+        $emailData = [
+          'supplier_name' => $supplierInfo['name'] ?? 'Valued Supplier',
+          'order_reference' => $orderData['reference'] ?? '',
+          'order_date' => date('F j, Y', strtotime($orderData['order_date'])),
+          'expected_date' => !empty($orderData['expected_date']) ? date('F j, Y', strtotime($orderData['expected_date'])) : 'As soon as possible',
+          'shipping_address' => $branchAddress ?? 'Our main address',
+          'contact_person' => $_SESSION['user']['display_name'] ?? '',
+          'contact_email' => $_SESSION['user']['email'] ?? '',
+          'contact_phone' => $_SESSION['user']['phone'] ?? '',
+          'special_instructions' => $orderData['notes'] ?? '',
+          'order_items' => $formattedItems,
+          'order_total' => number_format($orderTotal, 2),
+          'company_name' => $companyInfo['company_name'],
+          'company_address' => $companyInfo['company_address'],
+          'logo_url' => $companyInfo['logo_url'],
+          'portal_url' => isset($_ENV['SUPPLIER_PORTAL_URL']) ? $_ENV['SUPPLIER_PORTAL_URL'] . '?order=' . $orderData['reference'] : ''
+        ];
+
+        // Send the email
+        $emailService = EmailService::getInstance();
+        $emailService->sendPhpTemplate(
+          $supplierInfo['email'],
+          "Purchase Order: {$orderData['reference']}",
+          APP_PATH . '/Views/emails/OrderApproved.php',
+          $emailData
+        );
+      }
+    } catch (\Exception $e) {
+      // Log the error but don't stop execution
+      error_log("Failed to send supplier email for order #{$orderData['reference']}: " . $e->getMessage());
+    }
   }
 
   /**
@@ -576,7 +650,7 @@ class OrderController extends Controller
     // Notify the order creator if they didn't cancel it themselves
     $creatorId = $orderData['created_by'];
     $currentUserId = $_SESSION['user']['id'];
-    
+
     if ($creatorId != $currentUserId) {
       NotificationService::sendToUser(
         $creatorId,
@@ -603,7 +677,7 @@ class OrderController extends Controller
   {
     // Notify the order creator
     $creatorId = $orderData['created_by'];
-    
+
     NotificationService::sendToUser(
       $creatorId,
       'Purchase Order Completed',
@@ -616,10 +690,10 @@ class OrderController extends Controller
         'action' => 'view_order'
       ]
     );
-    
+
     // Notify users with inventory_manager role
     $inventoryManagers = $this->userModel->getUsersByRole(3); // Assuming 3 is inventory_manager role ID
-    
+
     foreach ($inventoryManagers as $user) {
       // Don't notify the creator twice if they are also an inventory manager
       if ($user['id'] != $creatorId) {
@@ -650,10 +724,10 @@ class OrderController extends Controller
   {
     // Notify the order creator
     $creatorId = $orderData['created_by'];
-    
+
     // Count received items
     $itemsCount = count($receivedData['batches']);
-    
+
     NotificationService::sendToUser(
       $creatorId,
       'Order Items Received',
@@ -667,10 +741,10 @@ class OrderController extends Controller
         'action' => 'view_order'
       ]
     );
-    
+
     // Notify inventory managers
     $inventoryManagers = $this->userModel->getUsersByRole(3); // Assuming 3 is inventory_manager role ID
-    
+
     foreach ($inventoryManagers as $user) {
       // Don't notify the creator twice if they are also an inventory manager
       if ($user['id'] != $creatorId) {
