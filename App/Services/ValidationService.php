@@ -406,6 +406,8 @@ class ValidationService
       ->rule('start_date', new Required('Start Date is required'))
       ->rule('start_date', new IsDateTime('Y-m-d', 'Invalid Start Date'))
       ->rule('end_date', new IsDateTime('Y-m-d', 'Invalid End Date'))
+      ->rule('end_date', new CompareWithValue('>=', date('Y-m-d'), 'date', 'End Date must be today or in the future'))
+      ->rule('end_date', new CompareWithField('>', 'start_date', 'date', 'End Date must be later than Start Date'))
       ->rule('is_combinable', new Required('Is Combinable is required'))
       ->rule('is_combinable', new IsBoolean(false, 'Is Combinable must be a boolean'))
       ->rule('conditions', new Required('Conditions are required'))
@@ -413,10 +415,16 @@ class ValidationService
       ->rule('conditions.*.condition_type', new Required('Condition Type is required'))
       ->rule('conditions.*.condition_type', new InArray(['min_quantity', 'min_amount', 'time_of_day', 'day_of_week', 'loyalty_points'], 'Invalid Condition Type'));
 
+    if ($data['discount_type'] === 'percentage') {
+      $validator->rule('value', new CompareWithValue('<=', 100, 'numeric', 'Percentage value must be less than or equal to 100'));
+    }
+
     if (!$validator->validate()) {
       $this->errors = $validator->errors();
       return false;
     }
+
+
 
     $minQuantityValidator = new Validator();
     $minQuantityValidator->rule('product_id', new Required('Product ID is required'))

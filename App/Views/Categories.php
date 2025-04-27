@@ -168,7 +168,10 @@ $canAddCategory = RBACService::hasPermission('add_category');
                         </div>
                     </div>
 
-                    <div class="form-field span-2 chip-container"></div>
+                    <div class="form-field span-2">
+                        <div class="chip-container">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeAddCategoryDialog()">Cancel</button>

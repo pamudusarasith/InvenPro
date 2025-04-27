@@ -365,6 +365,7 @@ $canAddProduct = RBACService::hasPermission('add_product');
                             <?php endforeach; ?>
                         </select>
                     </div>
+
                     <div class="form-field span-2">
                         <label for="product-categories">Categories *</label>
                         <div id="product-categories" class="search-bar">
@@ -373,7 +374,11 @@ $canAddProduct = RBACService::hasPermission('add_product');
                             <div class="search-results"></div>
                         </div>
                     </div>
-                    <div class="form-field span-2 chip-container"></div>
+                    <div class="form-field span-2">
+                        <div class="chip-container">
+
+                        </div>
+                    </div>
                     <div class="form-field">
                         <label for="product-reorder-level">Reorder Level *</label>
                         <input type="number" id="product-reorder-level" name="reorder_level" required>

@@ -170,16 +170,18 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
                 <div class="search-results"></div>
               </div>
             </div>
-            <div class="form-field span-2 chip-container">
-              <?php foreach ($product['categories'] as $category): ?>
-                <div class="chip">
-                  <?= htmlspecialchars($category['category_name']) ?>
-                  <input type="hidden" name="categories[]" value="<?= $category['id'] ?>">
-                  <button type="button" class="chip-delete" title="Remove Category" style="display: none;">
-                    <span class="icon">close</span>
-                  </button>
-                </div>
-              <?php endforeach; ?>
+            <div class="form-field span-2">
+              <div class="chip-container">
+                <?php foreach ($product['categories'] as $category): ?>
+                  <div class="chip">
+                    <?= htmlspecialchars($category['category_name']) ?>
+                    <input type="hidden" name="categories[]" value="<?= $category['id'] ?>">
+                    <button type="button" class="chip-delete" title="Remove Category" style="display: none;">
+                      <span class="icon">close</span>
+                    </button>
+                  </div>
+                <?php endforeach; ?>
+              </div>
             </div>
             <div class="form-field">
               <label for="reorder-level">Reorder Level</label>
