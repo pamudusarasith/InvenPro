@@ -23,7 +23,7 @@ class AuthController extends Controller
           View::redirect('/dashboard');
       }
     }
-    View::render('LoginPage');
+    View::renderTemplate('LoginPage');
   }
 
   /**
@@ -34,10 +34,10 @@ class AuthController extends Controller
   public function login(): void
   {
     if (!$this->validator->validateLogin($_POST)) {
-        View::render('LoginPage', [
-            'error' => $this->validator->getError()
-        ]);
-        return;
+      $_SESSION['message'] = $this->validator->getError();
+      $_SESSION['message_type'] = 'error';
+      View::renderTemplate('LoginPage');
+      return;
     }
 
     $userModel = new UserModel();
@@ -46,34 +46,33 @@ class AuthController extends Controller
     $user = $userModel->findByEmail($email);
 
     if (!$user || !password_verify($password, $user['password'])) {
-        $userModel->recordFailedLoginAttempt($email);
-        $attempts = $userModel->getFailedLoginAttempts($email);
+      $userModel->recordFailedLoginAttempt($email);
+      $attempts = $userModel->getFailedLoginAttempts($email);
 
-        if ($attempts >= 3) {
-            $userModel->lockUser($user['id'] ?? 0);
-            
-            $_SESSION['message'] = 'Account locked due to too many failed login attempts. Please contact support.';
-            $_SESSION['message_type'] = 'error';
+      if ($attempts >= 3) {
+        $userModel->lockUser($user['id'] ?? 0);
 
-            View::redirect('/');
-            return;
-        } else {
-
-            $_SESSION['message'] = 'Invalid email or password. Please try again.';
-            $_SESSION['message_type'] = 'error';
-
-            View::redirect('/');
-            return;
-        }
-        return;
-    }
-
-    if ($user['is_locked']) {
-        $_SESSION['message'] = 'Your account is locked. Please contact support.';
+        $_SESSION['message'] = 'Account locked due to too many failed login attempts. Please contact support.';
         $_SESSION['message_type'] = 'error';
 
         View::redirect('/');
         return;
+      } else {
+
+        $_SESSION['message'] = 'Invalid email or password. Please try again.';
+        $_SESSION['message_type'] = 'error';
+
+        View::redirect('/');
+        return;
+      }
+    }
+
+    if ($user['is_locked']) {
+      $_SESSION['message'] = 'Your account is locked. Please contact support.';
+      $_SESSION['message_type'] = 'error';
+
+      View::redirect('/');
+      return;
     }
 
     // Login successful
