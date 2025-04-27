@@ -25,11 +25,13 @@ class SupplierController extends Controller
 
     $branchModel = new BranchModel();
     $branches = $branchModel->getBranches($page, $itemsPerPage, $search , $status);
+    $brachForCreateSupplier = $branchModel->getBranchesForCreateSupplier($page, $itemsPerPage, $search , $status);
 
     View::renderTemplate('Suppliers', [
       'title' => 'Suppliers',
       'suppliers' => $suppliers,
       'branches' => $branches,
+      'brachForCreateSupplier' => $brachForCreateSupplier,
       'page' => $page,
       'itemsPerPage' => $itemsPerPage,
       'totalPages' => $totalPages,
