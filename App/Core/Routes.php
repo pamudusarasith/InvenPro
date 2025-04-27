@@ -40,8 +40,9 @@ return [
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
     '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
-
     '/branches' => 'App\Controllers\BranchController::index',
+    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
+    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch', 
 
   ],
 
@@ -75,9 +76,6 @@ return [
     '/discounts/{id}/update' => 'App\Controllers\DiscountsController::updateDiscount',
     '/branches/new' => 'App\Controllers\BranchController::createBranch',
     '/branches/{id}/update' => 'App\Controllers\BranchController::updateBranch',
-    '/branches/{id}/deactivate' => 'App\Controllers\BranchController::deactivateBranch',
-    '/branches/{id}/restore' => 'App\Controllers\BranchController::restoreBranch',
-    '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
   ],
 ];
 

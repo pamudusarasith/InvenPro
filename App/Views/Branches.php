@@ -111,11 +111,11 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
                     <?php endif; ?>
                     <?php if ($canDeleteBranch): ?>
                       <?php if ($branch['deleted_at']): ?>
-                        <button class="icon-btn success" title="Restore" onclick="restoreBranch(<?= $branch['id']; ?>)">
+                        <button class="icon-btn success" title="Restore" onclick="restoreBranch(event, <?= $branch['id']; ?>)">
                           <span class="icon">restore</span>
                         </button>
                       <?php else: ?>
-                        <button class="icon-btn danger" title="Deactivate" onclick="deactivateBranch(<?= $branch['id']; ?>)">
+                        <button class="icon-btn danger" title="Deactivate" onclick="deactivateBranch(event, <?= $branch['id']; ?>)">
                           <span class="icon">delete</span>
                         </button>
                       <?php endif; ?>

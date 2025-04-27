@@ -67,22 +67,45 @@ class BranchController extends Controller
   }
 
 
-  public function updateDeletedAt(array $params)
+  public function deactivateBranch(array $params): void
   {
-      $branchModel = new BranchModel();
-      $deletedAt = $params['deleted_at'] ?? null;
+      $branchId = $params['id'] ?? null;
   
-      if (!$deletedAt) {
-          $_SESSION['message'] = 'Invalid data provided for branch status update.';
+      if (!$branchId) {
+          $_SESSION['message'] = 'Invalid branch ID provided.';
           $_SESSION['message_type'] = 'error';
           View::redirect('/branches');
+          return;
       }
   
-      $branchModel->updateDeletedAt($params['id'], $deletedAt);
-      $_SESSION['message'] = $deletedAt ? 'Branch deactivated successfully' : 'Branch restored successfully';
+      $branchModel = new BranchModel();
+      $deletedAt = date('Y-m-d H:i:s'); // Current timestamp
+      $branchModel->updateDeletedAt($branchId, $deletedAt);
+  
+      $_SESSION['message'] = 'Branch deactivated successfully.';
       $_SESSION['message_type'] = 'success';
       View::redirect('/branches');
   }
+
+
+public function restoreBranch(array $params): void
+{
+    $branchId = $params['id'] ?? null;
+
+    if (!$branchId) {
+        $_SESSION['message'] = 'Invalid branch ID provided.';
+        $_SESSION['message_type'] = 'error';
+        View::redirect('/branches');
+        return;
+    }
+
+    $branchModel = new BranchModel();
+    $branchModel->updateDeletedAt($branchId, null); // Set deleted_at to NULL
+
+    $_SESSION['message'] = 'Branch restored successfully.';
+    $_SESSION['message_type'] = 'success';
+    View::redirect('/branches');
+}
 
 
   public function search(): void
