@@ -21,6 +21,7 @@ class BranchModel extends Model
             IF(b.deleted_at IS NULL, "Active", "Inactive") AS status,
             b.deleted_at
         FROM branch b
+        WHERE 1=1
         
     ';
     $params = [];
@@ -196,5 +197,7 @@ public function searchBranches(string $query, int $page, int $itemsPerPage): arr
     ]);
     return $stmt->fetchAll();
 }
+
+
   
 }
