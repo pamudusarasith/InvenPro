@@ -7,52 +7,62 @@ use DateTime;
 
 class ReportModel extends Model
 {
-    public function getTopSellingProducts($startDate = null, $endDate = null) {
-        
-        
-        $query = "SELECT p.product_name AS product_name, 
-                         SUM(si.quantity) AS quantity, 
-                         SUM((si.unit_price - si.discount) * si.quantity) AS revenue
-                    FROM sale_item si
-                    JOIN product p ON si.product_id = p.id
-                    JOIN sale s ON si.sale_id = s.id
-                    WHERE s.sale_date BETWEEN :startDate AND :endDate
-                    GROUP BY p.id, p.product_name
-                    ORDER BY revenue DESC
-                    LIMIT 10";
+    /**
+     * Get top selling products
+     */
+    public function getTopSellingProducts($startDate = null, $endDate = null): array
+    {
+        $query = "
+            SELECT 
+                p.product_name AS product_name, 
+                SUM(si.quantity) AS quantity, 
+                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
+            FROM sale_item si
+            JOIN product p ON si.product_id = p.id
+            JOIN sale s ON si.sale_id = s.id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+            GROUP BY p.id, p.product_name
+            ORDER BY revenue DESC
+            LIMIT 10
+        ";
         $params = [':startDate' => $startDate, ':endDate' => $endDate];
-        
-    
-        // Execute the query
+
         $results = self::$db->query($query, $params)->fetchAll();
-    
-        // Format the results to match the view's expected structure
+
         $formattedResults = [];
         foreach ($results as $row) {
             $formattedResults[] = [
                 'product_name' => $row['product_name'],
-                'quantity' => (int)$row['quantity'], // Ensure quantity is an integer
-                'revenue' => 'LKR ' . number_format($row['revenue'], 2) // Format revenue as "LKR X,XXX.XX"
+                'quantity' => (int)$row['quantity'],
+                'revenue' => 'LKR ' . number_format($row['revenue'], 2)
             ];
         }
-    
+
         return $formattedResults;
     }
 
+    /**
+     * Get supplier performance
+     */
     public function getSupplierPerformance($startDate, $endDate): array
     {
+        // Note: The original query references `delivery_date` and `quality_rating`, which are not in the schema.
+        // Assuming these are tracked elsewhere, I'll provide a placeholder query.
+        // You may need to adjust based on actual data sources for on-time delivery and quality.
         $query = "
             SELECT 
                 s.supplier_name AS name,
-                AVG(CASE WHEN po.delivery_date <= po.expected_delivery_date THEN 100 ELSE 0 END) AS on_time,
-                AVG(poi.quality_rating) AS quality
+                COUNT(CASE WHEN po.order_date <= po.expected_date THEN 1 END) / COUNT(*) * 100 AS on_time,
+                85 AS quality -- Placeholder: Quality rating not in schema
             FROM purchase_order po
-            INNER JOIN supplier s ON po.supplier_id = s.id
-            LEFT JOIN purchase_order_item poi ON po.id = poi.po_id
+            JOIN supplier s ON po.supplier_id = s.id
             WHERE po.deleted_at IS NULL
             AND po.order_date BETWEEN :startDate AND :endDate
+            AND po.status = 'completed'
             GROUP BY s.id, s.supplier_name
-            ORDER BY on_time DESC, quality DESC
+            ORDER BY on_time DESC
             LIMIT 5
         ";
 
@@ -75,9 +85,11 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
+    /**
+     * Get category revenue data
+     */
     public function getCategoryRevenueData($startDate, $endDate): array
     {
-
         $query = "
             SELECT 
                 c.category_name AS name,
@@ -87,7 +99,10 @@ class ReportModel extends Model
             LEFT JOIN product p ON pc.product_id = p.id
             LEFT JOIN sale_item si ON p.id = si.product_id
             LEFT JOIN sale s ON si.sale_id = s.id
-            AND s.sale_date BETWEEN :startDate AND :endDate
+            WHERE (s.sale_date BETWEEN :startDate AND :endDate OR s.sale_date IS NULL)
+            AND c.deleted_at IS NULL
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
             GROUP BY c.id, c.category_name
             ORDER BY revenue DESC
             LIMIT 10
@@ -111,18 +126,23 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
+    /**
+     * Get sales data for charts
+     */
     public function getSalesData($startDate, $endDate): array
     {
         $query = "
             SELECT 
-                s.sale_date AS date,
+                DATE(s.sale_date) AS date,
                 SUM((si.unit_price - si.discount) * si.quantity) AS revenue
             FROM sale s
-            LEFT JOIN sale_item si ON s.id = si.sale_id
+            JOIN sale_item si ON s.id = si.sale_id
             WHERE s.sale_date BETWEEN :startDate AND :endDate
-            GROUP BY s.sale_date
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+            GROUP BY DATE(s.sale_date)
             HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
-            ORDER BY s.sale_date ASC
+            ORDER BY DATE(s.sale_date) ASC
         ";
 
         $params = [
@@ -143,61 +163,62 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
+    /**
+     * Get count and revenue for sales
+     */
     public function getCountAndRevenue($startDate, $endDate): array
     {
+        $query = "
+            SELECT 
+                COUNT(DISTINCT s.id) AS order_count,
+                COALESCE(SUM((si.unit_price - si.discount) * si.quantity), 0) AS revenue
+            FROM sale s
+            LEFT JOIN sale_item si ON s.id = si.sale_id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+        ";
+
         $params = [
             ':startDate' => $startDate,
             ':endDate' => $endDate
         ];
 
-        $query = "
-            SELECT 
-                COUNT(*) AS count,
-                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
-            FROM sale s
-            LEFT JOIN sale_item si ON s.id = si.sale_id
-            WHERE s.sale_date BETWEEN :startDate AND :endDate
-            HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
-        ";
-
         $results = self::$db->query($query, $params)->fetchAll();
 
+        $formattedResults = [
+            'order_count' => 0,
+            'revenue' => 0.0
+        ];
 
-        $formattedResults = [];
         if (!empty($results)) {
-            $row = $results[0]; // Fetch the first row
+            $row = $results[0];
             $formattedResults = [
-                'count' => (int)$row['count'],
+                'order_count' => (int)$row['order_count'],
                 'revenue' => (float)$row['revenue']
-            ];
-        }
-        else {
-            $formattedResults = [
-                'count' => 0,
-                'revenue' => 0.00
             ];
         }
 
         return $formattedResults;
     }
 
-
+    /**
+     * Get category data
+     */
     public function getCategoryData(): array
     {
         $query = "
             SELECT 
                 c.category_name AS name,
-                COUNT(DISTINCT p.id) AS product_count,
-                COALESCE(SUM((si.unit_price - si.discount) * si.quantity), 0) AS revenue
+                COUNT(DISTINCT p.id) AS product_count
             FROM category c
             LEFT JOIN product_category pc ON c.id = pc.category_id
             LEFT JOIN product p ON pc.product_id = p.id
-            LEFT JOIN sale_item si ON p.id = si.product_id
-            LEFT JOIN sale s ON si.sale_id = s.id
+            WHERE c.deleted_at IS NULL
+            AND (p.deleted_at IS NULL OR p.id IS NULL)
             GROUP BY c.id, c.category_name
-            ORDER BY revenue DESC
+            ORDER BY product_count DESC
         ";
-
 
         $results = self::$db->query($query)->fetchAll();
 
@@ -205,31 +226,42 @@ class ReportModel extends Model
         foreach ($results as $row) {
             $formattedResults[] = [
                 'name' => $row['name'],
-                'count' => (int)$row['product_count'],
+                'count' => (int)$row['product_count']
             ];
         }
 
         return $formattedResults;
     }
 
-    public function getExpiringBatches($startDate, $endDate){   
+    /**
+     * Get expiring batches
+     */
+    public function getExpiringBatches($startDate, $endDate): array
+    {
         $query = "
             SELECT 
                 p.product_name AS product_name,
                 b.batch_code AS batch_code,
                 b.expiry_date AS expiry_date,
                 b.current_quantity AS quantity,
-                b.expiry_date - CURDATE() AS days_left,
-                u.unit_symbol as unit
+                DATEDIFF(b.expiry_date, CURDATE()) AS days_left,
+                u.unit_symbol AS unit
             FROM product_batch b
-            INNER JOIN product p ON b.product_id = p.id
-            INNER JOIN unit u ON p.unit_id = u.id
-            WHERE b.expiry_date BETWEEN ? AND ?
+            JOIN product p ON b.product_id = p.id
+            JOIN unit u ON p.unit_id = u.id
+            WHERE b.expiry_date BETWEEN :startDate AND :endDate
+            AND b.current_quantity > 0
             AND b.deleted_at IS NULL
+            AND p.deleted_at IS NULL
             ORDER BY b.expiry_date ASC
             LIMIT 10
         ";
-        $params = [$startDate, $endDate];
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
         $results = self::$db->query($query, $params)->fetchAll();
 
         $formattedResults = [];
@@ -239,28 +271,37 @@ class ReportModel extends Model
                 'batch_code' => $row['batch_code'],
                 'expiry_date' => (new DateTime($row['expiry_date']))->format('Y-m-d'),
                 'quantity' => (float)$row['quantity'],
-                'days_left' => (int)$row['days_left']
+                'days_left' => (int)$row['days_left'],
+                'unit' => $row['unit']
             ];
         }
+
         return $formattedResults;
     }
 
+    /**
+     * Get low stock items
+     */
     public function getLowStock(): array
     {
         $query = "
             SELECT 
                 p.product_name AS product_name,
                 SUM(b.current_quantity) AS current_stock,
-                bp.reorder_quantity AS reorder_level,
+                bp.reorder_level AS reorder_level,
                 u.unit_symbol AS unit,
                 u.is_int AS is_int
             FROM product_batch b
-            LEFT JOIN product p ON b.product_id = p.id
-            LEFT JOIN unit u ON p.unit_id = u.id
-            LEFT JOIN branch_product bp ON p.id = bp.product_id
-            WHERE b.current_quantity <= bp.reorder_quantity
-            GROUP BY p.id, p.product_name
+            JOIN product p ON b.product_id = p.id
+            JOIN unit u ON p.unit_id = u.id
+            JOIN branch_product bp ON p.id = bp.product_id AND b.branch_id = bp.branch_id
+            WHERE b.current_quantity <= bp.reorder_level
+            AND b.current_quantity > 0
+            AND b.deleted_at IS NULL
+            AND p.deleted_at IS NULL
+            GROUP BY p.id, p.product_name, bp.reorder_level, u.unit_symbol, u.is_int
             ORDER BY current_stock ASC
+            LIMIT 10
         ";
 
         $results = self::$db->query($query)->fetchAll();
@@ -279,5 +320,322 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
+    /**
+     * Get stock status
+     */
+    public function getStockStatus(): array
+    {
+        $query = "
+            SELECT 
+                SUM(CASE WHEN b.current_quantity > bp.reorder_level THEN 1 ELSE 0 END) AS in_stock,
+                SUM(CASE WHEN b.current_quantity <= bp.reorder_level AND b.current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+                SUM(CASE WHEN b.current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock,
+                SUM(b.current_quantity * b.unit_cost) AS total_value
+            FROM product_batch b
+            JOIN product p ON b.product_id = p.id
+            JOIN branch_product bp ON p.id = bp.product_id AND b.branch_id = bp.branch_id
+            WHERE b.deleted_at IS NULL
+            AND p.deleted_at IS NULL
+        ";
 
+        $results = self::$db->query($query)->fetchAll();
+
+        $formattedResults = [
+            'in_stock' => 0,
+            'low_stock' => 0,
+            'out_of_stock' => 0,
+            'total_value' => 'LKR 0.00'
+        ];
+
+        if (!empty($results)) {
+            $row = $results[0];
+            $formattedResults = [
+                'in_stock' => (int)$row['in_stock'],
+                'low_stock' => (int)$row['low_stock'],
+                'out_of_stock' => (int)$row['out_of_stock'],
+                'total_value' => 'LKR ' . number_format((float)$row['total_value'], 2)
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get recent purchase orders
+     */
+    public function getRecentPurchaseOrders($startDate, $endDate): array
+    {
+        $query = "
+            SELECT 
+                po.reference AS reference,
+                s.supplier_name AS supplier,
+                po.order_date AS date,
+                po.status AS status,
+                po.total_amount AS total
+            FROM purchase_order po
+            JOIN supplier s ON po.supplier_id = s.id
+            WHERE po.order_date BETWEEN :startDate AND :endDate
+            AND po.deleted_at IS NULL
+            ORDER BY po.order_date DESC
+            LIMIT 5
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        $formattedResults = [];
+        foreach ($results as $row) {
+            $formattedResults[] = [
+                'reference' => $row['reference'],
+                'supplier' => $row['supplier'],
+                'date' => (new DateTime($row['date']))->format('Y-m-d'),
+                'status' => $row['status'],
+                'total' => 'LKR ' . number_format((float)$row['total'], 2)
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get monthly sales data
+     */
+    public function getMonthlySalesData($startDate, $endDate): array
+    {
+        $query = "
+            SELECT 
+                DATE(s.sale_date) AS date,
+                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
+            FROM sale s
+            JOIN sale_item si ON s.id = si.sale_id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+            GROUP BY DATE(s.sale_date)
+            HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
+            ORDER BY DATE(s.sale_date) ASC
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        $formattedResults = [];
+        foreach ($results as $row) {
+            $formattedResults[] = [
+                'date' => (new DateTime($row['date']))->format('M d'),
+                'sales' => (float)$row['revenue']
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get sales stats for Sales Overview section
+     */
+    public function getSalesStats($startDate, $endDate): array
+    {
+        $query = "
+            SELECT 
+                COUNT(DISTINCT s.id) AS total_orders,
+                COALESCE(SUM((si.unit_price - si.discount) * si.quantity), 0) AS total_revenue,
+                COALESCE(SUM((si.unit_price - si.discount) * si.quantity) / COUNT(DISTINCT s.id), 0) AS avg_order_value
+            FROM sale s
+            LEFT JOIN sale_item si ON s.id = si.sale_id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        $formattedResults = [
+            'total_orders' => 0,
+            'total_revenue' => 'LKR 0.00',
+            'avg_order_value' => 'LKR 0.00'
+        ];
+
+        if (!empty($results)) {
+            $row = $results[0];
+            $formattedResults = [
+                'total_orders' => (int)$row['total_orders'],
+                'total_revenue' => 'LKR ' . number_format((float)$row['total_revenue'], 2),
+                'avg_order_value' => 'LKR ' . number_format((float)$row['avg_order_value'], 2)
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get inventory stats for Inventory Status section
+     */
+    public function getInventoryStats(): array
+    {
+        $query = "
+            SELECT 
+                SUM(CASE WHEN b.current_quantity > bp.reorder_level THEN 1 ELSE 0 END) AS in_stock,
+                SUM(CASE WHEN b.current_quantity <= bp.reorder_level AND b.current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+                SUM(CASE WHEN b.current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock
+            FROM product_batch b
+            JOIN product p ON b.product_id = p.id
+            JOIN branch_product bp ON p.id = bp.product_id AND b.branch_id = bp.branch_id
+            WHERE b.deleted_at IS NULL
+            AND p.deleted_at IS NULL
+        ";
+
+        $results = self::$db->query($query)->fetchAll();
+
+        $formattedResults = [
+            'in_stock' => 0,
+            'low_stock' => 0,
+            'out_of_stock' => 0
+        ];
+
+        if (!empty($results)) {
+            $row = $results[0];
+            $formattedResults = [
+                'in_stock' => (int)$row['in_stock'],
+                'low_stock' => (int)$row['low_stock'],
+                'out_of_stock' => (int)$row['out_of_stock']
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get category stats for Product Category Analysis section
+     */
+    public function getCategoryStats(): array
+    {
+        $query = "
+            SELECT 
+                COUNT(DISTINCT c.id) AS category_count,
+                COUNT(DISTINCT p.id) AS total_products,
+                COUNT(DISTINCT p.id) / COUNT(DISTINCT c.id) AS avg_products_per_category
+            FROM category c
+            LEFT JOIN product_category pc ON c.id = pc.category_id
+            LEFT JOIN product p ON pc.product_id = p.id
+            WHERE c.deleted_at IS NULL
+            AND (p.deleted_at IS NULL OR p.id IS NULL)
+        ";
+
+        $results = self::$db->query($query)->fetchAll();
+
+        $formattedResults = [
+            'category_count' => 0,
+            'total_products' => 0,
+            'avg_products_per_category' => 0.0
+        ];
+
+        if (!empty($results)) {
+            $row = $results[0];
+            $formattedResults = [
+                'category_count' => (int)$row['category_count'],
+                'total_products' => (int)$row['total_products'],
+                'avg_products_per_category' => round((float)$row['avg_products_per_category'], 1)
+            ];
+        }
+
+        return $formattedResults;
+    }
+
+    /**
+     * Get profit margin
+     */
+    public function getProfitMargin($startDate, $endDate): float
+    {
+        $query = "
+            SELECT 
+                COALESCE(SUM((si.unit_price - si.discount) * si.quantity), 0) AS revenue,
+                COALESCE(SUM(b.unit_cost * si.quantity), 0) AS cost
+            FROM sale s
+            JOIN sale_item si ON s.id = si.sale_id
+            JOIN product_batch b ON si.batch_id = b.id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+            AND b.deleted_at IS NULL
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate
+        ];
+
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        $revenue = 0.0;
+        $cost = 0.0;
+
+        if (!empty($results)) {
+            $row = $results[0];
+            $revenue = (float)$row['revenue'];
+            $cost = (float)$row['cost'];
+        }
+
+        // Calculate profit margin: (revenue - cost) / revenue * 100
+        return $revenue > 0 ? (($revenue - $cost) / $revenue) * 100 : 0.0;
+    }
+
+    public function getTopProductCombinations(string $startDate, string $endDate, int $limit = 10): array
+    {
+        // Query to find product pairs and their frequency
+        $query = "
+            SELECT 
+                p1.product_name AS product1,
+                p2.product_name AS product2,
+                COUNT(*) AS frequency
+            FROM sale s
+            JOIN sale_item si1 ON s.id = si1.sale_id
+            JOIN sale_item si2 ON s.id = si2.sale_id AND si1.product_id < si2.product_id
+            JOIN product p1 ON si1.product_id = p1.id
+            JOIN product p2 ON si2.product_id = p2.id
+            WHERE s.sale_date BETWEEN :startDate AND :endDate
+            AND s.status = 'completed'
+            AND s.deleted_at IS NULL
+            AND p1.deleted_at IS NULL
+            AND p2.deleted_at IS NULL
+            GROUP BY p1.id, p2.id, p1.product_name, p2.product_name
+            ORDER BY frequency DESC
+            LIMIT :limit
+        ";
+
+        $params = [
+            ':startDate' => $startDate,
+            ':endDate' => $endDate,
+            ':limit' => $limit
+        ];
+
+        // Execute query
+        $results = self::$db->query($query, $params)->fetchAll();
+
+        // Format results
+        $combinations = [];
+        foreach ($results as $row) {
+            $combinations[] = [
+                'product1' => (string)$row['product1'],
+                'product2' => (string)$row['product2'],
+                'frequency' => (int)$row['frequency']
+            ];
+        }
+
+        return $combinations;
+    }
+
+    
 }
