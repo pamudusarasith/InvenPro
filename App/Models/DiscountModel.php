@@ -76,7 +76,7 @@ class DiscountModel extends Model
         $params[] = $itemsPerPage;
         $params[] = $offset;
       }
-      
+
       $stmt = self::$db->query($sql, $params);
       $discounts = $stmt->fetchAll();
 

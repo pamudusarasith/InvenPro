@@ -21,6 +21,7 @@ class ProductModel extends Model
         p.*,
         u.unit_name,
         u.unit_symbol,
+        u.is_int,
         bp.reorder_level,
         bp.reorder_quantity
       FROM product p
@@ -421,6 +422,17 @@ class ProductModel extends Model
     self::$db->query($sql, [$data['reorder_level'], $data['reorder_quantity'], $id, $_SESSION['user']['branch_id']]);
     self::$db->commit();
   }
+
+  public function productCodeExists(string $productCode, ?int $productId = null): bool
+  {
+    $sql = '
+    SELECT COUNT(*) 
+    FROM product 
+    WHERE (id IS NULL AND product_code = ?) OR (id IS NOT NULL AND product_code = ? AND id != ?)';
+    $stmt = self::$db->query($sql, [$productCode, $productCode, $productId]);
+    return $stmt->fetchColumn() > 0;
+  }
+
 
   public function deleteProduct(int $id): void
   {
