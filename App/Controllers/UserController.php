@@ -25,7 +25,7 @@ class UserController extends Controller
     $roles = $roleModel->getAllRoles();
 
     $branchModel = new BranchModel();
-    $branches = $branchModel->getBranches();
+    $branches = $branchModel->getAllBranches();
 
     View::renderTemplate('Users', [
       'title' => 'Users',
@@ -64,7 +64,7 @@ class UserController extends Controller
     //error_log(print_r($activities, true)); // Debugging line
 
     $branchModal = new BranchModel();
-    $branches = $branchModal->getBranches();
+    $branches = $branchModal->getAllBranches();
 
     View::renderTemplate('UserDetails', [
       'title' => 'User Details',
@@ -90,7 +90,7 @@ class UserController extends Controller
     $roles = $roleModal->getAllRoles();
 
     $branchModal = new BranchModel();
-    $branches = $branchModal->getBranches();
+    $branches = $branchModal->getAllBranches();
 
     $auditLogModel = new AuditLogModel();
     $activities = $auditLogModel->getAuditLogsById($user['id']);

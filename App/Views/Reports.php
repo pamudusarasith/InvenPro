@@ -16,43 +16,53 @@ use App\Services\RBACService;
         </div>
 
         <div class="reports-container">
-    <!-- Filters Section -->
-    <div class="card glass">
-        <div class="content">
-            <div class="report-filters">
-                <div class="form-field">
-                    <label for="report-type">Report Type</label>
-                    <select id="report-type" name="report_type" onchange="updateTimePeriodOptions(this.value)">
-                        <?php foreach ($reportTypes as $value => $label): ?>
-                            <option value="<?= $value ?>" <?= $selectedReportType === $value ? 'selected' : '' ?>><?= $label ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
+            <!-- Filters Section -->
+            <div class="card glass">
+                <div class="content">
+                    <div class="report-filters">
+                        <div class="form-field">
+                            <label for="report-type">Report Type</label>
+                            <select id="report-type" name="report_type" onchange="updateTimePeriodOptions(this.value)">
+                                <?php foreach ($reportTypes as $value => $label): ?>
+                                    <option value="<?= $value ?>" <?= $selectedReportType === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
 
 
-                <div class="form-field">
-                    <label for="time-period">Time Period</label>
-                    <select id="time-period" name="time_period" onchange="toggleDateRange(this.value)">
-                        <?php if ($selectedReportType === 'batch_expiry'): ?>
-                            <?php foreach ($expiryTimePeriods as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <?php foreach ($timePeriods as $value => $label): ?>
-                                <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
-                </div>
+                        <div class="form-field" id="time-period-container">
+                            <label for="time-period">Time Period</label>
+                            <select id="time-period" name="time_period" onchange="toggleDateRange(this.value)">
+                                <?php if ($selectedReportType === 'batch_expiry'): ?>
+                                    <?php foreach ($expiryTimePeriods as $value => $label): ?>
+                                        <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                <?php elseif (!in_array($selectedReportType, ['inventory', 'suppliers'])): ?>
+                                    <?php foreach ($timePeriods as $value => $label): ?>
+                                        <option value="<?= $value ?>" <?= $selectedTimePeriod === $value ? 'selected' : '' ?>><?= $label ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
 
                 
 
 <script>
-    // JavaScript to update time period options based on report type
-    function updateTimePeriodOptions(reportType) {
+function updateTimePeriodOptions(reportType) {
+        const timePeriodContainer = document.getElementById('time-period-container');
         const timePeriodSelect = document.getElementById('time-period');
-        const currentValue = timePeriodSelect.value; // Store current selection
-        timePeriodSelect.innerHTML = ''; // Clear existing options
+        const dateRangeContainer = document.getElementById('date-range-container');
+        const currentValue = timePeriodSelect.value;
+
+        if (reportType === 'inventory' || reportType === 'suppliers') {
+            timePeriodContainer.style.display = 'none';
+            dateRangeContainer.style.display = 'none';
+            timePeriodSelect.innerHTML = '';
+            return;
+        }
+
+        timePeriodContainer.style.display = 'block';
+        timePeriodSelect.innerHTML = '';
 
         let options = [];
         if (reportType === 'batch_expiry') {
@@ -74,7 +84,6 @@ use App\Services\RBACService;
             ];
         }
 
-        // Populate the dropdown with new options
         options.forEach(option => {
             const opt = document.createElement('option');
             opt.value = option.value;
@@ -82,18 +91,32 @@ use App\Services\RBACService;
             timePeriodSelect.appendChild(opt);
         });
 
-        // Restore the previous selection if it exists in the new options
         const validOption = options.find(opt => opt.value === currentValue);
         timePeriodSelect.value = validOption ? currentValue : options[0].value;
 
-        // Update date range visibility
         toggleDateRange(timePeriodSelect.value);
     }
 
-    // JavaScript to toggle date range visibility
     function toggleDateRange(timePeriod) {
         const dateRangeContainer = document.getElementById('date-range-container');
-        dateRangeContainer.style.display = timePeriod === 'custom' ? 'block' : 'none';
+        dateRangeContainer.style.display = timePeriod === 'custom' ? 'flex' : 'none';
+    }
+
+    function generateReport() {
+        const reportType = document.getElementById('report-type').value;
+        let url = `/reports?report_type=${reportType}`;
+
+        if (reportType !== 'inventory' && reportType !== 'suppliers') {
+            const timePeriod = document.getElementById('time-period').value;
+            url += `&time_period=${timePeriod}`;
+            if (timePeriod === 'custom') {
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+                url += `&start_date=${startDate}&end_date=${endDate}`;
+            }
+        }
+
+        window.location.href = url;
     }
 </script>
 
@@ -223,15 +246,15 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value"><?= number_format($categoryStats['catCount'])?></div>
+                                <div class="summary-value"><?= $categoryStats['category_count'] ?></div>
                                 <div class="summary-label">Categories</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value"><?= number_format($categoryStats['catTotalProducts'])?></div>
+                                <div class="summary-value"><?= $categoryStats['total_products'] ?></div>
                                 <div class="summary-label">Total Products</div>
                             </div>
                             <div class="summary-item">
-                                <div class="summary-value"><?= number_format($categoryStats['catAvgProducts'])?></div>
+                                <div class="summary-value"><?= $categoryStats['avg_products_per_category'] ?></div>
                                 <div class="summary-label">Avg Products/Category</div>
                             </div>
                         </div>
@@ -277,7 +300,7 @@ use App\Services\RBACService;
                         </div>
                         <div class="report-summary mt-md">
                             <div class="summary-item">
-                                <div class="summary-value">LKR 7489.30</div>
+                                <div class="summary-value"><?= count($categoryRevenueData) > 0 ? 'LKR ' . number_format(array_sum(array_column($categoryRevenueData, 'revenue')) / count($categoryRevenueData), 2) : 'LKR 0.00' ?></div>
                                 <div class="summary-label">Avg Revenue/Category</div>
                             </div>
                         </div>
@@ -396,6 +419,11 @@ use App\Services\RBACService;
                                             <td><?= $order['total'] ?></td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No orders found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -441,14 +469,19 @@ use App\Services\RBACService;
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No products found to be expried in the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                         <div class="report-actions">
-                            <button class="btn btn-secondary" onclick="markForDiscount()">
+                            <!--<button class="btn btn-secondary" onclick="markForDiscount()">
                                 <span class="icon">sell</span>
                                 Mark for Discount
-                            </button>
+                            </button>-->
                             <div class="export-options">
                                 <button class="btn btn-secondary" onclick="viewAllExpiryAlerts()">
                                     <span class="icon">notification_important</span>
@@ -497,6 +530,11 @@ use App\Services\RBACService;
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
+                                    <?php if (empty($topSellingProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center;">No products found for the selected time period.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -515,30 +553,7 @@ use App\Services\RBACService;
 </div>
 
 <script>
-    // Toggle custom date range based on selected time period
-    function toggleDateRange(value) {
-        const dateRangeContainer = document.getElementById('date-range-container');
-        if (value === 'custom') {
-            dateRangeContainer.style.display = 'flex';
-        } else {
-            dateRangeContainer.style.display = 'none';
-        }
-    }
-
-    // Generate report based on selected filters
-    function generateReport() {
-        const reportType = document.getElementById('report-type').value;
-        const timePeriod = document.getElementById('time-period').value;
-        let url = `/reports?report_type=${reportType}&time_period=${timePeriod}`;
-        
-        if (timePeriod === 'custom') {
-            const startDate = document.getElementById('start-date').value;
-            const endDate = document.getElementById('end-date').value;
-            url += `&start_date=${startDate}&end_date=${endDate}`;
-        }
-        
-        window.location.href = url;
-    }
+   
 
     // View all products function
     function viewAllProducts() {
@@ -590,9 +605,6 @@ use App\Services\RBACService;
         // Only load charts if Chart.js is available
         if (typeof Chart !== 'undefined') {
             initializeCharts();
-        } else {
-            // If Chart.js isn't loaded, load it dynamically
-            loadChartJS();
         }
     });
 
@@ -604,6 +616,34 @@ use App\Services\RBACService;
         drawCategoryChart();
         drawSupplierChart();
         drawSalesByCategoryChart();
+    }
+
+    // Function to set up chart placeholders if drawing fails
+    function setupChartPlaceholders() {
+        const placeholders = document.querySelectorAll('.chart-placeholder');
+        placeholders.forEach(placeholder => {
+            // Style placeholder
+            placeholder.style.backgroundColor = '#f9fafb';
+            placeholder.style.border = '1px dashed #d1d5db';
+            placeholder.style.borderRadius = '4px';
+            placeholder.style.display = 'flex';
+            placeholder.style.justifyContent = 'center';
+            placeholder.style.alignItems = 'center';
+            placeholder.style.height = '200px';
+            placeholder.style.cursor = 'pointer';
+            
+            // Add placeholder text
+            const text = document.createElement('div');
+            text.textContent = 'Chart Placeholder - Click to load';
+            text.style.color = '#6b7280';
+            text.style.fontSize = '14px';
+            placeholder.appendChild(text);
+            
+            // Add click event
+            placeholder.addEventListener('click', function() {
+                alert('Charts would be loaded here in the final implementation');
+            });
+        });
     }
 
     // Draw line chart for sales trend
@@ -784,6 +824,7 @@ use App\Services\RBACService;
         
         return { cp1x, cp1y, cp2x, cp2y };
     }
+
     // Draw doughnut chart for inventory status
     function drawInventoryChart() {
         const canvas = document.getElementById('inventoryChart');
@@ -1348,34 +1389,6 @@ use App\Services\RBACService;
         ctx.font = '16px Arial'; // Increased font size
         ctx.fillText(yLabel, 0, 0);
         ctx.restore();
-    }
-
-    // Function to set up chart placeholders if drawing fails
-    function setupChartPlaceholders() {
-        const placeholders = document.querySelectorAll('.chart-placeholder');
-        placeholders.forEach(placeholder => {
-            // Style placeholder
-            placeholder.style.backgroundColor = '#f9fafb';
-            placeholder.style.border = '1px dashed #d1d5db';
-            placeholder.style.borderRadius = '4px';
-            placeholder.style.display = 'flex';
-            placeholder.style.justifyContent = 'center';
-            placeholder.style.alignItems = 'center';
-            placeholder.style.height = '200px';
-            placeholder.style.cursor = 'pointer';
-            
-            // Add placeholder text
-            const text = document.createElement('div');
-            text.textContent = 'Chart Placeholder - Click to load';
-            text.style.color = '#6b7280';
-            text.style.fontSize = '14px';
-            placeholder.appendChild(text);
-            
-            // Add click event
-            placeholder.addEventListener('click', function() {
-                alert('Charts would be loaded here in the final implementation');
-            });
-        });
     }
 
     // Function to dynamically load charts

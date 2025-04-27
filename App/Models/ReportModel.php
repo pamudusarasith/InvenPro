@@ -328,15 +328,23 @@ class ReportModel extends Model
     {
         $query = "
             SELECT 
-                SUM(CASE WHEN b.current_quantity > bp.reorder_level THEN 1 ELSE 0 END) AS in_stock,
-                SUM(CASE WHEN b.current_quantity <= bp.reorder_level AND b.current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
-                SUM(CASE WHEN b.current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock,
-                SUM(b.current_quantity * b.unit_cost) AS total_value
-            FROM product_batch b
-            JOIN product p ON b.product_id = p.id
-            JOIN branch_product bp ON p.id = bp.product_id AND b.branch_id = bp.branch_id
-            WHERE b.deleted_at IS NULL
-            AND p.deleted_at IS NULL
+                SUM(CASE WHEN total_quantity > max_reorder_level THEN 1 ELSE 0 END) AS in_stock,
+                SUM(CASE WHEN total_quantity <= max_reorder_level AND total_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+                SUM(CASE WHEN total_quantity = 0 OR total_quantity IS NULL THEN 1 ELSE 0 END) AS out_of_stock,
+                SUM(total_value) AS total_value
+            FROM (
+                SELECT 
+                    p.id AS product_id,
+                    COALESCE(SUM(b.current_quantity), 0) AS total_quantity,
+                    MAX(CASE WHEN bp.reorder_level >= 0 THEN bp.reorder_level ELSE 0 END) AS max_reorder_level,
+                    COALESCE(SUM(b.current_quantity * b.unit_cost), 0) AS total_value
+                FROM product p
+                LEFT JOIN branch_product bp ON p.id = bp.product_id
+                LEFT JOIN product_batch b ON p.id = b.product_id AND b.branch_id = bp.branch_id
+                    AND b.deleted_at IS NULL
+                WHERE p.deleted_at IS NULL
+                GROUP BY p.id
+            ) AS product_summary
         ";
 
         $results = self::$db->query($query)->fetchAll();
@@ -488,14 +496,21 @@ class ReportModel extends Model
     {
         $query = "
             SELECT 
-                SUM(CASE WHEN b.current_quantity > bp.reorder_level THEN 1 ELSE 0 END) AS in_stock,
-                SUM(CASE WHEN b.current_quantity <= bp.reorder_level AND b.current_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
-                SUM(CASE WHEN b.current_quantity = 0 THEN 1 ELSE 0 END) AS out_of_stock
-            FROM product_batch b
-            JOIN product p ON b.product_id = p.id
-            JOIN branch_product bp ON p.id = bp.product_id AND b.branch_id = bp.branch_id
-            WHERE b.deleted_at IS NULL
-            AND p.deleted_at IS NULL
+                SUM(CASE WHEN total_quantity > max_reorder_level THEN 1 ELSE 0 END) AS in_stock,
+                SUM(CASE WHEN total_quantity <= max_reorder_level AND total_quantity > 0 THEN 1 ELSE 0 END) AS low_stock,
+                SUM(CASE WHEN total_quantity = 0 OR total_quantity IS NULL THEN 1 ELSE 0 END) AS out_of_stock
+            FROM (
+                SELECT 
+                    p.id AS product_id,
+                    COALESCE(SUM(b.current_quantity), 0) AS total_quantity,
+                    MAX(CASE WHEN bp.reorder_level >= 0 THEN bp.reorder_level ELSE 0 END) AS max_reorder_level
+                FROM product p
+                LEFT JOIN branch_product bp ON p.id = bp.product_id
+                LEFT JOIN product_batch b ON p.id = b.product_id AND b.branch_id = bp.branch_id
+                    AND b.deleted_at IS NULL
+                WHERE p.deleted_at IS NULL
+                GROUP BY p.id
+            ) AS product_summary
         ";
 
         $results = self::$db->query($query)->fetchAll();
