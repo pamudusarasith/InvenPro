@@ -34,7 +34,7 @@ use App\Services\RBACService;
                                 <span class="icon">more_vert</span>
                             </button>
                             <div id="cart-menu" class="dropdown-menu">
-                                <button id="cart-clear-btn" class="dropdown-item danger" onclick="pos.clearCart()">
+                                <button id="cart-clear-btn" class="dropdown-item danger" onclick="pos.clearCartState(event)">
                                     <span class="icon">remove_shopping_cart</span>
                                     Clear Cart
                                 </button>

@@ -63,7 +63,7 @@ class PointOfSaleManager {
     this.renderCart();
   }
 
-  clearCartState() {
+  clearCartState(e) {
     this.cartItems.clear();
     this.selectedCustomer = null;
     this.calculatedSubtotal = 0;
@@ -72,6 +72,7 @@ class PointOfSaleManager {
     sessionStorage.removeItem("cart");
     sessionStorage.removeItem("customer");
     this.renderCart();
+    e.target.closest(".dropdown").classList.remove("active");
   }
 
   createProductCard(product) {
