@@ -12,22 +12,28 @@ class BranchController extends Controller
 
   public function index(): void
   {
-    $page = $_GET['p'] ?? 1;
-    $itemsPerPage = $_GET['ipp'] ?? 10;
-    $page = max(1, (int) ($_GET['p'] ?? 1));
-    $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
-    $branchModel = new BranchModel();
-    $branches = $branchModel->getBranches($page, $itemsPerPage);
-    
-    
-
-    View::renderTemplate('Branches', [
-      'title' => 'Manage Branches',
-      'branches' => $branches,
-      'page' => $page,
-      'itemsPerPage' => $itemsPerPage,
-    ]);
-      
+      $page = $_GET['p'] ?? 1;
+      $itemsPerPage = $_GET['ipp'] ?? 10;
+      $page = max(1, (int) ($_GET['p'] ?? 1));
+      $itemsPerPage = (int) ($_GET['ipp'] ?? 10);
+      $search = $_GET['search'] ?? '';
+      $status = $_GET['status'] ?? '';
+  
+      $branchModel = new BranchModel();
+      $branches = $branchModel->getBranches($page, $itemsPerPage, $search, $status);
+      $totalRecords = $branchModel->getBranchesCount($search, $status);
+      $totalPages = ceil($totalRecords / $itemsPerPage);
+  
+      View::renderTemplate('Branches', [
+          'title' => 'Branches',
+          'branches' => $branches,
+          'page' => $page,
+          'itemsPerPage' => $itemsPerPage,
+          'totalPages' => $totalPages,
+          'totalRecords' => $totalRecords,
+          'search' => $search,
+          'status' => $status
+      ]);
   }
 
   public function createBranch(): void
@@ -59,6 +65,40 @@ class BranchController extends Controller
       $_SESSION['message'] = 'Branch updated successfully';
       $_SESSION['message_type'] = 'success';
       View::redirect('/branches');
+  }
+
+
+  public function updateDeletedAt(array $params)
+  {
+      $branchModel = new BranchModel();
+      $deletedAt = $params['deleted_at'] ?? null;
+  
+      if (!$deletedAt) {
+          $_SESSION['message'] = 'Invalid data provided for branch status update.';
+          $_SESSION['message_type'] = 'error';
+          View::redirect('/branches');
+      }
+  
+      $branchModel->updateDeletedAt($params['id'], $deletedAt);
+      $_SESSION['message'] = $deletedAt ? 'Branch deactivated successfully' : 'Branch restored successfully';
+      $_SESSION['message_type'] = 'success';
+      View::redirect('/branches');
+  }
+
+
+  public function search(): void
+  {
+      $query = $_GET['q'] ?? ''; // Search query
+      $page = max(1, (int) ($_GET['p'] ?? 1)); // Current page
+      $itemsPerPage = (int) ($_GET['ipp'] ?? 10); // Items per page
+
+      $branchModel = new BranchModel();
+      $branches = $branchModel->searchBranches($query, $page, $itemsPerPage); // Fetch filtered branches
+
+      self::sendJSON([
+          'success' => true,
+          'data' => $branches,
+      ]);
   }
   
 }

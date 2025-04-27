@@ -39,6 +39,8 @@ return [
     '/api/products/search' => 'App\Controllers\ProductsController::searchProducts',
     '/batch/{id}/delete' => 'App\Controllers\BatchController::deleteBatch',
     '/categories/{id}/delete' => 'App\Controllers\CategoryController::deleteCategory',
+    '/products/{id}/placeorder' => 'App\Controllers\ProductsController::placeOrder',
+
     '/branches' => 'App\Controllers\BranchController::index',
 
   ],
@@ -78,3 +80,4 @@ return [
     '/branches/{id}/delete' => 'App\Controllers\BranchController::deleteBranch',    
   ],
 ];
+
