@@ -15,6 +15,7 @@
             ['url' => '/suppliers', 'icon' => 'local_shipping', 'label' => 'Suppliers', 'permission' => 'manage_suppliers'],
             ['url' => '/orders', 'icon' => 'orders', 'label' => 'Purchase Orders', 'permission' => 'manage_orders'],
             ['url' => '/discounts', 'icon' => 'percent', 'label' => 'Discounts', 'permission' => 'manage_discounts'],
+            ['url' => '/sales', 'icon' => 'sell', 'label' => 'Sales', 'permission' => 'manage_sales'],
             ['url' => '/reports', 'icon' => 'bar_chart', 'label' => 'Reports', 'permission' => 'manage_reports'],
         ];
 

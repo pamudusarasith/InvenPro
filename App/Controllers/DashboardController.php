@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $customerModel = new CustomerModel();
         $userModel = new UserModel();
 
-        $sales = $saleModel->getSalesToday();
+        $sales = $saleModel->getSalesCardData();
         $salesToday['today_sales'] = $sales['today_sales'] ?? 0;
         $salesToday['yesterday_sales'] = $sales['yesterday_sales'] ?? 0;
         $salesToday['trendToday'] = ($salesToday['yesterday_sales'] == 0) ? 0 : (($salesToday['today_sales'] - $salesToday['yesterday_sales']) * 100 / $salesToday['yesterday_sales']); // Avoid division by zero
