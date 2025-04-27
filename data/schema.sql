@@ -54,7 +54,6 @@ CREATE TABLE `category` (
   `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `customer`;
 CREATE TABLE `customer` (
   `id` int(11) NOT NULL,
   `first_name` varchar(50) NOT NULL,
@@ -154,7 +153,6 @@ CREATE TABLE `notification` (
   `expires_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `permission`;
 CREATE TABLE `permission` (
   `id` int(11) NOT NULL,
   `permission_name` varchar(50) NOT NULL,
@@ -450,6 +448,22 @@ CREATE TRIGGER `purchase_order_soft_delete` AFTER UPDATE ON `purchase_order` FOR
 END
 $$
 DELIMITER ;
+
+CREATE TABLE `purchase_order_action` (
+  `id` int(11) NOT NULL,
+  `po_id` int(11) NOT NULL,
+  `action` enum('create','update','approve','cancel','receive','delete','complete') NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `purchase_order_action` (
+  `id` int(11) NOT NULL,
+  `po_id` int(11) NOT NULL,
+  `action` enum('create','update','approve','cancel','receive','delete','complete') NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 DROP TABLE IF EXISTS `purchase_order_action`;
 CREATE TABLE `purchase_order_action` (

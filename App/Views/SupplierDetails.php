@@ -94,36 +94,36 @@ function getStatusBadgeClass($status)
       </div>
 
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="icon">inventory</span>
-            <span class="stat-label">Active Products</span>
+          <div class="stat-card">
+              <div class="stat-header">
+                  <span class="icon">inventory</span>
+                  <span class="stat-label">Active Products</span>
+              </div>
+              <div class="stat-value"><?= $stats['active_products'] ?? 0 ?></div>
           </div>
-          <div class="stat-value"><?= $stats['active_products'] ?? 0 ?></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="icon">shopping_cart</span>
-            <span class="stat-label">Total Orders</span>
+          <div class="stat-card">
+              <div class="stat-header">
+                  <span class="icon">shopping_cart</span>
+                  <span class="stat-label">Total Orders</span>
+              </div>
+              <div class="stat-value"><?= $stats['total_orders'] ?? 0 ?></div>
           </div>
-          <div class="stat-value"><?= $stats['total_orders'] ?? 0 ?></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="icon">payments</span>
-            <span class="stat-label">Total Spend</span>
+          <div class="stat-card">
+              <div class="stat-header">
+                  <span class="icon">payments</span>
+                  <span class="stat-label">Total Spend</span>
+              </div>
+              <div class="stat-value">Rs.<?= number_format($stats['total_spend'] ?? 0, 2) ?></div>
           </div>
-          <div class="stat-value">$<?= number_format($stats['total_spend'] ?? 0, 2) ?></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-header">
-            <span class="icon">schedule</span>
-            <span class="stat-label">Last Order</span>
+          <div class="stat-card">
+              <div class="stat-header">
+                  <span class="icon">schedule</span>
+                  <span class="stat-label">Last Order</span>
+              </div>
+              <div class="stat-value">
+                  <?= $stats['last_order'] ? date('M d, Y', strtotime($stats['last_order'])) : 'Never' ?>
+              </div>
           </div>
-          <div class="stat-value">
-            <?= $stats['last_order'] ? date('M d, Y', strtotime($stats['last_order'])) : 'Never' ?>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -131,7 +131,7 @@ function getStatusBadgeClass($status)
       <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
       <button class="tab-btn" onclick="switchTab('products')">Products</button>
       <button class="tab-btn" onclick="switchTab('orders')">Purchase Orders</button>
-      <button class="tab-btn" onclick="switchTab('returns')">Returns</button>
+      <!-- <button class="tab-btn" onclick="switchTab('returns')">Returns</button> -->
     </div>
 
     <form id="details-form" method="POST" action="/suppliers/<?= $supplier['id'] ?>/update">

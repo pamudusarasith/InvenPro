@@ -306,5 +306,48 @@ public function deleteAssignedProduct(int $productId, int $supplierId): void
 }
 
 
+public function getSupplierStats(int $supplierId): array
+{
+    // Fetch active products count
+    $sqlActiveProducts = '
+        SELECT COUNT(*) AS active_products
+        FROM supplier_product sp
+        INNER JOIN product p ON sp.product_id = p.id
+        WHERE sp.supplier_id = ? AND p.deleted_at IS NULL
+    ';
+    $activeProducts = self::$db->query($sqlActiveProducts, [$supplierId])->fetchColumn();
+
+    // Fetch total orders count
+    $sqlTotalOrders = '
+        SELECT COUNT(*) AS total_orders
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $totalOrders = self::$db->query($sqlTotalOrders, [$supplierId])->fetchColumn();
+
+    // Fetch total spend
+    $sqlTotalSpend = '
+        SELECT SUM(total_amount) AS total_spend
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $totalSpend = self::$db->query($sqlTotalSpend, [$supplierId])->fetchColumn();
+
+    // Fetch last order date
+    $sqlLastOrder = '
+        SELECT MAX(order_date) AS last_order
+        FROM purchase_order
+        WHERE supplier_id = ? AND deleted_at IS NULL
+    ';
+    $lastOrder = self::$db->query($sqlLastOrder, [$supplierId])->fetchColumn();
+
+    return [
+        'active_products' => (int) $activeProducts,
+        'total_orders' => (int) $totalOrders,
+        'total_spend' => (float) $totalSpend,
+        'last_order' => $lastOrder ? date('Y-m-d', strtotime($lastOrder)) : null,
+    ];
+}
+
 }
 

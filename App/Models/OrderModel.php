@@ -123,7 +123,8 @@ class OrderModel extends Model
           po.status,
           po.total_amount,
           po.notes,
-          u.display_name AS created_by
+          po.created_by,
+          u.display_name AS created_by_name
         FROM purchase_order po
         INNER JOIN supplier s ON po.supplier_id = s.id
         INNER JOIN user u ON po.created_by = u.id
@@ -429,5 +430,17 @@ class OrderModel extends Model
       VALUES (?, ?, ?)
     ';
     self::$db->query($sql, [$orderId, $action, $_SESSION['user']['id']]);
+  }
+
+  public function getOrderBranchAddress(int $orderId): ?string
+  {
+    $sql = '
+      SELECT b.address
+      FROM purchase_order po
+      INNER JOIN branch b ON po.branch_id = b.id
+      WHERE po.id = ?
+    ';
+    $stmt = self::$db->query($sql, [$orderId]);
+    return $stmt->fetchColumn();
   }
 }

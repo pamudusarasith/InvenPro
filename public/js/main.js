@@ -35,9 +35,11 @@ class Dropdown {
     dropdowns.forEach((d) => new Dropdown(d));
 
     // Close all dropdowns when clicking outside
-    document.addEventListener("click", () => {
+    document.addEventListener("click", (e) => {
       document.querySelectorAll(".dropdown.active").forEach((d) => {
-        d.classList.remove("active");
+        if (e.target !== d && !d.contains(e.target)) {
+          d.classList.remove("active");
+        }
       });
     });
   }

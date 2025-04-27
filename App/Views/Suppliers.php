@@ -170,7 +170,7 @@ $branches = $branches ?? [];
             <label for="branch">Branch *</label>
             <select id="branch" name="branch_id" required>
               <option value="">Select Branch</option>
-              <?php foreach ($branches as $branch): ?>
+              <?php foreach ($brachForCreateSupplier as $branch): ?>
                 <option value="<?= $branch['id'] ?>"><?= htmlspecialchars($branch['branch_name']) ?></option>
               <?php endforeach; ?>
             </select>
