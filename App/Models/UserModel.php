@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Core\Model;
 use App\Models\AuditLogModel;
+use Error;
 
 class UserModel extends Model
 {
@@ -65,11 +66,13 @@ class UserModel extends Model
         r.role_name,
         b.branch_name,
         u.is_locked,
-        u.last_login
+        u.last_login,
+        u.successfull_login_attempts as login_count
       FROM user u
       LEFT JOIN role r ON u.role_id = r.id
       LEFT JOIN branch b ON u.branch_id = b.id
       WHERE u.deleted_at IS NULL
+      ORDER BY u.successfull_login_attempts DESC, u.created_at ASC
     ';
     $params = [];
 
@@ -94,7 +97,7 @@ class UserModel extends Model
       $params[] = $status === 'locked' ? 1 : 0;
     }
 
-    $sql .= ' ORDER BY u.id LIMIT ? OFFSET ?';
+    $sql .= ' LIMIT ? OFFSET ?';
     $params[] = $itemsPerPage;
     $params[] = $offset;
 
@@ -126,7 +129,8 @@ class UserModel extends Model
         u.failed_login_attempts,
         u.last_login,
         u.last_login_ip,
-        u.created_at
+        u.created_at,
+        u.successfull_login_attempts as login_count
       FROM user u
       LEFT JOIN role r ON u.role_id = r.id
       LEFT JOIN branch b ON u.branch_id = b.id
@@ -245,8 +249,9 @@ class UserModel extends Model
 
   public function recordLastLogin(int $id): void
   {
+    error_log('recordLastLogin called with id: ' . $id);
     $ip = $_SERVER['REMOTE_ADDR'];
-    $sql = 'UPDATE user SET last_login = NOW(), last_login_ip = ? WHERE id = ?';
+    $sql = 'UPDATE user SET successfull_login_attempts = successfull_login_attempts + 1, last_login = NOW(), last_login_ip = ? WHERE id = ?';
     self::$db->query($sql, [$ip, $id]);
 
     $auditLogModel = new AuditLogModel();

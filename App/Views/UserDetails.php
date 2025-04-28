@@ -56,13 +56,13 @@ $activities = $activities ?? [];
                     <?php
                     
                     ?>
-                    <?php if (RBACService::hasPermission('user_update') || RBACService::hasPermission('user_delete')): ?>
+                    <?php if ((RBACService::hasPermission('user_update') || RBACService::hasPermission('user_delete')) || isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'])): ?>
                         <div class="dropdown">
                             <button class="dropdown-trigger icon-btn" title="More options">
                                 <span class="icon">more_vert</span>
                             </button>
                             <div class="dropdown-menu">
-                                <?php if (RBACService::hasPermission('user_update')): ?>
+                                <?php if (RBACService::hasPermission('user_update') || (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id']))): ?>
                                     <button class="dropdown-item" onclick="enableEditing()">
                                         <span class="icon">edit</span>
                                         Edit Profile
@@ -110,6 +110,13 @@ $activities = $activities ?? [];
                         <span class="stat-label">Failed Attempts</span>
                     </div>
                     <div class="stat-value"><?= $user['failed_login_attempts'] ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="icon">check_circle</span>
+                        <span class="stat-label">Successful logins</span>
+                    </div>
+                    <div class="stat-value"><?= $user['login_count'] ?></div>
                 </div>
             </div>
         </div>
@@ -165,7 +172,7 @@ $activities = $activities ?? [];
                             <div class="security-info">
                                 <h4>Password</h4>
                             </div>
-                            <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
+                            <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || RBACService::hasPermission('user_reset_password'))): ?>
                                 <button type="button" class="btn btn-secondary" onclick="openPasswordResetDialog()">Reset Password</button>
                             <?php else: ?>
                                 <button class="btn btn-secondary" disabled>Reset Password</button>
@@ -245,7 +252,7 @@ $activities = $activities ?? [];
     </div>
 </div>
 
-<?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
+<?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] ||  RBACService::hasPermission('user_reset_password'))): ?>
     <dialog id="passwordResetDialog" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -257,10 +264,12 @@ $activities = $activities ?? [];
 
             <form id="passwordResetForm" method="POST" action="/users/<?= $user['id'] ?>/reset-password" onsubmit="validateFrom(event);">
                 <div class="form-grid">
+                    <?php if ($_SESSION['user']['id'] == $user['id']): ?>
                     <div class="form-field span-1">
                         <label for="new_password">Old Password</label>
                         <input type="password" id="old_password" name="old_password" required>
                     </div>
+                    <?php endif; ?>
                     <div class="form-field span-1">
                         <label for="new_password">New Password</label>
                         <input type="password" id="new_password" name="new_password" required>
@@ -352,7 +361,7 @@ $activities = $activities ?? [];
         form.submit();
     }
 
-    <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
+    <?php if ((isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] ) || RBACService::hasPermission('user_reset_password'))): ?>
 
         function openPasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
@@ -387,26 +396,47 @@ $activities = $activities ?? [];
                 field.querySelector('.error-message')?.remove();
             });
 
-            if (oldPassword.value.trim() === '') {
-                showError(oldPassword, 'Old password is required!');
-                return;
-            }
+            <?php if (RBACService::hasPermission('user_reset_password')): ?>
+                if (newPassword.value.trim() === '') {
+                    showError(newPassword, 'New password is required!');
+                    return;
+                } else if (newPassword.value.length < 8) {
+                    showError(newPassword, 'Password must be at least 8 characters long!');
+                    return;
+                }
 
-            if (newPassword.value.trim() === '') {
-                showError(newPassword, 'New password is required!');
-                return;
-            } else if (newPassword.value.length < 8) {
-                showError(newPassword, 'Password must be at least 8 characters long!');
-                return;
-            }
+                if (confirmPassword.value.trim() === '') {
+                    showError(confirmPassword, 'Confirm password is required!');
+                    return;
+                } else if (confirmPassword.value !== newPassword.value) {
+                    showError(confirmPassword, 'Passwords do not match!');
+                    return;
+                }
+            <?php else: ?>
+            
+                if (oldPassword.value.trim() === '') {
+                    showError(oldPassword, 'Old password is required!');
+                    return;
+                }
 
-            if (confirmPassword.value.trim() === '') {
-                showError(confirmPassword, 'Confirm password is required!');
-                return;
-            } else if (confirmPassword.value !== newPassword.value) {
-                showError(confirmPassword, 'Passwords do not match!');
-                return;
-            }
+                if (newPassword.value.trim() === '') {
+                    showError(newPassword, 'New password is required!');
+                    return;
+                } else if (newPassword.value.length < 8) {
+                    showError(newPassword, 'Password must be at least 8 characters long!');
+                    return;
+                }
+
+                if (confirmPassword.value.trim() === '') {
+                    showError(confirmPassword, 'Confirm password is required!');
+                    return;
+                } else if (confirmPassword.value !== newPassword.value) {
+                    showError(confirmPassword, 'Passwords do not match!');
+                    return;
+                }
+            <?php endif; ?>
+            submitButton.disabled = true;
+            form.submit();
         }
 
     <?php endif; ?>

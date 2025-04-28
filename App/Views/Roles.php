@@ -39,11 +39,7 @@ use App\Services\RBACService;
           <p class=""><?= htmlspecialchars($role['description'] ?? 'No description') ?></p>
           <div class="role-permission-count">
             <span class="icon">verified_user</span>
-            <?php if ($roleId === 1): ?>
-              All permissions (<?= $role['permission_count'] ?? 0 ?>)
-            <?php else: ?>
               <?= $role['permission_count'] ?? 0 ?> permissions
-            <?php endif; ?>
           </div>
           <div class="role-chips">
             <?php foreach ($role['permission_categories'] ?? [] as $catId => $category): ?>

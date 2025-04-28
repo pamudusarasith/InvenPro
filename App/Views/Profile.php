@@ -104,6 +104,13 @@ $activities = $activities ?? [];
                     </div>
                     <div class="stat-value"><?= $user['failed_login_attempts'] ?></div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="icon">check_circle</span>
+                        <span class="stat-label">Successful logins</span>
+                    </div>
+                    <div class="stat-value"><?= $user['login_count'] ?></div>
+                </div>
             </div>
         </div>
 
