@@ -365,14 +365,12 @@ class ReportController extends Controller
                     'end' => date('Y-m-d', strtotime('-1 year', $end))
                 ];
             case 'custom':
-                // For custom range, use the same duration before the start date
                 return [
-                    'start' => date('Y-m-d', $start - $duration - 86400), // Subtract 1 day to avoid overlap
+                    'start' => date('Y-m-d', $start - $duration - 86400),
                     'end' => date('Y-m-d', $start - 86400)
                 ];
             case 'next_week':
             case 'next_month':
-                // For future periods, compare with the previous equivalent period
                 return [
                     'start' => date('Y-m-d', strtotime('-1 month', $start)),
                     'end' => date('Y-m-d', strtotime('-1 month', $end))

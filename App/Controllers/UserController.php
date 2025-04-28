@@ -69,9 +69,6 @@ class UserController extends Controller
     $auditLogModel = new AuditLogModel();
     $activities = $auditLogModel->getAuditLogsById($user['id']);
 
-    //error_log(print_r($user, true)); // Debugging line
-    //error_log(print_r($activities, true)); // Debugging line
-
     $branchModal = new BranchModel();
     $branches = $branchModal->getAllBranches();
 
@@ -151,7 +148,7 @@ class UserController extends Controller
 
 
     $_SESSION['user']['password'] = password_hash($_POST['password'], PASSWORD_BCRYPT);
-    $_SESSION['user']['is_locked'] = 0; // Reset the lock status
+    $_SESSION['user']['is_locked'] = 0;
 
     $_SESSION['message'] = 'Password updated successfully';
     $_SESSION['message_type'] = 'success';
@@ -186,14 +183,12 @@ class UserController extends Controller
       exit;
     }
 
-    // Generate a random password for the new user
     $_POST['password'] = $this->generateRandomPassword();
 
     $userModel = new UserModel();
     $userId = $userModel->createUser($_POST);
 
     if ($userId) {
-      // Send email with credentials
       $this->sendNewAccountEmail($_POST['email'], $_POST['password'], $_POST['role_id']);
 
       $_SESSION['message'] = 'User created successfully. Login credentials have been sent to their email.';
@@ -222,12 +217,10 @@ class UserController extends Controller
     $characters = $lowercase . $uppercase . $numbers . $specialChars;
     $password = '';
 
-    // Fill the password
     for ($i = 0; $i < $length; $i++) {
       $password .= $characters[random_int(0, strlen($characters) - 1)];
     }
 
-    // Shuffle the password to make it more random
     return str_shuffle($password);
   }
 
@@ -242,12 +235,10 @@ class UserController extends Controller
   private function sendNewAccountEmail(string $email, string $password, int $roleId): bool
   {
     try {
-      // Get role name from role ID
       $roleModel = new RoleModel();
       $role = $roleModel->getRoleById($roleId);
       $roleName = $role ? $role['role_name'] : 'User';
 
-      // Prepare data for the template
       $data = [
         'email' => $email,
         'password' => $password,
@@ -255,10 +246,8 @@ class UserController extends Controller
         'login_url' => 'http://' . $_SERVER['HTTP_HOST']
       ];
 
-      // Template path
       $templatePath = __DIR__ . '/../Views/emails/NewAccount.php';
 
-      // Send email using EmailService with PHP template
       $emailService = \App\Services\EmailService::getInstance();
       return $emailService->sendPhpTemplate(
         $email,

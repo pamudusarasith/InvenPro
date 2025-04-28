@@ -604,13 +604,11 @@ class ReportModel extends Model
             $cost = (float)$row['cost'];
         }
 
-        // Calculate profit margin: (revenue - cost) / revenue * 100
         return $revenue > 0 ? (($revenue - $cost) / $revenue) * 100 : 0.0;
     }
 
     public function getTopProductCombinations(string $startDate, string $endDate, int $limit = 10): array
     {
-        // Query to find product pairs and their frequency
         $query = "
             SELECT 
                 p1.product_name AS product1,
@@ -637,10 +635,8 @@ class ReportModel extends Model
             ':limit' => $limit
         ];
 
-        // Execute query
         $results = self::$db->query($query, $params)->fetchAll();
 
-        // Format results
         $combinations = [];
         foreach ($results as $row) {
             $combinations[] = [

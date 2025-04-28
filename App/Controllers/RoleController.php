@@ -37,9 +37,7 @@ class RoleController extends Controller
 		$permissionCategories = $this->permissionModel->getAllPermissionCategories();
 		$allPermissionsByCategory = $this->permissionModel->getAllPermissionsByCategory();
 
-		// error_log("Roles: " . print_r($roles, true)); // Log the roles for debugging
-		// error_log("Permission Categories: " . print_r($permissionCategories, true)); // Log the permission categories for debugging
-		// error_log("All Permissions by Category: " . print_r($allPermissionsByCategory, true)); // Log the permissions for debugging
+		
 
 		View::renderTemplate("Roles", [
 			"title" => "Roles",

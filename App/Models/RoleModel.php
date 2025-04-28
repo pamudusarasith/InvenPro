@@ -219,22 +219,20 @@ class RoleModel extends Model
         self::$db->beginTransaction();
 
         try {
-            // Fetch the current role details
             $currentRole = $this->getRoleById($data['role_id']);
             if (!$currentRole) {
                 self::$db->rollBack();
-                return false; // Role does not exist
+                return false; 
             }
 
             if ($currentRole['role_name'] !== $data['role_name']) {
                 $existingRole = $this->getRoleByName($data['role_name']);
                 if ($existingRole) {
                     self::$db->rollBack();
-                    return false; // Role name already exists
+                    return false;
                 }
             }
 
-            // Update role details
             $sql = 'UPDATE role SET role_name = ?, description = ? WHERE id = ?';
             $result = self::$db->query($sql, [
                 $data['role_name'],
@@ -251,7 +249,6 @@ class RoleModel extends Model
             $permissionsToAdd = $data['addedPermissions'] ?? [];
             $permissionsToRemove = $data['removedPermissions'] ?? [];
 
-            // Add new permissions
             if (!empty($permissionsToAdd)) {
                 $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
                 $insertParts = [];
@@ -270,7 +267,6 @@ class RoleModel extends Model
                 }
             }
 
-            // Remove permissions
             if (!empty($permissionsToRemove)) {
                 $placeholders = implode(',', array_fill(0, count($permissionsToRemove), '?'));
                 $deleteSql = "DELETE FROM role_permission WHERE role_id = ? AND permission_id IN ($placeholders)";
@@ -282,12 +278,10 @@ class RoleModel extends Model
                 }
             }
 
-            // Commit transaction
             self::$db->commit();
 
             return true;
         } catch (\Exception $e) {
-            // Rollback transaction on error
             self::$db->rollBack();
             error_log("Error updating role: " . $e->getMessage());
             return false;
@@ -308,7 +302,6 @@ class RoleModel extends Model
         self::$db->beginTransaction();
 
         try {
-            // Delete associated permissions
             $deletePermissionsSql = 'DELETE FROM role_permission WHERE role_id = ?';
             $deletePermissionsResult = self::$db->query($deletePermissionsSql, [$roleId]);
 
@@ -317,8 +310,6 @@ class RoleModel extends Model
                 return false;
             }
 
-            // Delete the role
-            // Check if assigned users are soft delete
             $activeUserCount= RoleModel::getUserCountByRole($roleId);
 
             if ($activeUserCount > 0) {
