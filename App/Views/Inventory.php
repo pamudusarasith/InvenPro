@@ -2,7 +2,7 @@
 
 use App\Services\RBACService;
 
-$canAddProduct = RBACService::hasPermission('add_product');
+$canAddProduct = RBACService::hasPermission('product_create');
 
 ?>
 
@@ -332,7 +332,7 @@ $canAddProduct = RBACService::hasPermission('add_product');
     </div>
 </div>
 
-<?php if (RBACService::hasPermission('add_inventory')): ?>
+<?php if (RBACService::hasPermission('product_create')): ?>
     <dialog id="addProductModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
