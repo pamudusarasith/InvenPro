@@ -35,7 +35,7 @@ class SalesController extends Controller
         $endDate = $dateRange['end'];
 
         // Validate custom date range
-        if ($period === 'custom' && !$this->validateDateRange($startDate, $endDate)) {
+        if (!$this->validateDateRange($startDate, $endDate)) {
             $_SESSION['message'] = 'Invalid date range selected';
             $_SESSION['message_type'] = 'error';
             $startDate = date('Y-m-d', strtotime('-30 days'));
@@ -152,6 +152,7 @@ class SalesController extends Controller
         return $start && $end && $start <= $end && $start <= time();
     }
 
+
     /**
      * Calculate date range for the previous period
      */
@@ -217,4 +218,5 @@ class SalesController extends Controller
             'type' => $percentage >= 0 ? 'positive' : 'negative'
         ];
     }
+
 }

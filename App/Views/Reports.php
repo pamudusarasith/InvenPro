@@ -605,6 +605,9 @@ function updateTimePeriodOptions(reportType) {
         // Only load charts if Chart.js is available
         if (typeof Chart !== 'undefined') {
             initializeCharts();
+        } else {
+            // If Chart.js isn't loaded, load it dynamically
+            loadChartJS();
         }
     });
 

@@ -16,13 +16,6 @@ $canViewDetails = RBACService::hasPermission('view_sale_details');
 $canPrintReceipt = RBACService::hasPermission('print_sale_receipt');
 $canViewSalesAnalytics = RBACService::hasPermission('view_sales_analytics');
 
-// Sample data for demonstration
-$totalSales = 245;
-$totalsToday = 5650.25;
-$totalThisWeek = 32410.75;
-$totalThisMonth = 125680.50;
-
-
 
 // Helper function to get badge class based on status
 function getStatusBadgeClass($status)
@@ -41,10 +34,7 @@ function getStatusBadgeClass($status)
   }
 }
 
-// Sample sale items for demonstration
-$saleItems = [
-  // Sample sale item data
-];
+
 ?>
 
 <link rel="stylesheet" href="/css/pages/sales.css">
@@ -119,12 +109,14 @@ $saleItems = [
           <option value="yearly" <?= $period === 'yearly' ? 'selected' : '' ?>>Yearly</option>
         </select>
 
-        <div class="date-filter">
-          <input type="date" class="date-input" id="fromDate" placeholder="From date"
-            value="<?= $fromDate ?>" onchange="applyFilters()">
-          <span class="icon">arrow_forward</span>
-          <input type="date" class="date-input" id="toDate" placeholder="To date"
-            value="<?= $toDate ?>" onchange="applyFilters()">
+        <div id="date-range-container" class="date-range">
+            <div class="form-field">
+              <input type="date" id="fromDate" name="start_date" placeholder="From date" value="<?= $fromDate ?>" onchange="applyFilters()">
+            </div>
+            <span>to</span>
+            <div class="form-field">
+              <input type="date" id="toDate" name="end_date" placeholder="To date" value="<?= $toDate ?>" onchange="applyFilters()">
+            </div>
         </div>
 
         <select id="branchFilter" onchange="applyFilters()">
