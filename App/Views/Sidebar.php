@@ -14,6 +14,7 @@
             ['url' => '/suppliers', 'icon' => 'local_shipping', 'label' => 'Suppliers', 'permission' => 'supplier_view'],
             ['url' => '/orders', 'icon' => 'orders', 'label' => 'Purchase Orders', 'permission' => 'order_view'],
             ['url' => '/discounts', 'icon' => 'percent', 'label' => 'Discounts', 'permission' => 'discount_view'],
+            ['url' => '/sales', 'icon' => 'shopping_cart', 'label' => 'Sales', 'permission' => 'report_sales'],
             ['url' => '/reports', 'icon' => 'bar_chart', 'label' => 'Reports', 'permission' => 'report_view'],
         ];
 
