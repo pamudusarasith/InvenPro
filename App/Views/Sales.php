@@ -29,7 +29,6 @@ function getStatusBadgeClass($status)
   }
 }
 
-
 ?>
 
 <link rel="stylesheet" href="/css/pages/sales.css">

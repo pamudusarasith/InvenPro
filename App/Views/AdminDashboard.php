@@ -1,7 +1,6 @@
 <?php
 use App\Services\RBACService;
 
-// Validate data from controller to prevent undefined variable errors
 $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardData : [];
 
 ?>
@@ -14,7 +13,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
   <?php App\Core\View::render("Navbar") ?>
   <?php App\Core\View::render("Sidebar") ?>
     <div class="main">
-        <!-- Header Section -->
     <div class="card glass page-header">
       <div class="header-content">
         <h1><?=$dashboardData['greeting'] ?></h1>
@@ -23,11 +21,9 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
     </div>
     
 
-    <!-- Main Content Section -->
     <div class="content">
       <div class="dashboard-grid">
 
-        <!-- Sales Overview Card -->
         <div class="dashboard-card sales">
           <div class="card-header">
             <span class="icon">trending_up</span>
@@ -39,7 +35,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Low Stock Card -->
         <div class="dashboard-card low-stock warning">
           <div class="card-header">
             <span class="icon">inventory</span>
@@ -51,7 +46,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Pending Orders Card -->
         <div class="dashboard-card approved warning">
           <div class="card-header">
             <span class="icon">shopping_cart</span>
@@ -63,7 +57,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Approved Orders Card -->
         <div class="dashboard-card orders">
           <div class="card-header">
             <span class="icon">order_approve</span>
@@ -75,7 +68,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Staff Card -->
         <div class="dashboard-card staff">
           <div class="card-header">
             <span class="icon">group</span>
@@ -87,7 +79,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Revenue Card -->
         <div class="dashboard-card revenue">
           <div class="card-header">
             <span class="icon">payments</span>
@@ -99,7 +90,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Customer Card -->
         <div class="dashboard-card customers">
           <div class="card-header">
             <span class="icon">people</span>
@@ -111,7 +101,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Returns Card -->
         <div class="dashboard-card returns warning">
           <div class="card-header">
             <span class="icon">assignment_return</span>
@@ -123,7 +112,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Out of Stock Card -->
         <div class="dashboard-card out-of-stock warning">
           <div class="card-header">
             <span class="icon">block</span>
@@ -135,7 +123,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Total Products Card -->
         <div class="dashboard-card products">
           <div class="card-header">
             <span class="icon">category</span>
@@ -147,7 +134,6 @@ $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardD
           </div>
         </div>
 
-        <!-- Suppliers Card -->
         <div class="dashboard-card suppliers">
           <div class="card-header">
             <span class="icon">local_shipping</span>
