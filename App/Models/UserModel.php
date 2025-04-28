@@ -165,7 +165,6 @@ class UserModel extends Model
     $sql = 'UPDATE user SET password = ?,  WHERE id = ?';
     self::$db->query($sql, [password_hash($password, PASSWORD_BCRYPT), $id]);
 
-    // Log the action
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
         'user',
@@ -204,7 +203,6 @@ class UserModel extends Model
       $id
     ]);
 
-    // Log the action
     $auditLogModel = new AuditLogModel();
     $auditLogModel->logAction(
         'user',
@@ -222,17 +220,14 @@ class UserModel extends Model
 
   public function deleteUser(int $id): void
   {
-    // Fetch user details to get branch_id
     $user = $this->getUserById($id);
     if (!$user) {
       throw new \Exception('User not found');
     }
 
-    // Soft delete the user
     $sql = 'UPDATE user SET deleted_at = NOW() WHERE id = ?';
     self::$db->query($sql, [$id]);
 
-      // Log the action
       $auditLogModel = new AuditLogModel();
       $auditLogModel->logAction(
           'user',
@@ -279,7 +274,7 @@ class UserModel extends Model
 
     $attempts = $this->getFailedLoginAttempts($email);
     if ($attempts >= 3) {
-      return; // User is already locked out
+      return;
     }
 
     $sql = 'UPDATE user SET failed_login_attempts = failed_login_attempts + 1, last_failed_login = ? WHERE email = ?';

@@ -26,20 +26,14 @@ class RoleController extends Controller
 		$this->userModel = new UserModel();
 	}
 
-	/**
-	 * Display the roles and permissions page.
-	 *
-	 * @return void
-	 */
+	
 	public function index()
 	{
 		$roles = $this->roleModel->getAllRolesPermissionsGrouped();
 		$permissionCategories = $this->permissionModel->getAllPermissionCategories();
 		$allPermissionsByCategory = $this->permissionModel->getAllPermissionsByCategory();
 
-		// error_log("Roles: " . print_r($roles, true)); // Log the roles for debugging
-		// error_log("Permission Categories: " . print_r($permissionCategories, true)); // Log the permission categories for debugging
-		// error_log("All Permissions by Category: " . print_r($allPermissionsByCategory, true)); // Log the permissions for debugging
+		
 
 		View::renderTemplate("Roles", [
 			"title" => "Roles",
@@ -50,12 +44,7 @@ class RoleController extends Controller
 	}
 
 
-	/**
-	 * Display the role details page.
-	 *
-	 * @param array $params
-	 * @return void
-	 */
+
 	public function details(array $params)
 	{
 		$roleId = $params['id'] ?? null;
@@ -73,10 +62,7 @@ class RoleController extends Controller
 		}
 	}
 
-	/**
-	 * Add a new role
-	 * @return void
-	 */
+
 	public function addRole()
 	{
 		RBACService::requirePermission('role_create');
@@ -128,10 +114,7 @@ class RoleController extends Controller
 		}
 	}
 
-	/**
-	 * Update an existing role
-	 * @return void
-	 */
+
 	public function updateRole($params)
 	{
 		RBACService::requirePermission('role_update');
@@ -197,10 +180,7 @@ class RoleController extends Controller
 	}
 
 
-	/**
-	 * Delete a role
-	 * @return void
-	 */
+
 	public function deleteRole()
 	{
 		RBACService::requirePermission('role_delete');

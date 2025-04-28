@@ -2,15 +2,6 @@
 
 use App\Services\RBACService;
 
-// Validate data from controller to prevent undefined variable errors
-//$roles = isset($roles) && is_array($roles) ? $roles : [];
-//$permissionCategories = isset($permissionCategories) && is_array($permissionCategories) ? $permissionCategories : [];
-//$allPermissionsByCategory = isset($allPermissionsByCategory) && is_array($allPermissionsByCategory) ? $allPermissionsByCategory : [];
-
-// Log data for debugging
-//error_log("View: allPermissionsByCategory: " . print_r($allPermissionsByCategory, true));
-//error_log("View: roles: " . print_r($roles, true)); // Log the roles for debugging
-//error_log("View: permissionCategories: " . print_r($permissionCategories, true)); // Log the permission categories for debugging
 ?>
 
 <div class="body">
@@ -18,7 +9,6 @@ use App\Services\RBACService;
   <?php App\Core\View::render("Sidebar") ?>
 
   <div class="main">
-    <!-- Header Section -->
     <div class="card glass page-header">
       <div class="header-content">
         <h1>Role Management</h1>
@@ -32,7 +22,6 @@ use App\Services\RBACService;
       <?php endif; ?>
     </div>
 
-    <!-- Controls Section -->
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
@@ -40,7 +29,6 @@ use App\Services\RBACService;
       </div>
     </div>
 
-    <!-- Role Cards Section -->
     <div class="role-cards">
       <?php foreach ($roles as $roleId => $role): ?>
       <div class="role-card">
@@ -85,7 +73,6 @@ use App\Services\RBACService;
   </div>
 </div>
 
-<!-- Add/Edit Role Dialog -->
 <?php if (RBACService::hasPermission('role_create') || RBACService::hasPermission('role_update')): ?>
   <dialog id="roleDialog" class="modal">
     <div class="modal-content wide-modal">
@@ -159,7 +146,6 @@ use App\Services\RBACService;
   </dialog>
 <?php endif; ?>
 
-<!-- View Role Details Dialog -->
 <?php if (RBACService::hasPermission('role_view')): ?>
   <dialog id="roleDetailsDialog" class="modal">
     <div class="modal-content">
@@ -194,7 +180,6 @@ use App\Services\RBACService;
               <div class="permission-category">
                 <h5><?= htmlspecialchars($category) ?></h5>
                 <ul class="permission-details-list" id="details<?= str_replace(' ', '', $category) ?>Permissions">
-                  <!-- Populated by JavaScript -->
                 </ul>
               </div>
             <?php endforeach; ?>
@@ -222,7 +207,6 @@ use App\Services\RBACService;
 
 <link rel="stylesheet" href="/css/pages/roles.css">
 
-<!-- Include any additional scripts here -->
 <?php if (isset($_SESSION['message'])): ?>
   <div class="card glass notification <?= htmlspecialchars($_SESSION['message_type']) ?>">
     <p><?= htmlspecialchars($_SESSION['message']) ?></p>
@@ -241,7 +225,6 @@ use App\Services\RBACService;
     initSelectAllPermissions();
   });
 
-  // Initialize search functionality for roles
   function initSearch() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -263,7 +246,6 @@ use App\Services\RBACService;
     }
   }
 
-  // Initialize permission tabs
   function initPermissionTabs() {
     const tabs = document.querySelectorAll('.permission-tab');
 
@@ -286,7 +268,6 @@ use App\Services\RBACService;
     });
   }
 
-  // Initialize select all functionality
   function initSelectAllPermissions() {
     const selectAllBtns = document.querySelectorAll('.select-all');
 
@@ -308,7 +289,6 @@ use App\Services\RBACService;
     });
   }
 
-  // Open the add role dialog
   function openAddRoleDialog() {
     const form = document.getElementById('roleForm');
     const dialogTitle = document.getElementById('roleDialogTitle');
@@ -326,7 +306,7 @@ use App\Services\RBACService;
     }
   }
 
-  let initialPermissions = []; // To store the initial permissions of the role
+  let initialPermissions = [];
 
   function openEditRoleDialog(roleId) {
     currentRoleId = roleId;
@@ -338,16 +318,13 @@ use App\Services\RBACService;
       dialogTitle.textContent = 'Edit Role';
       form.action = `/roles/${roleId}/update`;
 
-      // Populate the form fields
       document.getElementById('roleName').value = role.role_name || '';
       document.getElementById('roleDescription').value = role.description || '';
 
-      // Reset all permission checkboxes
       document.querySelectorAll('input[name="permissions[]"]').forEach(cb => {
         cb.checked = false;
       });
 
-      // Add the role_id as a hidden input field if it doesn't already exist
       let roleIdInput = document.getElementById('role_id');
       if (!roleIdInput) {
         roleIdInput = document.createElement('input');
@@ -359,8 +336,7 @@ use App\Services\RBACService;
       roleIdInput.value = roleId;
       console.log(roleIdInput);
 
-      // Populate permissions and store initial permissions
-      initialPermissions = []; // Reset initial permissions
+      initialPermissions = [];
       const permissionIds = [];
       for (const category in role.permissions) {
         role.permissions[category].forEach(perm => {
@@ -368,7 +344,7 @@ use App\Services\RBACService;
             <?php foreach ($permissions as $p): ?>
               if (perm === '<?= $p['permission_name'] ?>') {
                 permissionIds.push('<?= $p['id'] ?>');
-                initialPermissions.push('<?= $p['id'] ?>'); // Store initial permissions
+                initialPermissions.push('<?= $p['id'] ?>');
               }
             <?php endforeach; ?>
           <?php endforeach; ?>
@@ -382,12 +358,10 @@ use App\Services\RBACService;
         }
       });
 
-      // Show the dialog
       document.getElementById('roleDialog').showModal();
     }
   }
 
-  // event listener to the form to handle submission
   document.getElementById('roleForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -396,10 +370,6 @@ use App\Services\RBACService;
     const addedPermissions = currentPermissions.filter(id => !initialPermissions.includes(id));
     const removedPermissions = initialPermissions.filter(id => !currentPermissions.includes(id));
 
-    // console.log('Added Permissions:', addedPermissions);
-    // console.log('Removed Permissions:', removedPermissions);
-
-    // Create a hidden input to send the added and removed permissions
     let addedInput = document.getElementById('addedPermissionsInput');
     if (!addedInput) {
       addedInput = document.createElement('input');
@@ -420,11 +390,9 @@ use App\Services\RBACService;
     }
     removedInput.value = JSON.stringify(removedPermissions);
 
-    // Submit the form
     this.submit();
   });
 
-  // Close the role dialog
   function closeRoleDialog() {
     const dialog = document.getElementById('roleDialog');
     if (dialog) {
@@ -432,7 +400,6 @@ use App\Services\RBACService;
     }
   }
 
-  // View role details
   function viewRoleDetails(roleId) {
     currentRoleId = roleId;
     const role = roles[roleId];
@@ -492,7 +459,6 @@ use App\Services\RBACService;
     }
   }
 
-  // Close the role details dialog
   function closeRoleDetailsDialog() {
     const dialog = document.getElementById('roleDetailsDialog');
     if (dialog) {
@@ -501,7 +467,6 @@ use App\Services\RBACService;
   }
 
   function deleteRole(roleId) {
-    // Use currentRoleId if roleId is not provided or invalid
     const id = roleId || currentRoleId;
     if (!id) {
       alert('Error: Role ID is missing.');
@@ -513,7 +478,6 @@ use App\Services\RBACService;
       form.method = 'POST';
       form.action = `/roles/${id}/delete`;
 
-      // Add role_id to the form
       const roleIdInput = document.createElement('input');
       roleIdInput.type = 'hidden';
       roleIdInput.name = 'role_id';

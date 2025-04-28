@@ -11,7 +11,6 @@ $branches = $branches ?? [];
   <?php App\Core\View::render("Sidebar") ?>
 
   <div class="main">
-    <!-- Header Section -->
     <div class="card glass page-header">
       <div class="header-content">
         <h1>User Management</h1>
@@ -25,7 +24,6 @@ $branches = $branches ?? [];
       <?php endif; ?>
     </div>
 
-    <!-- Controls Section -->
     <div class="card glass controls">
       <div class="search-bar">
         <span class="icon">search</span>
@@ -57,7 +55,6 @@ $branches = $branches ?? [];
     </div>
 
 
-    <!-- Users Table -->
     <div class="table-container">
       <table class="data-table clickable" id="users-table">
         <thead>
@@ -155,7 +152,6 @@ $branches = $branches ?? [];
   </div>
 </div>
 
-<!--add user modal-->
 <?php if (RBACService::hasPermission('user_create')): ?>
 
   <dialog id="addUserModal" class="modal">
@@ -241,15 +237,6 @@ $branches = $branches ?? [];
 
 <?php endif; ?>
 
-<!-- Include any additional scripts here -->
-<?php if (isset($_SESSION['message'])): ?>
-  <div class="card glass notification <?= htmlspecialchars($_SESSION['message_type']) ?>">
-    <p><?= htmlspecialchars($_SESSION['message']) ?></p>
-    <button class="close-btn" onclick="this.parentElement.remove()">✕</button>
-  </div>
-  <?php unset($_SESSION['message'], $_SESSION['message_type']); ?>
-<?php endif; ?>
-
 <script>
   document.getElementById('searchInput').addEventListener('input', applyFilters);
   document.getElementById('filterRole').addEventListener('change', applyFilters);
@@ -286,7 +273,6 @@ $branches = $branches ?? [];
       const branch = form.querySelector('#branch');
       const submitButton = form.querySelector('button[type="submit"]');
 
-      // Clear existing errors
       const errorFields = form.querySelectorAll('.error');
       errorFields.forEach(field => {
         field.classList.remove('error');
@@ -295,7 +281,6 @@ $branches = $branches ?? [];
 
       let isValid = true;
 
-      // Validate first name
       if (!first_Name.value) {
         addErrorMessage(first_Name.parentElement, 'First Name is required');
         isValid = false;
@@ -304,7 +289,6 @@ $branches = $branches ?? [];
         isValid = false;
       }
 
-      // Validate last name
       if (!last_Name.value) {
         addErrorMessage(last_Name.parentElement, 'Last Name is required');
         isValid = false;
@@ -313,7 +297,6 @@ $branches = $branches ?? [];
         isValid = false;
       }
 
-      // Validate email
       if (!email.value) {
         addErrorMessage(email.parentElement, 'Email is required');
         isValid = false;
@@ -322,7 +305,6 @@ $branches = $branches ?? [];
         isValid = false;
       }
 
-      // Validate role
       if (!role.value) {
         addErrorMessage(role.parentElement, 'Role is required');
         isValid = false;
@@ -331,7 +313,6 @@ $branches = $branches ?? [];
         isValid = false;
       }
 
-      // Validate branch
       if (!branch.value) {
         addErrorMessage(branch.parentElement, 'Branch is required');
         isValid = false;
@@ -341,9 +322,9 @@ $branches = $branches ?? [];
       }
 
       if (!isValid) {
-        event.preventDefault(); // Prevent submission if invalid
+        event.preventDefault();
       } else {
-        submitButton.disabled = true; // Disable button to prevent multiple submissions
+        submitButton.disabled = true;
       }
     }
   <?php endif; ?>
@@ -380,7 +361,6 @@ $branches = $branches ?? [];
     }
   <?php endif; ?>
 
-  // Debounce function to limit URL updates
   function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -389,7 +369,6 @@ $branches = $branches ?? [];
     };
   }
 
-  // Apply status filter client-side
   function applyFilters() {
     const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
     const rows = document.querySelectorAll('#users-table tbody tr');
@@ -400,7 +379,6 @@ $branches = $branches ?? [];
     });
   }
 
-  // Update URL with search and filter parameters
   function updateSearchParams() {
     const search = document.getElementById('searchInput').value;
     const role = document.getElementById('filterRole').value;
@@ -416,7 +394,6 @@ $branches = $branches ?? [];
     location.href = url.toString();
   }
 
-  // Event listeners
   document.getElementById('filterRole').addEventListener('change', updateSearchParams);
   document.getElementById('filterBranch').addEventListener('change', updateSearchParams);
   document.getElementById('filterStatus').addEventListener('change', () => {
@@ -425,7 +402,6 @@ $branches = $branches ?? [];
   });
   document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
 
-  // Existing Pagination Functions
   function changePage(pageNo) {
     const url = new URL(location.href);
     url.searchParams.set('p', pageNo);

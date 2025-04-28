@@ -2,20 +2,17 @@
 
 use App\Services\RBACService;
 
-// Get current filters from request
 $currentStatus = $_GET['status'] ?? '';
 $fromDate = $_GET['from'] ?? '';
 $toDate = $_GET['to'] ?? '';
 $searchQuery = $_GET['q'] ?? '';
 $paymentMethod = $_GET['payment'] ?? '';
-$period = $_GET['period'] ?? 'monthly'; // Default to monthly view
+$period = $_GET['period'] ?? 'monthly';
 $branchId = $_GET['branch'] ?? '';
 
-// Check permissions
 $canViewSalesAnalytics = RBACService::hasPermission('sales_report');
 
 
-// Helper function to get badge class based on status
 function getStatusBadgeClass($status)
 {
   switch ($status) {
@@ -49,7 +46,6 @@ function getStatusBadgeClass($status)
       </div>
     </div>
 
-    <!-- Sales statistics summary -->
     <div class="sales-stats">
       <div class="stat-card card glass">
         <div class="stat-header">
@@ -97,7 +93,6 @@ function getStatusBadgeClass($status)
       </div>
     </div>
 
-    <!-- Filters and period selection -->
     <div class="card glass controls">
       <div class="filters">
         <select id="periodFilter" onchange="changePeriod(this.value)">
@@ -116,17 +111,9 @@ function getStatusBadgeClass($status)
               <input type="date" id="toDate" name="end_date" placeholder="To date" value="<?= $toDate ?>" onchange="applyFilters()">
             </div>
         </div>
-
-        <select id="branchFilter" onchange="applyFilters()">
-          <option value="">All Branches</option>
-          <option value="1" <?= $branchId === '1' ? 'selected' : '' ?>>Main Branch</option>
-          <option value="2" <?= $branchId === '2' ? 'selected' : '' ?>>Downtown Branch</option>
-          <option value="3" <?= $branchId === '3' ? 'selected' : '' ?>>Uptown Branch</option>
-        </select>
       </div>
     </div>
 
-    <!-- Recent Sales Section -->
     <div class="recent-sales-section">
       <div class="section-header">
         <h2>Recent Sales</h2>
@@ -152,7 +139,6 @@ function getStatusBadgeClass($status)
               </tr>
             <?php else: ?>
               <?php
-              // Only show 5 most recent sales
               $recentSales = array_slice($sales, 0, 5);
               foreach ($recentSales as $sale):
               ?>
@@ -184,10 +170,8 @@ function getStatusBadgeClass($status)
 </div>
 
 <script>
-  // Global variable to store the current sale ID in the modal
   let currentModalSaleId = null;
 
-  // Function to apply filters
   function applyFilters() {
     const fromDate = document.getElementById("fromDate").value;
     const toDate = document.getElementById("toDate").value;
@@ -203,7 +187,6 @@ function getStatusBadgeClass($status)
     window.location.href = url.href;
   }
 
-  // Function to change time period
   function changePeriod(period) {
     const url = new URL(window.location.href);
     url.searchParams.set("period", period);

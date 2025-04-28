@@ -14,12 +14,9 @@ class ReportController extends Controller
         $this->reportModel = new ReportModel();
     }
 
-    /**
-     * Display the reports dashboard with filtered data
-     */
+
     public function index(): void
     {
-        // Get filter parameters
         $reportType = $_GET['report_type'] ?? 'sales';
         $timePeriod = $_GET['time_period'] ?? 'this_month';
         
@@ -32,7 +29,6 @@ class ReportController extends Controller
             $endDate = $dateRange['end'];
         }
 
-        // Validate custom date range
         if ($timePeriod === 'custom' && !$this->validateDateRange($startDate, $endDate)) {
             $_SESSION['message'] = 'Invalid date range selected';
             $_SESSION['message_type'] = 'error';
@@ -40,7 +36,6 @@ class ReportController extends Controller
             $endDate = date('Y-m-d');
         }
 
-        // Define report types and time periods
         $reportTypes = [
             'sales' => 'Sales Report',
             'inventory' => 'Inventory Report',
@@ -66,10 +61,8 @@ class ReportController extends Controller
             'next_month' => 'Next Month'
         ];
 
-        // Fetch data based on filters
         $data = $this->fetchReportData($reportType, $timePeriod, $startDate, $endDate);
 
-        // Render the reports view
         View::renderTemplate('Reports', [
             'title' => 'Reports & Analytics',
             'reportTypes' => $reportTypes,
@@ -99,12 +92,8 @@ class ReportController extends Controller
         ]);
     }
 
-    /**
-     * Fetch report data based on filters
-     */
     private function fetchReportData(string $reportType, string $timePeriod, string $startDate, string $endDate): array
     {
-        // Fetch datasets
         $topSellingProducts = $this->getTopSellingProducts($startDate, $endDate);
         $salesData = $this->getSalesData($startDate, $endDate);
         $countAndRevenue = $this->getCountAndRevenue($startDate, $endDate);
@@ -117,36 +106,29 @@ class ReportController extends Controller
         $lowStockItems = $this->getLowStockItems();
         $monthlySalesData = $this->getMonthlySalesData($startDate, $endDate);
 
-        // Fetch stats for hardcoded values in the view
         $salesStats = $this->getSalesStats($startDate, $endDate);
         $inventoryStats = $this->getInventoryStats();
         $categoryStats = $this->getCategoryStats();
 
-        // Get previous period date range for trend calculations
         $previousPeriod = $this->getPreviousPeriodRange($timePeriod, $startDate, $endDate);
 
-        // Fetch previous period data for trends
         $previousCountAndRevenue = $this->getCountAndRevenue($previousPeriod['start'], $previousPeriod['end']);
         $previousProfitMargin = $this->getProfitMargin($previousPeriod['start'], $previousPeriod['end']);
 
-        // Current period data
         $currentRevenue = $countAndRevenue['revenue'] ?? 0;
         $currentOrderCount = $countAndRevenue['order_count'] ?? 0;
         $currentAvgOrderValue = $currentOrderCount > 0 ? $currentRevenue / $currentOrderCount : 0;
         $currentProfitMargin = $this->getProfitMargin($startDate, $endDate);
 
-        // Previous period data
         $previousRevenue = $previousCountAndRevenue['revenue'] ?? 0;
         $previousOrderCount = $previousCountAndRevenue['order_count'] ?? 0;
         $previousAvgOrderValue = $previousOrderCount > 0 ? $previousRevenue / $previousOrderCount : 0;
 
-        // Calculate trends
         $revenueTrend = $this->calculateTrend($currentRevenue, $previousRevenue);
         $orderCountTrend = $this->calculateTrend($currentOrderCount, $previousOrderCount);
         $avgOrderValueTrend = $this->calculateTrend($currentAvgOrderValue, $previousAvgOrderValue);
         $profitMarginTrend = $this->calculateTrend($currentProfitMargin, $previousProfitMargin);
 
-        // KPI Metrics with dynamic trends
         $kpiMetrics = [
             [
                 'label' => 'Total Sales',
@@ -182,10 +164,8 @@ class ReportController extends Controller
             ]
         ];
 
-        // basket analysis
         $basketAnalysisResults = $this->reportModel->getTopProductCombinations($startDate,$endDate);
 
-        // Return all data
         return [
             'kpiMetrics' => $kpiMetrics,
             'topSellingProducts' => $topSellingProducts,
@@ -206,17 +186,13 @@ class ReportController extends Controller
         ];
     }
 
-    /**
-     * Get top selling products
-     */
+
     private function getTopSellingProducts(string $startDate, string $endDate): array
     {
         return $this->reportModel->getTopSellingProducts($startDate, $endDate);
     }
 
-    /**
-     * Get sales data for charts
-     */
+
     private function getSalesData(string $startDate, string $endDate): array
     {
         return $this->reportModel->getSalesData($startDate, $endDate);

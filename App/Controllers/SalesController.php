@@ -15,12 +15,8 @@ class SalesController extends Controller
         $this->salesModel = new SaleModel();
     }
 
-    /**
-     * Display the sales analytics dashboard with filtered data
-     */
     public function index(): void
     {
-        // Get filter parameters from request
         $period = $_GET['period'] ?? 'monthly';
         $fromDate = $_GET['from'] ?? '';
         $toDate = $_GET['to'] ?? '';
@@ -29,12 +25,10 @@ class SalesController extends Controller
         $paymentMethod = $_GET['payment'] ?? '';
         $searchQuery = $_GET['q'] ?? '';
 
-        // Determine date range based on period
         $dateRange = $this->getDateRange($period, $fromDate, $toDate);
         $startDate = $dateRange['start'];
         $endDate = $dateRange['end'];
 
-        // Validate custom date range
         if (!$this->validateDateRange($startDate, $endDate)) {
             $_SESSION['message'] = 'Invalid date range selected';
             $_SESSION['message_type'] = 'error';
@@ -42,7 +36,6 @@ class SalesController extends Controller
             $endDate = date('Y-m-01');
         }
 
-        // Fetch data
         $totalSales = $this->salesModel->getTotalSalesCount($startDate, $endDate, $branchId);
         $salesSummary = $this->salesModel->getSalesSummary($branchId);
         $salesTrend = $this->salesModel->getSalesTrend($startDate, $endDate, $branchId, $period);
@@ -60,7 +53,6 @@ class SalesController extends Controller
 
         error_log(print_r($recentSales,true));
 
-        // Calculate trends for stats cards
         $previousPeriod = $this->getPreviousPeriodRange($period, $startDate, $endDate);
         $prevSalesSummary = $this->salesModel->getSalesSummary($branchId);
         $prevTotalSales = $this->salesModel->getTotalSalesCount(
@@ -83,7 +75,6 @@ class SalesController extends Controller
             $prevSalesSummary['this_month_sales'] ?? 0
         );
 
-        // Render the sales analytics view
         View::renderTemplate('Sales', [
             'title' => 'Sales Analytics',
             'totalSales' => $totalSales,
@@ -109,9 +100,7 @@ class SalesController extends Controller
         ]);
     }
 
-    /**
-     * Display the sales list page
-     */
+
     public function salesList(): void
     {
         View::renderTemplate('SalesList', [
@@ -119,9 +108,7 @@ class SalesController extends Controller
         ]);
     }
 
-    /**
-     * Calculate date range based on period
-     */
+
     private function getDateRange(string $period, string $fromDate, string $toDate): array
     {
         if ($period === 'custom' && $fromDate && $toDate) {
@@ -142,9 +129,7 @@ class SalesController extends Controller
         }
     }
 
-    /**
-     * Validate custom date range
-     */
+
     private function validateDateRange(string $startDate, string $endDate): bool
     {
         $start = strtotime($startDate);
@@ -153,9 +138,7 @@ class SalesController extends Controller
     }
 
 
-    /**
-     * Calculate date range for the previous period
-     */
+
     private function getPreviousPeriodRange(string $period, string $startDate, string $endDate): array
     {
         $start = strtotime($startDate);
@@ -196,9 +179,7 @@ class SalesController extends Controller
         }
     }
 
-    /**
-     * Calculate trend percentage and type
-     */
+
     private function calculateTrend(float $currentValue, float $previousValue): array
     {
         if ($previousValue == 0) {

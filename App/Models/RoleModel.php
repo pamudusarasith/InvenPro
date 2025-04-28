@@ -9,11 +9,7 @@ use App\Models\AuditLogModel;
 class RoleModel extends Model
 {
 
-    /**
-     * Get a role by ID with permission count and categories
-     * @param int $roleId
-     * @return array|null
-     */
+   
     public function getRoleById(int $roleId): ?array
     {
         $sql = 'SELECT r.id, r.role_name, r.description, r.created_at,
@@ -42,10 +38,7 @@ class RoleModel extends Model
         ];
     }
 
-    /**
-     * Get all roles with permission count and categories, ordered by role name
-     * @return array
-     */
+
     public function getAllRoles(): array
     {
         $sql = 'SELECT r.id, r.role_name, r.description, r.created_at,
@@ -62,10 +55,7 @@ class RoleModel extends Model
         return $stmt->fetchAll();
     }
 
-    /**
-     * Get all roles with permissions grouped by category
-     * @return array
-     */
+
     public function getAllRolesPermissionsGrouped(): array
     {
         $sql = '
@@ -123,11 +113,7 @@ class RoleModel extends Model
         return $result;
     }
 
-    /**
-     * Get the count of users assigned to a specific role
-     * @param int $roleId 
-     * @return array
-     */
+
     public function getUserCountByRole($roleId): int
     {
         $sql = 'SELECT COUNT(*) as user_count FROM user WHERE role_id = ? AND deleted_at IS NULL';
@@ -137,11 +123,7 @@ class RoleModel extends Model
         
     }
 
-    /**
-     * Get a role by Role Name
-     * @param string $roleName
-     * @return array|null
-     */
+    
     public function getRoleByName(string $roleName): array
     {
         $sql = 'SELECT id as role_id, role_name, description, created_at FROM role WHERE role_name = ? AND deleted_at IS NULL';
@@ -150,11 +132,7 @@ class RoleModel extends Model
         return $result ?: [];
     }
 
-    /**
-     * Add a new role with permissions
-     * @param array $data Contains role_name, description, permissions (array of permission IDs)
-     * @return int|false Role ID or false on failure
-     */
+    
     public function addRole(array $data)
     {
         if (empty($data['role_name'])) {
@@ -205,11 +183,7 @@ class RoleModel extends Model
         }
     }
 
-    /**
-     * Update a role by ID
-     * @param array $data Contains role_name, description, permissions (array of permission IDs)
-     * @return bool True on success, false on failure
-     */
+    
     public function updateRole(array $data): bool
     {
         if (empty($data['role_id'])) {
@@ -219,22 +193,20 @@ class RoleModel extends Model
         self::$db->beginTransaction();
 
         try {
-            // Fetch the current role details
             $currentRole = $this->getRoleById($data['role_id']);
             if (!$currentRole) {
                 self::$db->rollBack();
-                return false; // Role does not exist
+                return false; 
             }
 
             if ($currentRole['role_name'] !== $data['role_name']) {
                 $existingRole = $this->getRoleByName($data['role_name']);
                 if ($existingRole) {
                     self::$db->rollBack();
-                    return false; // Role name already exists
+                    return false; 
                 }
             }
 
-            // Update role details
             $sql = 'UPDATE role SET role_name = ?, description = ? WHERE id = ?';
             $result = self::$db->query($sql, [
                 $data['role_name'],
@@ -251,7 +223,6 @@ class RoleModel extends Model
             $permissionsToAdd = $data['addedPermissions'] ?? [];
             $permissionsToRemove = $data['removedPermissions'] ?? [];
 
-            // Add new permissions
             if (!empty($permissionsToAdd)) {
                 $insertSql = 'INSERT INTO role_permission (role_id, permission_id, granted_at) VALUES ';
                 $insertParts = [];
@@ -270,7 +241,6 @@ class RoleModel extends Model
                 }
             }
 
-            // Remove permissions
             if (!empty($permissionsToRemove)) {
                 $placeholders = implode(',', array_fill(0, count($permissionsToRemove), '?'));
                 $deleteSql = "DELETE FROM role_permission WHERE role_id = ? AND permission_id IN ($placeholders)";
@@ -282,23 +252,17 @@ class RoleModel extends Model
                 }
             }
 
-            // Commit transaction
             self::$db->commit();
 
             return true;
         } catch (\Exception $e) {
-            // Rollback transaction on error
             self::$db->rollBack();
             error_log("Error updating role: " . $e->getMessage());
             return false;
         }
     }
 
-    /**
-     * Delete a role by ID
-     * @param int $roleId
-     * @return bool True on success, false on failure
-     */
+ 
     public function deleteRole(int $roleId): bool
     {
         if (empty($roleId)) {
@@ -308,7 +272,6 @@ class RoleModel extends Model
         self::$db->beginTransaction();
 
         try {
-            // Delete associated permissions
             $deletePermissionsSql = 'DELETE FROM role_permission WHERE role_id = ?';
             $deletePermissionsResult = self::$db->query($deletePermissionsSql, [$roleId]);
 
@@ -317,8 +280,6 @@ class RoleModel extends Model
                 return false;
             }
 
-            // Delete the role
-            // Check if assigned users are soft delete
             $activeUserCount= RoleModel::getUserCountByRole($roleId);
 
             if ($activeUserCount > 0) {

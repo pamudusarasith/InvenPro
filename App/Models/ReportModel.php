@@ -7,9 +7,7 @@ use DateTime;
 
 class ReportModel extends Model
 {
-    /**
-     * Get top selling products
-     */
+
     public function getTopSellingProducts($startDate = null, $endDate = null): array
     {
         $query = "
@@ -43,14 +41,10 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get supplier performance
-     */
+
     public function getSupplierPerformance($startDate, $endDate): array
     {
-        // Note: The original query references `delivery_date` and `quality_rating`, which are not in the schema.
-        // Assuming these are tracked elsewhere, I'll provide a placeholder query.
-        // You may need to adjust based on actual data sources for on-time delivery and quality.
+
         $query = "
             SELECT 
                 s.supplier_name AS name,
@@ -85,9 +79,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get category revenue data
-     */
+ 
     public function getCategoryRevenueData($startDate, $endDate): array
     {
         $query = "
@@ -126,9 +118,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get sales data for charts
-     */
+
     public function getSalesData($startDate, $endDate): array
     {
         $query = "
@@ -163,9 +153,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get count and revenue for sales
-     */
+
     public function getCountAndRevenue($startDate, $endDate): array
     {
         $query = "
@@ -202,9 +190,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get category data
-     */
+
     public function getCategoryData(): array
     {
         $query = "
@@ -233,9 +219,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get expiring batches
-     */
+
     public function getExpiringBatches($startDate, $endDate): array
     {
         $query = "
@@ -279,9 +263,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get low stock items
-     */
+
     public function getLowStock(): array
     {
         $query = "
@@ -321,9 +303,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get stock status
-     */
+
     public function getStockStatus(): array
     {
         $query = "
@@ -369,9 +349,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get recent purchase orders
-     */
+
     public function getRecentPurchaseOrders($startDate, $endDate): array
     {
         $query = "
@@ -410,9 +388,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get monthly sales data
-     */
+
     public function getMonthlySalesData($startDate, $endDate): array
     {
         $query = "
@@ -447,9 +423,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get sales stats for Sales Overview section
-     */
+
     public function getSalesStats($startDate, $endDate): array
     {
         $query = "
@@ -489,9 +463,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get inventory stats for Inventory Status section
-     */
+
     public function getInventoryStats(): array
     {
         $query = "
@@ -533,9 +505,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get category stats for Product Category Analysis section
-     */
+ 
     public function getCategoryStats(): array
     {
         $query = "
@@ -570,9 +540,7 @@ class ReportModel extends Model
         return $formattedResults;
     }
 
-    /**
-     * Get profit margin
-     */
+
     public function getProfitMargin($startDate, $endDate): float
     {
         $query = "
@@ -604,13 +572,11 @@ class ReportModel extends Model
             $cost = (float)$row['cost'];
         }
 
-        // Calculate profit margin: (revenue - cost) / revenue * 100
         return $revenue > 0 ? (($revenue - $cost) / $revenue) * 100 : 0.0;
     }
 
     public function getTopProductCombinations(string $startDate, string $endDate, int $limit = 10): array
     {
-        // Query to find product pairs and their frequency
         $query = "
             SELECT 
                 p1.product_name AS product1,
@@ -637,10 +603,8 @@ class ReportModel extends Model
             ':limit' => $limit
         ];
 
-        // Execute query
         $results = self::$db->query($query, $params)->fetchAll();
 
-        // Format results
         $combinations = [];
         foreach ($results as $row) {
             $combinations[] = [
