@@ -124,20 +124,17 @@ class ReportModel extends Model
         $query = "
             SELECT 
                 DATE(s.sale_date) AS date,
-                SUM((si.unit_price - si.discount) * si.quantity) AS revenue
+                SUM(s.total) AS revenue
             FROM sale s
-            JOIN sale_item si ON s.id = si.sale_id
-            WHERE s.sale_date BETWEEN :startDate AND :endDate
-            AND s.status = 'completed'
-            AND s.deleted_at IS NULL
+            WHERE s.sale_date BETWEEN ? AND ?
             GROUP BY DATE(s.sale_date)
-            HAVING SUM((si.unit_price - si.discount) * si.quantity) > 0
+            HAVING SUM(total) > 0
             ORDER BY DATE(s.sale_date) ASC
         ";
 
         $params = [
-            ':startDate' => $startDate,
-            ':endDate' => $endDate
+            $startDate,
+            $endDate
         ];
 
         $results = self::$db->query($query, $params)->fetchAll();
@@ -149,6 +146,8 @@ class ReportModel extends Model
                 'sales' => (float)$row['revenue']
             ];
         }
+
+        error_log(print_r($formattedResults,true));
 
         return $formattedResults;
     }

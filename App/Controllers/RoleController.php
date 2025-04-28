@@ -25,15 +25,12 @@ class RoleController extends Controller
 		$this->permissionModel = new PermissionModel();
 		$this->userModel = new UserModel();
 	}
-
 	
 	public function index()
 	{
 		$roles = $this->roleModel->getAllRolesPermissionsGrouped();
 		$permissionCategories = $this->permissionModel->getAllPermissionCategories();
 		$allPermissionsByCategory = $this->permissionModel->getAllPermissionsByCategory();
-
-		
 
 		View::renderTemplate("Roles", [
 			"title" => "Roles",

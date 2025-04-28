@@ -39,7 +39,6 @@ class ReportController extends Controller
         $reportTypes = [
             'sales' => 'Sales Report',
             'inventory' => 'Inventory Report',
-            'suppliers' => 'Supplier Performance',
             'orders' => 'Purchase Orders',
             'batch_expiry' => 'Batch Expiry Report'
         ];
@@ -62,6 +61,8 @@ class ReportController extends Controller
         ];
 
         $data = $this->fetchReportData($reportType, $timePeriod, $startDate, $endDate);
+
+        error_log(print_r($data['salesData'],true));
 
         View::renderTemplate('Reports', [
             'title' => 'Reports & Analytics',
@@ -198,113 +199,83 @@ class ReportController extends Controller
         return $this->reportModel->getSalesData($startDate, $endDate);
     }
 
-    /**
-     * Get count and revenue for sales
-     */
+
     private function getCountAndRevenue(string $startDate, string $endDate): array
     {
         return $this->reportModel->getCountAndRevenue($startDate, $endDate);
     }
 
-    /**
-     * Get stock status
-     */
     private function getStockStatus(): array
     {
         return $this->reportModel->getStockStatus();
     }
 
-    /**
-     * Get recent purchase orders
-     */
+
     private function getRecentPurchaseOrders(string $startDate, string $endDate): array
     {
         return $this->reportModel->getRecentPurchaseOrders($startDate, $endDate);
     }
 
-    /**
-     * Get category data
-     */
     private function getCategoryData(): array
     {
         return $this->reportModel->getCategoryData();
     }
 
-    /**
-     * Get supplier performance
-     */
+
     private function getSupplierPerformance(string $startDate, string $endDate): array
     {
         return $this->reportModel->getSupplierPerformance($startDate, $endDate);
     }
 
-    /**
-     * Get category revenue data
-     */
+
     private function getCategoryRevenueData(string $startDate, string $endDate): array
     {
         return $this->reportModel->getCategoryRevenueData($startDate, $endDate);
     }
 
-    /**
-     * Get expiring batches
-     */
+
     private function getExpiringBatches(string $startDate, string $endDate): array
     {
         return $this->reportModel->getExpiringBatches($startDate, $endDate);
     }
 
-    /**
-     * Get low stock items
-     */
+
     private function getLowStockItems(): array
     {
         return $this->reportModel->getLowStock();
     }
 
-    /**
-     * Get monthly sales data
-     */
+
     private function getMonthlySalesData(string $startDate, string $endDate): array
     {
         return $this->reportModel->getMonthlySalesData($startDate, $endDate);
     }
 
-    /**
-     * Get sales stats for hardcoded view values
-     */
+
     private function getSalesStats(string $startDate, string $endDate): array
     {
         return $this->reportModel->getSalesStats($startDate, $endDate);
     }
 
-    /**
-     * Get inventory stats for hardcoded view values
-     */
+
     private function getInventoryStats(): array
     {
         return $this->reportModel->getInventoryStats();
     }
 
-    /**
-     * Get category stats for hardcoded view values
-     */
+
     private function getCategoryStats(): array
     {
         return $this->reportModel->getCategoryStats();
     }
 
-    /**
-     * Get profit margin
-     */
+
     private function getProfitMargin(string $startDate, string $endDate): float
     {
         return $this->reportModel->getProfitMargin($startDate, $endDate);
     }
 
-    /**
-     * Calculate date range for the previous period
-     */
+
     private function getPreviousPeriodRange(string $timePeriod, string $startDate, string $endDate): array
     {
         $start = strtotime($startDate);
@@ -341,14 +312,12 @@ class ReportController extends Controller
                     'end' => date('Y-m-d', strtotime('-1 year', $end))
                 ];
             case 'custom':
-                // For custom range, use the same duration before the start date
                 return [
-                    'start' => date('Y-m-d', $start - $duration - 86400), // Subtract 1 day to avoid overlap
+                    'start' => date('Y-m-d', $start - $duration - 86400),
                     'end' => date('Y-m-d', $start - 86400)
                 ];
             case 'next_week':
             case 'next_month':
-                // For future periods, compare with the previous equivalent period
                 return [
                     'start' => date('Y-m-d', strtotime('-1 month', $start)),
                     'end' => date('Y-m-d', strtotime('-1 month', $end))
@@ -361,9 +330,7 @@ class ReportController extends Controller
         }
     }
 
-    /**
-     * Calculate trend percentage and type
-     */
+
     private function calculateTrend(float $currentValue, float $previousValue): array
     {
         if ($previousValue == 0) {
@@ -384,9 +351,7 @@ class ReportController extends Controller
         ];
     }
 
-    /**
-     * Calculate date range based on time period
-     */
+
     private function getDateRange(string $timePeriod): array
     {
         switch ($timePeriod) {
@@ -415,9 +380,7 @@ class ReportController extends Controller
         }
     }
 
-    /**
-     * Validate custom date range
-     */
+
     private function validateDateRange(string $startDate, string $endDate): bool
     {
         $start = strtotime($startDate);

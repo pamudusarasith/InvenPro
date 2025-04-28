@@ -46,8 +46,10 @@ class ValidationService
   public function validateUpdatePassword(array $data): bool
   {
     $validator = new Validator($data);
-    $validator->rule('old_password', new Required('Password is required'))
-      ->rule('new_password', new Required('Password is required'))
+    if (!RBACService::hasPermission('user_reset_password')) {
+      $validator->rule('old_password', new Required('Password is required'));
+    }
+    $validator->rule('new_password', new Required('Password is required'))
       ->rule('new_password', new IsString(8, 50, 'Password must be between 8 and 50 characters'))
       ->rule('confirm_password', new Required('Confirm Password is required'))
       ->rule('confirm_password', new IsString(8, 50, 'Confirm Password must be between 8 and 50 characters'))
