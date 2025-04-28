@@ -54,9 +54,7 @@ $activities = $activities ?? [];
                         </button>
                     </div>
                     <?php
-                    // Debug logging for user and session IDs
-                    //error_log('Debug User ID: ' . (isset($user['id']) ? $user['id'] : 'Not set'));
-                    //error_log('Debug Session User ID: ' . (isset($_SESSION['id']) ? $_SESSION['id'] : 'Not set'));
+
                     ?>
                     <?php if (RBACService::hasPermission('user_update') || RBACService::hasPermission('user_delete')): ?>
                         <div class="dropdown">
@@ -174,7 +172,7 @@ $activities = $activities ?? [];
                                 <?php
                                 if (!isset($_SESSION['error'])) {
                                     $_SESSION['error'] = 'You do not have permission to reset this password.';
-                                    $_SESSION['error_type'] = 'error'; // Optional: Define the type of message
+                                    $_SESSION['error_type'] = 'error';
                                 }
                                 ?>
                             <?php endif; ?>
@@ -223,14 +221,13 @@ $activities = $activities ?? [];
                             <tbody>
                                 <?php foreach ($activities as $activity): ?>
                                     <?php
-                                    // Parse metadata JSON
+
                                     $metadata = json_decode($activity['metadata'], true);
                                     $ip = htmlspecialchars($metadata['ip'] ?? 'N/A');
                                     $table_name = htmlspecialchars($activity['table_name'] ?? 'N/A');
                                     $user_agent = htmlspecialchars($metadata['user_agent'] ?? 'N/A');
-                                    // Handle empty action_type
+
                                     $action_type = htmlspecialchars($activity['action_type'] ?: 'Unknown');
-                                    // Format timestamp
                                     $timestamp = date('M d, Y H:i', strtotime($activity['created_at']));
                                     ?>
                                     <tr>
@@ -297,25 +294,20 @@ $activities = $activities ?? [];
 
 <script>
     function switchTab(tabId) {
-        // Remove active class from all tabs and contents
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-        // Add active class to selected tab and content
         document.querySelector(`.tab-btn[onclick*="${tabId}"]`).classList.add('active');
         document.getElementById(tabId).classList.add('active');
     }
 
     function enableEditing() {
-        // Add edit mode class to header
         document.querySelector('.details-header').classList.add('edit-mode');
 
-        // Enable all inputs except those in AccessControl
         document.querySelectorAll('.form-field:not(.AccessControl) :is(input, select, textarea)').forEach(input => {
             input.disabled = false;
         });
 
-        // Then handle AccessControl fields based on permission
         <?php if (RBACService::hasPermission('user_delete') && isset($_SESSION['user']['id']) && $_SESSION['user']['id'] != $user['id']): ?>
             document.querySelectorAll('.form-field.AccessControl :is(input, select, textarea)').forEach(input => {
                 input.disabled = false;
@@ -327,7 +319,6 @@ $activities = $activities ?? [];
         <?php endif; ?>
 
 
-        // Scroll to form
         document.querySelector('.tab-content.active').scrollIntoView({
             behavior: 'smooth'
         });
@@ -339,12 +330,10 @@ $activities = $activities ?? [];
         }
     }
 
-    // User actions
     function deleteUser(userId) {
         if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             return;
         }
-        // Implement delete user logic
         const form = document.createElement('form');
         form.method = 'GET';
         form.action = '/users/<?= $user['id'] ?>/delete';
@@ -357,13 +346,11 @@ $activities = $activities ?? [];
             return;
         }
 
-        // Implement save changes logic
         const form = document.getElementById('details-form');
 
         const accessControlFields = document.querySelectorAll('.form-field.AccessControl :is(input, select)');
         accessControlFields.forEach(field => {
             if (field.disabled) {
-                // Add the field's name and value to a hidden input
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = field.name;
@@ -375,19 +362,17 @@ $activities = $activities ?? [];
         form.submit();
     }
 
-    // Password Reset Dialog Functions
     <?php if (isset($_SESSION['user']['id']) && ($_SESSION['user']['id'] == $user['id'] || $_SESSION['user']['id'] == 1)): ?>
 
         function openPasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            // Reset form
             document.getElementById('passwordResetForm').reset();
-            dialog.showModal(); // Show the dialog
+            dialog.showModal();
         }
 
         function closePasswordResetDialog() {
             const dialog = document.getElementById('passwordResetDialog');
-            dialog.close(); // Close the dialog
+            dialog.close();
         }
 
         function addErrorMessage(field, message) {
@@ -406,20 +391,17 @@ $activities = $activities ?? [];
             const confirmPassword = form.querySelector('#confirm_password');
             const submitButton = form.querySelector('button[type="submit"]');
 
-            // Clear existing errors
             const errorFields = form.querySelectorAll('.error');
             errorFields.forEach(field => {
                 field.classList.remove('error');
                 field.querySelector('.error-message')?.remove();
             });
 
-            // Validate old password
             if (oldPassword.value.trim() === '') {
                 showError(oldPassword, 'Old password is required!');
                 return;
             }
 
-            // Validate new password
             if (newPassword.value.trim() === '') {
                 showError(newPassword, 'New password is required!');
                 return;
@@ -428,7 +410,6 @@ $activities = $activities ?? [];
                 return;
             }
 
-            // Validate confirm password
             if (confirmPassword.value.trim() === '') {
                 showError(confirmPassword, 'Confirm password is required!');
                 return;

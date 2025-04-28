@@ -263,7 +263,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
         this.supplier = null;
         this.items = new Map();
 
-        // Initialize search handlers after DOM is loaded
         this.initSearchHandlers();
       }
 
@@ -275,7 +274,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
       }
 
       initSearchHandlers() {
-        // Supplier search handler
         this.supplierSearch = new SearchHandler({
           apiEndpoint: "/api/suppliers/search",
           inputElement: this.form.querySelector("#order-supplier input"),
@@ -292,7 +290,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
           onSelect: (supplier) => this.selectSupplier(supplier),
         });
 
-        // Products search handler
         this.productSearch = new SearchHandler({
           apiEndpoint: "/api/suppliers/{supplier_id}/products/search",
           inputElement: this.form.querySelector("#order-items input"),
@@ -322,7 +319,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
         this.form.querySelector("#supplier_phone").textContent = supplier.phone;
         this.form.querySelector("#supplier_id").value = supplier.id;
 
-        // Update product search with current supplier ID
         this.productSearch.updateParams({
           supplier_id: supplier.id,
         });
@@ -470,7 +466,6 @@ $canCreateOrder = RBACService::hasPermission('create_purchase_order');
       const currentPage = parseInt(pagination.dataset.page);
       const totalPages = parseInt(pagination.dataset.totalPages);
 
-      // Insert pagination
       insertPagination(pagination, currentPage, totalPages, (page) => {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set("p", page);

@@ -1,7 +1,6 @@
 <?php
 use App\Services\RBACService;
 
-// Validate data from controller to prevent undefined variable errors
 $dashboardData = isset($dashboardData) && is_array($dashboardData) ? $dashboardData : [];
 
 ?>

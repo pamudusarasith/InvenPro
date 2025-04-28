@@ -131,7 +131,6 @@ function getStatusBadgeClass($status)
       <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
       <button class="tab-btn" onclick="switchTab('products')">Products</button>
       <button class="tab-btn" onclick="switchTab('orders')">Purchase Orders</button>
-      <!-- <button class="tab-btn" onclick="switchTab('returns')">Returns</button> -->
     </div>
 
     <form id="details-form" method="POST" action="/suppliers/<?= $supplier['id'] ?>/update">
@@ -229,7 +228,6 @@ function getStatusBadgeClass($status)
 
 
       <div id="orders" class="tab-content">
-        <!-- Similar structure for purchase orders -->
         <div class="card">
           <h3>Purchase Orders</h3>
           <div class="content">
@@ -270,7 +268,6 @@ function getStatusBadgeClass($status)
       </div>
 
       <div id="returns" class="tab-content">
-        <!-- Similar structure for returns -->
       </div>
     </form>
   </div>
@@ -314,7 +311,6 @@ function getStatusBadgeClass($status)
 
 <?php endif; ?>
 
-<!-- Include message popup from existing code -->
 <?php
 $popupIcon = 'error';
 if ($messageType === 'success') {
@@ -350,13 +346,13 @@ if ($messageType === 'success') {
       const element = document.createElement("div");
       element.classList.add("search-result");
       element.textContent = product.product_name;
-      element.addEventListener("click", () => selectproduct(product)); // bind click handler
+      element.addEventListener("click", () => selectproduct(product)); 
       return element;
     },
   });
 
 
-  // Reuse existing tab switching functionality
+ 
   function switchTab(tabId) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
@@ -366,15 +362,12 @@ if ($messageType === 'success') {
   }
 
   function enableEditing() {
-    // Add edit mode class to header
     document.querySelector('.details-header').classList.add('edit-mode');
 
-    // Enable all form inputs
     document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
       input.disabled = false;
     });
 
-    // Scroll to form
     document.querySelector('.tab-content.active').scrollIntoView({
       behavior: 'smooth'
     });
@@ -404,7 +397,6 @@ if ($messageType === 'success') {
     const dialog = document.getElementById('assignProductsModal');
     dialog.showModal();
 
-    // Setup product search filtering
     const searchInput = document.getElementById('productSearch');
     const productItems = document.querySelectorAll('.product-assignment-item');
 
@@ -419,7 +411,6 @@ if ($messageType === 'success') {
       });
     });
 
-    // Show/hide product details when checkbox changes
     document.querySelectorAll('[name="products[]"]').forEach(checkbox => {
       checkbox.addEventListener('change', (e) => {
         const details = e.target.closest('.product-assignment-item')

@@ -2,15 +2,12 @@
 
 use App\Services\NotificationService;
 
-// Get current filters from request
 $currentFilter = $_GET['filter'] ?? 'all';
 $searchQuery = $_GET['q'] ?? '';
 
-// Parse other query parameters
 $page = isset($_GET['p']) ? intval($_GET['p']) : 1;
 $itemsPerPage = isset($_GET['ipp']) ? intval($_GET['ipp']) : 10;
 
-// Helper function to get badge class based on notification type
 function getNotificationBadgeClass($type, $priority)
 {
   if ($priority === 'high') {
@@ -30,10 +27,8 @@ function getNotificationBadgeClass($type, $priority)
   }
 }
 
-// Get notifications with pagination
 $notifications = NotificationService::getNotifications(false, null);
 
-// Get unread count for filter badge
 $unreadCount = NotificationService::getUnreadCount();
 ?>
 
@@ -102,7 +97,6 @@ $unreadCount = NotificationService::getUnreadCount();
           $notificationPriority = $notification['priority']; // low, normal, high
           $timeAgo = getTimeAgo($notification['created_at']);
 
-          // Determine icon based on notification type and metadata
           $icon = 'notifications';
           if (isset($notification['metadata']['action'])) {
             switch ($notification['metadata']['action']) {
@@ -116,7 +110,6 @@ $unreadCount = NotificationService::getUnreadCount();
                 $icon = 'notifications';
             }
           } else {
-            // Fallback icons based on notification type
             switch ($notificationType) {
               case 'success':
                 $icon = 'check_circle';
@@ -132,7 +125,6 @@ $unreadCount = NotificationService::getUnreadCount();
             }
           }
 
-          // Additional classes based on notification properties
           $itemClasses = ['card', 'glass', 'notification-card'];
           if ($isUnread) $itemClasses[] = 'unread';
           if ($notificationType) $itemClasses[] = $notificationType;
@@ -216,5 +208,4 @@ $unreadCount = NotificationService::getUnreadCount();
   </div>
 </div>
 
-<!-- Reference the centralized notifications.js file -->
 <script src="/js/notifications.js"></script>

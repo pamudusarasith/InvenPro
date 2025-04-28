@@ -2,7 +2,6 @@
 
 use App\Services\RBACService;
 
-// Simulate data from controller
 $branches = $branches ?? [];
 
 $canManageBranches = RBACService::hasPermission('manage_branches');
@@ -235,10 +234,7 @@ $canDeleteBranch = RBACService::hasPermission('delete_branch');
 <?php endif; ?>
 
 
-<!-- <script src="/js/search.js"></script> -->
-
 <script>
-  // Navigation and pagination functions
   const branches = <?= json_encode($branches) ?>;
 </script>
 <script src="/js/branches.js"></script>

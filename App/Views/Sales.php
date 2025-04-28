@@ -186,10 +186,8 @@ function getStatusBadgeClass($status)
 </div>
 
 <script>
-  // Global variable to store the current sale ID in the modal
   let currentModalSaleId = null;
 
-  // Function to apply filters
   function applyFilters() {
     const fromDate = document.getElementById("fromDate").value;
     const toDate = document.getElementById("toDate").value;
@@ -205,7 +203,6 @@ function getStatusBadgeClass($status)
     window.location.href = url.href;
   }
 
-  // Function to change time period
   function changePeriod(period) {
     const url = new URL(window.location.href);
     url.searchParams.set("period", period);

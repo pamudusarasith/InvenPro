@@ -478,10 +478,6 @@ function updateTimePeriodOptions(reportType) {
                             </table>
                         </div>
                         <div class="report-actions">
-                            <!--<button class="btn btn-secondary" onclick="markForDiscount()">
-                                <span class="icon">sell</span>
-                                Mark for Discount
-                            </button>-->
                             <div class="export-options">
                                 <button class="btn btn-secondary" onclick="viewAllExpiryAlerts()">
                                     <span class="icon">notification_important</span>
@@ -516,13 +512,6 @@ function updateTimePeriodOptions(reportType) {
                                             <td><?= $item['product_name'] ?></td>
                                             <td><?= $item['is_int'] ? (int)$item['current_stock'] . ' ' . $item['unit'] : number_format((float)$item['current_stock'], 2) . ' ' . $item['unit'] ?></td>
                                             <td><?= $item['is_int'] ? (int)$item['reorder_level'] . ' ' . $item['unit'] : number_format((float)$item['reorder_level'], 2) . ' ' . $item['unit'] ?></td>
-                                            <!--
-                                            <td>
-                                                <span class="badge <?= $item['days_to_out'] <= 3 ? 'danger' : ($item['days_to_out'] <= 7 ? 'warning' : 'success') ?>">
-                                                    <?= $item['days_to_out'] ?> days
-                                                </span>
-                                            </td>
-                                    -->
                                             <td>
                                                 <button class="btn btn-primary btn-sm" onclick="createPurchaseOrder('<?= $item['product_name'] ?>')">
                                                     Reorder
@@ -555,65 +544,51 @@ function updateTimePeriodOptions(reportType) {
 <script>
    
 
-    // View all products function
     function viewAllProducts() {
         window.location.href = "/inventory";
     }
 
-    // View inventory function
     function viewInventory() {
         window.location.href = "/inventory";
     }
 
-    // View all orders function
     function viewAllOrders() {
         window.location.href = "/purchase-orders";
     }
 
-    // Export inventory function
     function exportInventory(format) {
-        // In a real implementation, this would trigger a download
         console.log(`Exporting inventory report as ${format}`);
         alert(`Inventory report will be exported as ${format}`);
     }
 
-    // Mark expiring products for discount
     function markForDiscount() {
         console.log('Marking expiring products for discount');
         alert('Expiring products have been marked for discount');
     }
 
-    // View all expiry alerts
     function viewAllExpiryAlerts() {
         window.location.href = "/inventory?filter=expiring";
     }
 
-    // Create purchase order for a specific product
     function createPurchaseOrder(productName) {
         console.log(`Creating purchase order for ${productName}`);
         alert(`Purchase order will be created for ${productName}`);
     }
 
-    // Reorder all low stock items
     function reorderAllLowStock() {
         console.log('Reordering all low stock items');
         alert('Purchase orders have been created for all low stock items');
     }
 
-    // Add Chart.js for interactive visualizations
     document.addEventListener('DOMContentLoaded', function() {
-        // Only load charts if Chart.js is available
         if (typeof Chart !== 'undefined') {
             initializeCharts();
         } else {
-            // If Chart.js isn't loaded, load it dynamically
             loadChartJS();
         }
     });
 
-    // Main initialization function to set up all charts
     function initializeCharts() {
-        // Initialize each chart if its canvas exists
         drawSalesTrendChart();
         drawInventoryChart();
         drawCategoryChart();
@@ -621,11 +596,9 @@ function updateTimePeriodOptions(reportType) {
         drawSalesByCategoryChart();
     }
 
-    // Function to set up chart placeholders if drawing fails
     function setupChartPlaceholders() {
         const placeholders = document.querySelectorAll('.chart-placeholder');
         placeholders.forEach(placeholder => {
-            // Style placeholder
             placeholder.style.backgroundColor = '#f9fafb';
             placeholder.style.border = '1px dashed #d1d5db';
             placeholder.style.borderRadius = '4px';
@@ -635,14 +608,12 @@ function updateTimePeriodOptions(reportType) {
             placeholder.style.height = '200px';
             placeholder.style.cursor = 'pointer';
             
-            // Add placeholder text
             const text = document.createElement('div');
             text.textContent = 'Chart Placeholder - Click to load';
             text.style.color = '#6b7280';
             text.style.fontSize = '14px';
             placeholder.appendChild(text);
             
-            // Add click event
             placeholder.addEventListener('click', function() {
                 alert('Charts would be loaded here in the final implementation');
             });
@@ -654,7 +625,6 @@ function updateTimePeriodOptions(reportType) {
         const canvas = document.getElementById('salesTrendChart');
         if (!canvas) return;
         
-        // Set larger canvas dimensions
         canvas.width = 800;
         canvas.height = 400;
         canvas.style.width = '100%';
@@ -665,23 +635,18 @@ function updateTimePeriodOptions(reportType) {
         const width = canvas.width;
         const height = canvas.height;
         
-        // Get data from PHP (in production, this would be parsed from JSON)
-        // Sample data for demonstration
+  
         const dates = JSON.parse('<?= json_encode(array_column($salesData, "date")) ?>');
         const salesData = JSON.parse('<?= json_encode(array_column($salesData, "sales")) ?>');
         
-        // Clear canvas
         ctx.clearRect(0, 0, width, height);
         
-        // Draw chart background and grid
         drawChartBackground(ctx, width, height);
         
-        // Calculate scales
-        const maxSales = Math.max(...salesData) * 1.1; // Add 10% padding
+        const maxSales = Math.max(...salesData) * 1.1;
         const minSales = 0;
         const dataPoints = salesData.length;
         
-        // Draw axes with larger margins
         const margins = {
             left: 80,
             right: 60,
@@ -691,13 +656,11 @@ function updateTimePeriodOptions(reportType) {
         
         drawAxes(ctx, width, height, 'Date', 'Sales (LKR)', minSales, maxSales, margins);
         
-        // Prepare for drawing data
         const chartWidth = width - margins.left - margins.right;
         const chartHeight = height - margins.top - margins.bottom;
         const xStep = chartWidth / (dataPoints - 1);
         const yScale = chartHeight / maxSales;
         
-        // Create array of points
         const points = [];
         for (let i = 0; i < dataPoints; i++) {
             const x = margins.left + i * xStep;
@@ -705,32 +668,24 @@ function updateTimePeriodOptions(reportType) {
             points.push({x, y});
         }
         
-        // Start drawing the curve
         ctx.beginPath();
         ctx.strokeStyle = '#2563eb';
         ctx.fillStyle = 'rgba(37, 99, 235, 0.1)';
         ctx.lineWidth = 3;
         
-        // Draw using Catmull-Rom spline (ensuring curve passes through all points)
         if (points.length > 1) {
-            // Move to first point
             ctx.moveTo(points[0].x, points[0].y);
             
-            // Handle the first segment separately (using the first point twice)
             if (points.length === 2) {
-                // For only two points, just draw a line
                 ctx.lineTo(points[1].x, points[1].y);
             } else {
-                // First segment with duplicate first point
                 const p0 = points[0];
                 const p1 = points[0];
                 const p2 = points[1];
                 const p3 = points[2];
                 
-                // Draw first curve
                 drawCatmullRomSegment(ctx, p0, p1, p2, p3);
                 
-                // Draw middle segments
                 for (let i = 1; i < points.length - 2; i++) {
                     const p0 = points[i-1];
                     const p1 = points[i];
@@ -740,7 +695,6 @@ function updateTimePeriodOptions(reportType) {
                     drawCatmullRomSegment(ctx, p0, p1, p2, p3);
                 }
                 
-                // Handle the last segment separately (using the last point twice)
                 const lastIdx = points.length - 1;
                 const pLast0 = points[lastIdx-2];
                 const pLast1 = points[lastIdx-1];
@@ -751,16 +705,13 @@ function updateTimePeriodOptions(reportType) {
             }
         }
         
-        // Stroke the line
         ctx.stroke();
         
-        // Fill area under the line
         ctx.lineTo(points[points.length-1].x, height - margins.bottom);
         ctx.lineTo(points[0].x, height - margins.bottom);
         ctx.closePath();
         ctx.fill();
         
-        // Draw points
         for (let i = 0; i < points.length; i++) {
             ctx.beginPath();
             ctx.arc(points[i].x, points[i].y, 6, 0, Math.PI * 2);
@@ -771,7 +722,6 @@ function updateTimePeriodOptions(reportType) {
             ctx.stroke();
         }
         
-        // Draw x-axis labels (dates) with larger font
         ctx.fillStyle = '#333';
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
@@ -781,7 +731,6 @@ function updateTimePeriodOptions(reportType) {
             ctx.fillText(dates[i], x, height - margins.bottom + 30);
         }
         
-        // Draw y-axis labels (sales values) with larger font
         ctx.textAlign = 'right';
         const ySteps = 5;
         for (let i = 0; i <= ySteps; i++) {
@@ -792,13 +741,9 @@ function updateTimePeriodOptions(reportType) {
             
     }
 
-    // Helper function to draw a Catmull-Rom segment between points
     function drawCatmullRomSegment(ctx, p0, p1, p2, p3, tension = 0.5) {
-        // Catmull-Rom to Cubic Bezier conversion
-        // Calculate control points (using tension parameter to control curve tightness)
         const controlPoints = getCatmullRomControlPoints(p0, p1, p2, p3, tension);
         
-        // Draw the curve segment
         ctx.bezierCurveTo(
             controlPoints.cp1x, controlPoints.cp1y,
             controlPoints.cp2x, controlPoints.cp2y,
@@ -806,34 +751,27 @@ function updateTimePeriodOptions(reportType) {
         );
     }
 
-    // Helper function to calculate Catmull-Rom control points for bezier curve
     function getCatmullRomControlPoints(p0, p1, p2, p3, tension = 0.5) {
-        // Calculate control points for bezier curve that approximates Catmull-Rom
         const d1 = Math.sqrt(Math.pow(p1.x - p0.x, 2) + Math.pow(p1.y - p0.y, 2));
         const d2 = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
         const d3 = Math.sqrt(Math.pow(p3.x - p2.x, 2) + Math.pow(p3.y - p2.y, 2));
         
-        // Scale factors
         const s1 = tension * d2 / (d1 + d2);
         const s2 = tension * d2 / (d2 + d3);
         
-        // Control point 1
         const cp1x = p1.x + s1 * (p2.x - p0.x);
         const cp1y = p1.y + s1 * (p2.y - p0.y);
         
-        // Control point 2
         const cp2x = p2.x - s2 * (p3.x - p1.x);
         const cp2y = p2.y - s2 * (p3.y - p1.y);
         
         return { cp1x, cp1y, cp2x, cp2y };
     }
 
-    // Draw doughnut chart for inventory status
     function drawInventoryChart() {
         const canvas = document.getElementById('inventoryChart');
         if (!canvas) return;
         
-        // Set larger canvas dimensions
         canvas.width = 700;
         canvas.height = 400;
         canvas.style.width = '100%';
@@ -844,35 +782,29 @@ function updateTimePeriodOptions(reportType) {
         const width = canvas.width;
         const height = canvas.height;
         
-        // Get data
         const inStock = <?= $stockStatus['in_stock'] ?>;
         const lowStock = <?= $stockStatus['low_stock'] ?>;
         const outOfStock = <?= $stockStatus['out_of_stock'] ?>;
         const total = inStock + lowStock + outOfStock;
         
-        // Define colors
         const colors = [
-            {fill: 'rgba(22, 163, 74, 0.7)', stroke: 'rgba(22, 163, 74, 1)'}, // success/green
-            {fill: 'rgba(217, 119, 6, 0.7)', stroke: 'rgba(217, 119, 6, 1)'}, // warning/orange
-            {fill: 'rgba(220, 38, 38, 0.7)', stroke: 'rgba(220, 38, 38, 1)'}  // danger/red
+            {fill: 'rgba(22, 163, 74, 0.7)', stroke: 'rgba(22, 163, 74, 1)'}, 
+            {fill: 'rgba(217, 119, 6, 0.7)', stroke: 'rgba(217, 119, 6, 1)'}, 
+            {fill: 'rgba(220, 38, 38, 0.7)', stroke: 'rgba(220, 38, 38, 1)'}  
         ];
         
-        // Clear canvas
         ctx.clearRect(0, 0, width, height);
         
-        // Draw doughnut chart
         const centerX = width / 2;
-        const centerY = height / 2 - 30; // Adjust for legend space
+        const centerY = height / 2 - 30; 
         const outerRadius = Math.min(width, height - 100) / 2.5;
-        const innerRadius = outerRadius * 0.6; // Hole size
+        const innerRadius = outerRadius * 0.6; 
         
-        // Data values and labels
         const data = [inStock, lowStock, outOfStock];
         const labels = ['In Stock', 'Low Stock', 'Out of Stock'];
         
-        let startAngle = -Math.PI / 2; // Start from top
+        let startAngle = -Math.PI / 2; 
         
-        // Draw each segment
         for (let i = 0; i < data.length; i++) {
             const sliceAngle = (data[i] / total) * (Math.PI * 2);
             const endAngle = startAngle + sliceAngle;
@@ -892,10 +824,9 @@ function updateTimePeriodOptions(reportType) {
             startAngle = endAngle;
         }
         
-        // Draw legend with larger font and better spacing
         const legendY = height - 80;
         const itemHeight = 25;
-        const spacing = 150; // Increased spacing
+        const spacing = 150; 
         
         for (let i = 0; i < labels.length; i++) {
             const x = (width / 2) - (spacing * (labels.length / 2)) + (spacing * i) + 25;

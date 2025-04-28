@@ -253,18 +253,16 @@ $branches = $branches ?? [];
       field.appendChild(errorMessage);
     }
 
-    // Apply status filter client-side
     function applyFilters() {
       const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
       const rows = document.querySelectorAll('#suppliers-table tbody tr');
       rows.forEach(row => {
-        const status = row.cells[5].textContent.toLowerCase(); // Adjusted for the "Status" column in suppliers table
+        const status = row.cells[5].textContent.toLowerCase(); 
         const matchesStatus = statusFilter === '' || status === statusFilter;
         row.style.display = matchesStatus ? '' : 'none';
       });
     }
 
-    // Update URL with search and filter parameters
     function updateSearchParams() {
       const search = document.getElementById('searchInput').value;
       const branch = document.getElementById('filterBranch').value;
@@ -276,11 +274,9 @@ $branches = $branches ?? [];
       location.href = url.toString();
     }
 
-    // Event listeners
     document.getElementById('filterBranch').addEventListener('change', updateSearchParams);
     document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
 
-    // Debounce function to limit URL updates
     function debounce(func, wait) {
       let timeout;
       return function (...args) {

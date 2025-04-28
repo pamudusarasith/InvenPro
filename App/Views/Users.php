@@ -341,9 +341,9 @@ $branches = $branches ?? [];
       }
 
       if (!isValid) {
-        event.preventDefault(); // Prevent submission if invalid
+        event.preventDefault();
       } else {
-        submitButton.disabled = true; // Disable button to prevent multiple submissions
+        submitButton.disabled = true;
       }
     }
   <?php endif; ?>
@@ -380,7 +380,6 @@ $branches = $branches ?? [];
     }
   <?php endif; ?>
 
-  // Debounce function to limit URL updates
   function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -389,7 +388,6 @@ $branches = $branches ?? [];
     };
   }
 
-  // Apply status filter client-side
   function applyFilters() {
     const statusFilter = document.getElementById('filterStatus').value.toLowerCase();
     const rows = document.querySelectorAll('#users-table tbody tr');
@@ -400,7 +398,6 @@ $branches = $branches ?? [];
     });
   }
 
-  // Update URL with search and filter parameters
   function updateSearchParams() {
     const search = document.getElementById('searchInput').value;
     const role = document.getElementById('filterRole').value;
@@ -416,7 +413,6 @@ $branches = $branches ?? [];
     location.href = url.toString();
   }
 
-  // Event listeners
   document.getElementById('filterRole').addEventListener('change', updateSearchParams);
   document.getElementById('filterBranch').addEventListener('change', updateSearchParams);
   document.getElementById('filterStatus').addEventListener('change', () => {
@@ -425,7 +421,6 @@ $branches = $branches ?? [];
   });
   document.getElementById('searchInput').addEventListener('input', debounce(updateSearchParams, 500));
 
-  // Existing Pagination Functions
   function changePage(pageNo) {
     const url = new URL(location.href);
     url.searchParams.set('p', pageNo);

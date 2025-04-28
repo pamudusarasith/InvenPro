@@ -357,10 +357,8 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
   }
 
   function enableEditing() {
-    // Add edit mode class to header
     document.querySelector('.details-header').classList.add('edit-mode');
 
-    // Enable all form inputs
     document.querySelectorAll('.form-field :is(input, select, textarea)').forEach(input => {
       input.disabled = false;
     });
@@ -374,7 +372,6 @@ $canPlaceOrder = RBACService::hasPermission('place_order');
       };
     });
 
-    // Scroll to form
     document.querySelector('.tab-content.active').scrollIntoView({
       behavior: 'smooth'
     });

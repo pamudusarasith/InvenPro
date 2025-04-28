@@ -690,7 +690,6 @@ $canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
         }
       }
 
-      // Add a new batch for a product
       addNewBatch(e) {
         const productContent = e.target.closest(".product-content");
         const container = productContent.querySelector(".batches-container");
@@ -698,36 +697,29 @@ $canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
         const batches = container.querySelectorAll(".batch-card");
         const nextBatchNumber = batches.length + 1;
 
-        // Clone the template
         const batchNode = template.content.cloneNode(true);
 
-        // Update batch number
         batchNode.querySelector(".batch-number").textContent = nextBatchNumber;
 
         batchNode.querySelector("input[name*='product_id']").value =
           productContent.dataset.productId;
 
-        // Append the new batch
         container.appendChild(batchNode);
       }
 
-      // Remove a batch
       removeBatch(e) {
         const productContent = e.target.closest(".product-content");
         const container = productContent.querySelector(".batches-container");
         const batchElement = e.target.closest(".batch-card");
         batchElement.remove();
 
-        // Renumber the batches
         container.querySelectorAll(".batch-card").forEach((batch, index) => {
           batch.querySelector(".batch-number").textContent = index + 1;
         });
 
-        // Update the received quantity badge
         this.updateTotalReceivedQty(productId);
       }
 
-      // Update the total received quantity for a product
       updateTotalReceivedQty(productId) {
         const container = document.getElementById(`batches-container-${productId}`);
         const quantityInputs = container.querySelectorAll(
@@ -742,12 +734,10 @@ $canCompleteOrder = RBACService::hasPermission('complete_purchase_orders');
           }
         });
 
-        // Update the badge
         const badge = document.getElementById(`received-qty-badge-${productId}`);
         const unitSymbol = badge.textContent.split(" ").pop();
         badge.textContent = `Received: ${total} ${unitSymbol}`;
 
-        // Update class based on comparison with ordered quantity
         const orderedText = document.querySelector(
           `.product-meta .badge.accent[id*="${productId}"]`
         ).textContent;
