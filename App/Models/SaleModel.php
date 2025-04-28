@@ -461,5 +461,4 @@ class SaleModel extends Model
 
     return self::$db->query($sql, $params)->fetch();
   }
-
 }
