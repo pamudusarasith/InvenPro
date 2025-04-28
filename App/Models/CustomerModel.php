@@ -39,7 +39,7 @@ class CustomerModel extends Model
       AND deleted_at IS NULL
     ';
     $stmt = self::$db->query($sql, [$customerId]);
-    return $stmt->fetch();
+    return $stmt->fetchColumn();
   }
 
   public function getActiveCustomersCount(): int

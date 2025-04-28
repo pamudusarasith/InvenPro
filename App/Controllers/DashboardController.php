@@ -19,11 +19,11 @@ class DashboardController extends Controller
         $customerModel = new CustomerModel();
         $userModel = new UserModel();
 
-        $sales = $saleModel->getSalesCardData();
-        $salesToday['today_sales'] = $sales['today_sales'] ?? 0;
-        $salesToday['yesterday_sales'] = $sales['yesterday_sales'] ?? 0;
-        $salesToday['trendToday'] = ($salesToday['yesterday_sales'] == 0) ? 0 : (($salesToday['today_sales'] - $salesToday['yesterday_sales']) * 100 / $salesToday['yesterday_sales']); // Avoid division by zero
-        $salesToday['trnedType'] = $salesToday['trendToday'] > 0 ? 'positive' : ($salesToday['trendToday'] < 0 ? 'negative' : 'neutral');
+        // $sales = $saleModel->getSalesCardData();
+        // $salesToday['today_sales'] = $sales['today_sales'] ?? 0;
+        // $salesToday['yesterday_sales'] = $sales['yesterday_sales'] ?? 0;
+        // $salesToday['trendToday'] = ($salesToday['yesterday_sales'] == 0) ? 0 : (($salesToday['today_sales'] - $salesToday['yesterday_sales']) * 100 / $salesToday['yesterday_sales']); // Avoid division by zero
+        // $salesToday['trnedType'] = $salesToday['trendToday'] > 0 ? 'positive' : ($salesToday['trendToday'] < 0 ? 'negative' : 'neutral');
 
         $stock = $productModel->getStockProductsCounts();
         $pendingOrders = $orderModel->getPendingAndOpenOrdersCount();
@@ -42,14 +42,14 @@ class DashboardController extends Controller
 
 
         
-        if ($_SESSION['user']['role_name'] === 'System Admin') {
+        if ($_SESSION['user']['role_name'] === 'System Admin' || true) {
             $dashboardData = [
                 'greeting' => 'Welcome to Invenpro!',
-                'sales' => [
-                    'value' => 'LKR ' . number_format($salesToday['today_sales'], 2),
-                    'trend' => ($salesToday['trendToday'] > 0 ? '+' : ($salesToday['trendToday'] < 0 ? '-' : '')) . number_format($salesToday['trendToday'], 2) . '%',
-                    'trendType' => $salesToday['trnedType'],
-                ],
+                // 'sales' => [
+                //     'value' => 'LKR ' . number_format($salesToday['today_sales'], 2),
+                //     'trend' => ($salesToday['trendToday'] > 0 ? '+' : ($salesToday['trendToday'] < 0 ? '-' : '')) . number_format($salesToday['trendToday'], 2) . '%',
+                //     'trendType' => $salesToday['trnedType'],
+                // ],
                 'lowStock' => [
                     'value' => $stock['low_stock'],
                 ],

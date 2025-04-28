@@ -33,7 +33,7 @@ $canEditDiscounts = RBACService::hasPermission('discount_update');
 $canDeleteDiscounts = RBACService::hasPermission('discount_delete');
 $canActivateDiscounts = RBACService::hasPermission('discount_update');
 $canDeactivateDiscounts = RBACService::hasPermission('discount_update');
-$canViewDiscounts = RBACService::hasPermission('view_discounts');
+$canViewDiscounts = RBACService::hasPermission('discount_view');
 ?>
 
 <link rel="stylesheet" href="/css/pages/discounts.css">

@@ -18,7 +18,7 @@ class DiscountsController extends Controller
 
   public function index()
   {
-    if (!RBACService::hasPermission('view_discounts')) {
+    if (!RBACService::hasPermission('discount_view')) {
       $_SESSION['message'] = 'You do not have permission to view discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -46,7 +46,7 @@ class DiscountsController extends Controller
 
   public function createDiscount()
   {
-    if (!RBACService::hasPermission('add_discounts')) {
+    if (!RBACService::hasPermission('discount_create')) {
       $_SESSION['message'] = 'You do not have permission to create discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -76,7 +76,7 @@ class DiscountsController extends Controller
 
   public function updateDiscount(array $params)
   {
-    if (!RBACService::hasPermission('edit_discounts')) {
+    if (!RBACService::hasPermission('discount_update')) {
       $_SESSION['message'] = 'You do not have permission to edit discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -113,7 +113,7 @@ class DiscountsController extends Controller
 
   public function deleteDiscount(array $params)
   {
-    if (!RBACService::hasPermission('delete_discounts')) {
+    if (!RBACService::hasPermission('discount_delete')) {
       $_SESSION['message'] = 'You do not have permission to delete discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -136,7 +136,7 @@ class DiscountsController extends Controller
 
   public function activateDiscount(array $params)
   {
-    if (!RBACService::hasPermission('activate_discounts')) {
+    if (!RBACService::hasPermission('discount_update')) {
       $_SESSION['message'] = 'You do not have permission to activate discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -159,7 +159,7 @@ class DiscountsController extends Controller
 
   public function deactivateDiscount(array $params)
   {
-    if (!RBACService::hasPermission('deactivate_discounts')) {
+    if (!RBACService::hasPermission('discount_update')) {
       $_SESSION['message'] = 'You do not have permission to deactivate discounts';
       $_SESSION['message_type'] = 'error';
       View::redirect('/dashboard');
@@ -182,7 +182,7 @@ class DiscountsController extends Controller
 
   public function getDiscounts()
   {
-    if (!RBACService::hasPermission('view_discounts')) {
+    if (!RBACService::hasPermission('discount_view')) {
       self::sendJSON([
         "success" => false,
         "message" => "You do not have permission to view discounts"
